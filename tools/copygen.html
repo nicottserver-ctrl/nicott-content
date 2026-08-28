@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NICOTT 신제품 원고 생성기 v0.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@200;300;400;500;700&family=Questrial&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#D6C3B0;--terra:#E05A33;--cream:#ECEAE4;--forest:#2F4433;--paper:#FAF8F4;
+--ink:#2A2724;--ink-sub:#8C8377;--ui-bg:#F4F2EE;--ui-line:#E4DFD7;--ok:#4E7A52;--bad:#B24A3C;
+--en:'Questrial',sans-serif;--kr:'Noto Sans KR',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--kr);color:var(--ink);background:var(--ui-bg);line-height:1.65;-webkit-font-smoothing:antialiased}
+header{background:var(--forest);color:#fff;padding:16px 22px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+header .b{font-family:var(--en);letter-spacing:.4em;text-transform:uppercase;font-size:15px}
+header .v{font-size:11px;opacity:.6}
+header .n{font-size:11px;opacity:.75;margin-left:auto}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 18px 80px;display:grid;grid-template-columns:400px 1fr;gap:14px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--ui-line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.card h3{font-size:13.5px;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.badge{font-family:var(--en);font-size:9.5px;letter-spacing:.1em;padding:2px 7px;border-radius:20px;background:var(--cream);color:var(--ink-sub)}
+.badge.t{background:#FBEDE8;color:var(--terra)}
+.hint{font-size:11px;color:var(--ink-sub);margin-bottom:10px;line-height:1.65}
+.field{margin-bottom:10px}
+.field label{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-sub);margin-bottom:4px}
+input[type=text],textarea,select{width:100%;padding:8px 10px;border:1px solid var(--ui-line);border-radius:8px;background:#fff;outline:none;font-family:inherit;font-size:13px;color:var(--ink)}
+input:focus,textarea:focus{border-color:var(--ink-sub)}
+textarea{resize:vertical;min-height:48px;line-height:1.6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.btn{padding:8px 14px;border-radius:8px;font-size:12.5px;border:1px solid var(--ui-line);background:#fff;cursor:pointer;font-family:inherit;color:var(--ink)}
+.btn:hover{border-color:var(--ink-sub)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.terra{background:var(--terra);color:#fff;border-color:var(--terra)}
+.tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.out{border:1px solid var(--ui-line);border-radius:9px;background:var(--paper);margin-bottom:9px;overflow:hidden}
+.out summary{padding:9px 12px;font-size:12.5px;font-weight:500;cursor:pointer;background:#fff;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.out summary::-webkit-details-marker{display:none}
+.out .body{padding:2px 12px 10px}
+.out textarea{background:#fff;font-size:12px;min-height:90px;width:100%;margin-top:8px}
+.gate{border-radius:9px;padding:10px 12px;font-size:11.5px;margin-top:10px;line-height:1.7}
+.gate.yes{background:#E9F1E9;color:#2F5233}.gate.no{background:#FBEAE6;color:#8E3729}.gate.info{background:#EDF1F7;color:#3A5478}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:24px;font-size:12.5px;z-index:99;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.why{font-size:10.5px;color:var(--ink-sub);margin-top:6px;line-height:1.6}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chips button{font-size:11.5px;padding:5px 11px;border-radius:20px;border:1px solid var(--ui-line);background:#fff;color:var(--ink-sub);cursor:pointer;font-family:inherit}
+.chips button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+</style>
+</head>
+<body>
+<header><span class="b">Nicott</span><span class="v">신제품 원고 생성기 v0.1</span>
+<span class="n">시트는 읽기 전용 — 이 도구는 "붙여넣을 한 줄"만 만듭니다</span></header>
+<div class="wrap">
+<div>
+  <div class="card"><h3>1. 신제품 팩트 입력 <span class="badge">2~3분</span></h3>
+  <div class="hint">아는 것만 채우세요. 나머지는 규칙과 컬렉션 프리셋으로 자동 조립됩니다.</div>
+  <div class="grid2">
+    <div class="field"><label><span>상품명 *</span></label><input type="text" id="name" placeholder="니코트 플리츠 내열 유리 머그컵"></div>
+    <div class="field"><label><span>코드</span></label><input type="text" id="code" placeholder="PLS"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label><span>컬렉션</span></label><select id="col"></select></div>
+    <div class="field"><label><span>카테고리</span></label><select id="cat">
+      <option value="접시">접시</option><option value="볼·공기">볼·공기</option><option value="머그·컵">머그·컵</option>
+      <option value="유리">유리</option><option value="커트러리">커트러리</option><option value="우드">우드(플레이트·트레이·조리도구)</option>
+      <option value="패브릭">패브릭</option><option value="세트">세트</option></select></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label><span>소재</span></label><input type="text" id="mat" placeholder="고온소성 도자기 / 내열유리 / 원목"></div>
+    <div class="field"><label><span>원산지</span></label><input type="text" id="org" placeholder="일본 / 대한민국"></div>
+  </div>
+  <div class="field"><label><span>구성 (기물·수량)</span></label><input type="text" id="comp" placeholder="머그컵 1P (둥근형 / 롱형 중 선택)"></div>
+  <div class="field"><label><span>사이즈·스펙 한 줄</span></label><input type="text" id="size" placeholder="지름 8cm · 높이 9.5cm · 300ml"></div>
+  <div class="field"><label><span>특징 1 (가장 중요한 것) *</span></label><input type="text" id="f1" placeholder="빛을 담은 플리츠 디자인"></div>
+  <div class="field"><label><span>특징 2</span></label><input type="text" id="f2" placeholder="영하 20℃~120℃ 내열유리"></div>
+  <div class="field"><label><span>특징 3</span></label><input type="text" id="f3" placeholder="선물하기 좋은 패키지"></div>
+  <div class="grid2">
+    <div class="field"><label><span>추천 용도</span></label><input type="text" id="use" placeholder="커피 · 라떼 · 차 · 에이드"></div>
+    <div class="field"><label><span>컬러 (있으면)</span></label><input type="text" id="colors" placeholder="밀크 · 샌드 (없으면 비움)"></div>
+  </div>
+  <div class="chips" id="giftChips"></div>
+  <div class="tools">
+    <button class="btn primary" onclick="gen()">원고 생성</button>
+    <button class="btn" onclick="fillDemo()">예시로 채우기</button>
+    <button class="btn" onclick="resetAll()">비우기</button>
+  </div>
+  <div id="banCheck"></div>
+  </div>
+  <div class="card"><h3>인스타 연계 <span class="badge t">대시보드 신상품 세트</span></h3>
+  <div class="hint">같은 입력에서 인스타 신상품 세트(S1)에 넣을 값을 함께 만듭니다. 대시보드 만들기 → 신상품 소개에 붙여넣으세요.</div>
+  <div id="igOut" class="why">원고를 생성하면 여기에 표시됩니다.</div>
+  </div>
+</div>
+<div>
+  <div class="card"><h3>2. 생성 결과 <span class="badge">41열 · "진짜 최신 버전" 탭 기준</span></h3>
+  <div class="hint">각 칸은 수정할 수 있습니다. 수정 후 <b>시트용 한 줄 복사</b>를 누르면 셀 안 줄바꿈까지 보존된 형태로 복사됩니다 → 구글시트 새 행의 A열을 클릭하고 붙여넣기(⌘V)만 하면 됩니다. <b>시트는 붙여넣기 외에 절대 수정하지 않습니다.</b></div>
+  <div class="tools">
+    <button class="btn terra" onclick="copyRow()">시트용 한 줄 복사 (41열)</button>
+    <button class="btn" onclick="copyText()">원고 전문 복사 (검토용)</button>
+  </div>
+  <div id="fields"></div>
+  <div class="gate info" id="status">왼쪽에 팩트를 넣고 <b>원고 생성</b>을 누르세요.</div>
+  </div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ── 컬렉션 프리셋 (기존 시트 관찰 기반 · 필요 시 추가) ── */
+const COLS={
+ '플리츠':{code:'PLS',mod:'우아한 라인을 따라\n투명하게 빛나는 티타임',desc:'빛을 따라 은은하게 반짝이는 플리츠 라인. 매일의 티타임을 조금 더 특별하게 만드는 니코트의 플리츠 컬렉션입니다.',tags:'#플리츠 #티웨어 #투명한유리 #티타임'},
+ '샤틴 Satin':{code:'STN',mod:'부드러운 광택이 손끝에 머무는\n새틴 마감 커트러리',desc:'은은한 새틴 광택과 단정한 실루엣. 국내에서 생산하는 니코트의 Satin 커트러리 컬렉션입니다.',tags:'#샤틴 #커트러리 #국내생산 #수저세트'},
+ '베이지무드':{code:'BGM',mod:'은은한 베이지 컬러가 머무는,\n단아한 도자기',desc:'은은한 베이지 톤이 식탁에 차분히 스며드는 니코트의 베이지무드 컬렉션입니다.',tags:'#베이지무드 #도자기 #단아한식탁'},
+ '에브리데이':{code:'EVD',mod:'매일 쓰는 그릇의\n기본을 다시 생각하다',desc:'가볍고 단단한 우윳빛 도자기. 매일 쓰는 그릇의 기준을 다시 생각하며 만든 니코트의 에브리데이 컬렉션입니다.',tags:'#에브리데이 #데일리그릇 #기본기'},
+ '블루 스트라이프':{code:'BLS',mod:'단정한 줄무늬가 그리는\n청량한 식탁',desc:'손으로 그린 듯한 블루 스트라이프가 식탁에 청량함을 더하는 컬렉션입니다.',tags:'#블루스트라이프 #줄무늬그릇'},
+ '큐티네코':{code:'QTN',mod:'식탁 위 작은 장난,\n큐티네코',desc:'슬쩍 웃음이 나는 고양이 패턴. 일상에 작은 즐거움을 더하는 큐티네코 라인입니다.',tags:'#큐티네코 #고양이그릇'},
+ '우드':{code:'WOD',mod:'나무의 결이 담아내는\n따뜻한 온도',desc:'하나하나 결이 다른 원목. 시간이 지날수록 손에 익는 니코트의 우드 컬렉션입니다.',tags:'#우드 #원목 #우드플레이트'},
+ '하나토쿠사':{code:'HNT',mod:'화지처럼 번지는 무늬,\n하나토쿠사',desc:'일본 산지에서 만든 하나토쿠사. 은은한 무늬가 식탁의 배경이 되어 줍니다.',tags:'#하나토쿠사 #MADEINJAPAN'},
+ '직접 입력':{code:'',mod:'',desc:'',tags:''}
+};
+const BANNED=['역대급','무조건 소장','안 사면 후회','지금 바로 GET','완전 핫한','대박','최저가','품절임박','서두르세요'];
+const CATTIP={'접시':'전자레인지·식기세척기 사용이 가능합니다. 포개어 보관하면 자리를 덜 차지합니다.',
+ '볼·공기':'전자레인지·식기세척기 사용이 가능합니다. 국물 요리부터 볶음까지 두루 담기는 깊이입니다.',
+ '머그·컵':'뜨거운 음료를 담기 전 미지근한 물로 한 번 헹구면 온도 충격을 줄일 수 있습니다.',
+ '유리':'급격한 온도 변화는 피해 주세요. 부드러운 스펀지로 세척해 주세요.',
+ '커트러리':'사용 후 물기를 닦아 보관하면 광택이 오래 유지됩니다.',
+ '우드':'물에 오래 담가두지 마시고, 사용 후 바로 물기를 닦아 통풍이 잘 되는 곳에 보관해 주세요. 식기세척기·전자레인지는 사용할 수 없습니다.',
+ '패브릭':'첫 세탁 시 단독 세탁을 권장합니다. 중성세제로 부드럽게 세탁해 주세요.',
+ '세트':'구성품별 소재에 맞는 취급 방법을 함께 확인해 주세요.'};
+const HEADERS=['코드','컬렉션','상단 패키지 사진','','수식어','상품명','대표 소구포인트1','','대표 소구포인트2','','기물 많은 경우 추가 설명','','네임태그·옵션 사진','기프트 패키지 사진','디테일','컬러 사진','컬러 설명+컬러칩','컬러 GIF','공통 사진','GIF·해시태그','공통 사진','체크 포인트 아이콘','공통 사진','포인트 1','공통 사진','포인트 2','공통 사진','포인트 3','공통 사진','구성','기물 사진','공통 사진','원산지','공장 사진','컬렉션 설명','취급·주의사항','','','','',''];
+let V=new Array(41).fill('');
+const $=id=>document.getElementById(id);
+const toast=m=>{const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2000);};
+let gift=false;
+function paintGift(){$('giftChips').innerHTML='<button class="'+(gift?'':'on')+'" onclick="gift=false;paintGift()">일반 패키지</button><button class="'+(gift?'on':'')+'" onclick="gift=true;paintGift()">기프트 패키지 있음</button>';}
+(function init(){
+  $('col').innerHTML=Object.keys(COLS).map(k=>'<option>'+k+'</option>').join('');
+  paintGift();
+  try{const s=localStorage.getItem('nicott_gen_v0');if(s){const j=JSON.parse(s);for(const k of ['name','code','col','cat','mat','org','comp','size','f1','f2','f3','use','colors'])if(j[k]!==undefined)$(k).value=j[k];gift=!!j.gift;paintGift();}}catch(e){}
+})();
+function readIn(){
+  const o={};for(const k of ['name','code','col','cat','mat','org','comp','size','f1','f2','f3','use','colors'])o[k]=$(k).value.trim();
+  o.gift=gift;try{localStorage.setItem('nicott_gen_v0',JSON.stringify(o));}catch(e){}
+  return o;
+}
+function gen(){
+  const i=readIn();
+  if(!i.name||!i.f1){toast('상품명과 특징 1은 필요합니다');return;}
+  const P=COLS[i.col]||COLS['직접 입력'];
+  const feats=[i.f1,i.f2,i.f3].filter(Boolean);
+  const NL='\n';
+  V=new Array(41).fill('');
+  V[0]=i.code||P.code; V[1]=i.col==='직접 입력'?'':i.col;
+  V[4]=P.mod||(i.f1+'\n일상에 더하는 니코트의 제안');
+  V[5]=i.name;
+  V[6]=[i.name.replace(/^니코트\s*/,'')+ (i.cat==='세트'?' 구성입니다.':'입니다.'),'',
+    i.f1+'.',(i.mat?i.mat+' 소재로 만들어':'')+(i.f2?' '+i.f2+'까지 갖췄습니다.':(i.mat?' 매일 쓰기 좋습니다.':'')),
+    '','특별한 날이 아니어도 좋은 도구를 쓰는 일.','그게 일상에 낭만을 더하는 방법이라고 생각합니다.'].filter(s=>s!==null).join(NL);
+  V[8]=[i.comp?('구성은 '+i.comp+'.'):'',i.colors?('컬러는 '+i.colors+' 중에서 고를 수 있습니다.'):'','취향과 식탁에 맞게 선택해 보세요.'].filter(Boolean).join(NL);
+  V[10]=i.use?('추천용도 — '+i.use):'';
+  V[12]=i.colors?('옵션: '+i.colors):'단일 구성';
+  V[13]=i.gift?'기프트 패키지 O':'X';
+  V[14]=['추천 용도',(i.use||'일상 상차림'),'','감성 한 줄','',(i.f1+'로 완성하는 오늘의 식탁입니다.')].join(NL);
+  V[15]=i.colors?'컬러 사진':'X'; V[16]=i.colors?(i.colors+' — 실물 기준 컬러칩 첨부'):'X'; V[17]='X';
+  V[19]=(P.tags?P.tags+' ':'')+'#니코트 #지금의식탁 #일상의낭만';
+  V[21]=['CHECK POINT','',i.name.replace(/^니코트\s*/,'')+',','일상이 더 좋아지는 이유','','DESIGN','MATERIAL','PACKAGE','',
+    ...feats.map((f,n)=>'POINT.0'+(n+1)+' '+f+'\n')].join(NL).trim();
+  const PT=['DESIGN DETAIL','MATERIAL','HOW TO USE'];
+  feats.forEach((f,n)=>{
+    V[23+n*2]=[PT[n]||('POINT '+(n+1)),f,'---------------------','',
+      n===0?'매일 보아도 질리지 않는 담백한 디자인.\n식탁 위 어떤 그릇과도 자연스럽게 어울립니다.'
+      :n===1?((i.mat?i.mat+'. ':'')+'오래 쓸수록 좋은 도구의 기본을 지켰습니다.')
+      :('생활 속에서 이렇게 활용해 보세요.\n'+(i.use||'매일의 식탁에서'))].join(NL);
+  });
+  V[29]=[ '구성', (i.comp||i.name), i.size?('사이즈 — '+i.size):'' ].filter(Boolean).join(NL);
+  V[32]=i.org||'';
+  V[34]=P.desc||'';
+  V[35]=CATTIP[i.cat]||'';
+  paintFields();
+  // 금지어 검사
+  const blob=V.join(' ');
+  const found=BANNED.filter(b=>blob.includes(b));
+  $('banCheck').innerHTML=found.length?'<div class="gate no">금지 표현 포함: '+found.join(', ')+'</div>':'<div class="gate yes">금지 표현 없음 — 니코트 톤 검사 통과</div>';
+  $('status').className='gate yes';
+  $('status').innerHTML='생성 완료 — 내용을 다듬은 뒤 <b>시트용 한 줄 복사</b>를 누르세요.';
+  // 인스타 연계
+  $('igOut').innerHTML=['<b>헤드라인(D2 제목)</b>: '+i.name.replace(/^니코트\s*/,''),
+   '<b>키커</b>: NEW ARRIVAL','<b>설명(D2 본문)</b>: '+i.f1,
+   '<b>디테일(A6)</b>: 소재 '+(i.mat||'-')+' / 구성 '+(i.comp||'-')+' / 사용 '+(i.use||'-'),
+   '<b>캡션 태그</b>: '+V[19]].join('<br>');
+}
+function paintFields(){
+  const el=$('fields');el.innerHTML='';
+  HEADERS.forEach((h,idx)=>{
+    if(!h&&!V[idx])return;
+    const d=document.createElement('details');d.className='out';if([4,5,6,8,21].includes(idx))d.open=true;
+    d.innerHTML='<summary><span>'+(idx+1)+'열 · '+(h||'(빈)')+'</span><span class="badge">'+(V[idx]?V[idx].length+'자':'비움')+'</span></summary>'+
+      '<div class="body"><textarea data-i="'+idx+'">'+V[idx].replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</textarea></div>';
+    el.appendChild(d);
+  });
+  el.querySelectorAll('textarea').forEach(t=>t.addEventListener('input',e=>{V[+e.target.dataset.i]=e.target.value;}));
+}
+async function copyRow(){
+  if(!V[5]){toast('먼저 원고를 생성하세요');return;}
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html='<table><tr>'+V.map(v=>'<td>'+esc(v).replace(/\n/g,'<br>')+'</td>').join('')+'</tr></table>';
+  const plain=V.map(v=>String(v).replace(/\t/g,' ')).join('\t');
+  try{
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':new Blob([html],{type:'text/html'}),
+      'text/plain':new Blob([plain],{type:'text/plain'})})]);
+    toast('복사 완료 — 시트 새 행 A열에 붙여넣으세요 (줄바꿈 보존됨)');
+  }catch(e){
+    try{await navigator.clipboard.writeText(plain);toast('텍스트로 복사됨 (일부 줄바꿈은 시트에서 행으로 갈라질 수 있음)');}
+    catch(e2){toast('복사 실패: '+e2.message);}
+  }
+}
+async function copyText(){
+  const doc=HEADERS.map((h,i)=>V[i]?('■ '+(h||'(열'+(i+1)+')')+'\n'+V[i]):null).filter(Boolean).join('\n\n');
+  try{await navigator.clipboard.writeText(doc);toast('원고 전문을 복사했습니다');}catch(e){toast('복사 실패');}
+}
+function fillDemo(){
+  $('name').value='니코트 플리츠 내열 유리 머그컵';$('code').value='PLS';$('col').value='플리츠';$('cat').value='유리';
+  $('mat').value='내열유리 (영하 20℃~120℃)';$('org').value='중국 (니코트 기획·검수)';
+  $('comp').value='머그컵 1P (둥근형 / 롱형 중 선택)';$('size').value='지름 8cm · 높이 9.5cm · 300ml';
+  $('f1').value='빛을 담은 플리츠 디자인';$('f2').value='영하 20℃부터 120℃까지 내열유리';$('f3').value='선물하기 좋은 패키지';
+  $('use').value='커피 · 라떼 · 밀크티 · 차 · 아이스티 · 에이드';$('colors').value='';gift=true;paintGift();
+}
+function resetAll(){for(const k of ['name','code','mat','org','comp','size','f1','f2','f3','use','colors'])$(k).value='';gift=false;paintGift();V=new Array(41).fill('');$('fields').innerHTML='';$('banCheck').innerHTML='';$('status').className='gate info';$('status').textContent='왼쪽에 팩트를 넣고 원고 생성을 누르세요.';}
+</script>
+</body>
+</html>
