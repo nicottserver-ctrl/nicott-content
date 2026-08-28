@@ -939,7 +939,7 @@ function render(){paintNav();paintGauge();paintStore();paintCustomCss();
 function skinBar(perPage){
   const cur=perPage?(CP()?.skin||''):S.skin;
   return `<div class="chips">${perPage?`<button class="${!cur?'on':''}" onclick="setPageSkin('')">세트 기본</button>`:''}
-  ${SKINS.map(s=>`<button class="${cur===s.id?'on':''}" onclick="${perPage?`setPageSkin('${s.id}')`:`setSkin('${s.id}')`}" title="${s.desc}"><span style="display:inline-flex;gap:2px;vertical-align:-2px;margin-right:5px">${s.sw.map(c=>`<i style="width:8px;height:8px;border-radius:50%;background:${c};display:block;border:1px solid rgba(0,0,0,.08)"></i>`).join('')}</span>${s.nm}</button>`).join('')}</div>`;}
+  ${SKINS.map(s=>`<button class="${cur===s.id?'on':''}" onclick="${perPage?`setPageSkin('${s.id}')`:`setSkin('${s.id}')`}" title="${s.desc}"><span style="display:inline-flex;gap:2px;vertical-align:-2px;margin-right:5px">${s.sw.map(c=>`<i style="width:8px;height:8px;border-radius:50%;background:${c};display:block;border:1px solid rgba(0,0,0,.08)"></i>`).join('')}</span>${s.name}</button>`).join('')}</div>`;}
 function setSkin(id){S.skin=id;S.pages.forEach(p=>p.skin=null);render();}
 function setPageSkin(id){CP().skin=id||null;render();}
 /* ══ 만들기 ══ */
@@ -1561,7 +1561,7 @@ function cgDetect(){
 function cgParse(){
   const m=CG.in.memo||'',lines=m.split('\n').map(s=>s.trim()).filter(Boolean);
   const pick=(re)=>{const x=m.match(re);return x?x[0]:'';};
-  const MATS=['내열유리','고온소성 도자기','도자기','유리','스테인리스','원목','린넨','실리콘','옹기'];
+  const MATS=['내열유리','고온소성 도자기','도자기','유리','스테인리스','원목','린넨','라탄','면 100%','실리콘','옹기'];
   const mat=MATS.find(w=>m.includes(w))||'';
   const sizes=(m.match(/\d+(?:\.\d+)?\s*(?:cm|mm|ml|L)/g)||[]).slice(0,5).join(' · ');
   const comp=pick(/[^,\n·]*\d+\s*[Pp인개][^,\n·]*/);
