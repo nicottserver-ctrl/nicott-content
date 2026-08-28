@@ -1,0 +1,18 @@
+{
+  "note": "월간 트렌드 리서치가 관찰하는 계정 목록입니다. handle만 고치면 대상이 바뀝니다.",
+  "updated": "2026-08-12",
+  "accounts": [
+    { "handle": "kintojapan",            "name": "KINTO",            "why": "제품이 있는 시간을 보여주는 방식 · 니코트 지향점과 최근접" },
+    { "handle": "nakagawamasa7",         "name": "中川政七商店",      "why": "세로쓰기 타이포 · 계절과 공예 서사" },
+    { "handle": "azmaya.co.jp",          "name": "東屋",             "why": "다크 그라운드 단독 정물 · 소재 중심" },
+    { "handle": "iittala",               "name": "iittala",          "why": "적게 올리고 한 장의 완성도" },
+    { "handle": "kwangjuyo_official",    "name": "광주요",            "why": "컬러 스튼디오 배경 · 시리즈 락업" },
+    { "handle": "chapter1_official",     "name": "책터원",            "why": "PICK 카드 · 편집숍식 큐레이션" },
+    { "handle": "official_hasamiporcelain", "name": "HASAMI PORCELAIN", "why": "여백·그림자·혅태" },
+    { "handle": "fermliving",            "name": "ferm LIVING",      "why": "제품 → 공간 → 생활 확장" },
+    { "handle": "haydesign",             "name": "HAY",              "why": "컬러·그래픽 피드 리듬" },
+    { "handle": "eastforkpottery",       "name": "East Fork",        "why": "사람이 느껴지는 축 · 공장·팀·팝업" },
+    { "handle": "foglinenwork",          "name": "Fog Linen Work",   "why": "자연 소재 생활도구" },
+    { "handle": "d_d_department",        "name": "D&DEPARTMENT",     "why": "오래 쓰는 물건과 생활문화" }
+  ]
+}
