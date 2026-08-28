@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NICOTT 콘텐츠 대시보드 v1.2</title>
+<title>NICOTT 콘텐츠 대시보드 v1.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700&family=Questrial&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -469,7 +469,7 @@ main{padding:18px 22px 60px;min-width:0}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.2</div>
+    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.3</div>
     <nav class="nav" id="nav"></nav>
     <div class="gm"><h4>이번 달 진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
@@ -761,7 +761,7 @@ const BASE_SETS=[
 const KEY='nicott_dash_v1';
 const DEF={settings:{handle:'@nicott_kitchen',perWeek:5,goals:{product:30,lifestyle:30,story:20,event:20},
    metaToken:'',igUserId:'',igUsername:'',ghOwner:'',ghRepo:'',ghBranch:'main',ghToken:'',ghOk:false,
-   driveKey:'',driveLinks:'',autoPublish:'semi'},
+   driveKey:'',driveLinks:'',aiKey:'',autoPublish:'semi'},
   mySets:[],favTpl:[],favSet:[],recentTpl:[],recentSet:[],archivedTpl:[],
   trend:{batches:[{id:'2026-08',date:'2026-08-12',src:'일본 키친·공예 상위 계정 실측 (東屋 9.6천 · 中川政七商店 26.3만 · KINTO 23만 외)',items:['T1','T2','T3','T4','T5','T6']}],saved:[]},
   customTpl:[],pendingTpl:[],lastTplCheck:'',
@@ -877,12 +877,12 @@ function paintGauge(){
     const pct=Math.min((c[k]||0)/total/(g[k]/100)*100,140);
     return `<div class="gmr"><div class="t"><span>${MIXLABEL[k]}</span><span>${c[k]||0}건</span></div><div class="gmb"><i class="${pct>125?'over':''}" style="width:${Math.min(pct,100)}%"></i></div></div>`;}).join('')
    +`<div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:6px">목표 ${g.product}/${g.lifestyle}/${g.story}/${g.event} · 주 ${DB.settings.perWeek}회</div>`;}
-const VIEWS=[['make','만들기','01'],['gallery','템플릿 갤러리','02'],['contents','콘텐츠','03'],['calendar','캘린더','04'],['settings','설정','05']];
+const VIEWS=[['make','만들기','01'],['gallery','템플릿 갤러리','02'],['contents','콘텐츠','03'],['calendar','캘린더','04'],['copygen','제품 원고','05'],['settings','설정','06']];
 function paintNav(){document.getElementById('nav').innerHTML=VIEWS.map(([k,l,n])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')"><span>${l}</span><span class="n">${n}</span></button>`).join('');}
 function go(v){S.view=v;render();}
 function render(){paintNav();paintGauge();paintStore();paintCustomCss();
   const m=document.getElementById('main');
-  m.innerHTML=S.view==='make'?vMake():S.view==='gallery'?vGallery():S.view==='contents'?vContents():S.view==='calendar'?vCalendar():vSettings();
+  m.innerHTML=S.view==='make'?vMake():S.view==='gallery'?vGallery():S.view==='contents'?vContents():S.view==='calendar'?vCalendar():S.view==='copygen'?vCopygen():vSettings();
   paint();setTimeout(fit,20);}
 function skinBar(perPage){
   const cur=perPage?(CP()?.skin||''):S.skin;
@@ -1470,6 +1470,180 @@ function addAllPlan(){PLAN.forEach((_,i)=>addPlan(i));toast('제안을 모두 �
 function startFromPlan(i){const p=PLAN[i];if(!p)return;pickSet(p.setId);S.view='make';S.step=2;render();}
 function moveMonth(d){const base=S.calMonth?new Date(S.calMonth+'-01'):new Date();base.setMonth(base.getMonth()+d);
   S.calMonth=base.getFullYear()+'-'+String(base.getMonth()+1).padStart(2,'0');render();}
+/* ══ 제품 원고 — 구글시트 41열 연계 (v1.3) ══
+   입력은 상품명 + 자유 메모뿐. 컬렉션·카테고리는 상품명에서 자동 인식,
+   소재·사이즈·구성·원산지·컬러·용도는 메모에서 자동 추출.
+   [완전 자동]은 설정의 Anthropic API 키로 특징 추출~카피 작성까지 AI가 수행.
+   시트는 절대 수정하지 않음 — "붙여넣을 한 줄"만 만든다.            */
+const CG_HEADERS=['코드','컬렉션','상단 패키지 사진','','수식어','상품명','대표 소구포인트1','','대표 소구포인트2','','기물 많은 경우 추가 설명','','네임태그·옵션 사진','기프트 패키지 사진','디테일','컬러 사진','컬러 설명+컬러칩','컬러 GIF','공통 사진','GIF·해시태그','공통 사진','체크 포인트 아이콘','공통 사진','포인트 1','공통 사진','포인트 2','공통 사진','포인트 3','공통 사진','구성','기물 사진','공통 사진','원산지','공장 사진','컬렉션 설명','취급·주의사항','','','','',''];
+const CG_COLS={
+ '플리츠':{code:'PLS',kw:['플리츠'],mod:'우아한 라인을 따라\n투명하게 빛나는 티타임',desc:'빛을 따라 은은하게 반짝이는 플리츠 라인. 매일의 티타임을 조금 더 특별하게 만드는 니코트의 플리츠 컬렉션입니다.',tags:'#플리츠 #티웨어 #티타임'},
+ '샤틴 Satin':{code:'STN',kw:['샤틴','satin'],mod:'부드러운 광택이 손끝에 머무는\n새틴 마감 커트러리',desc:'은은한 새틴 광택과 단정한 실루엣. 국내에서 생산하는 니코트의 Satin 커트러리 컬렉션입니다.',tags:'#샤틴 #커트러리 #국내생산'},
+ '베이지무드':{code:'BGM',kw:['베이지','피넛'],mod:'은은한 베이지 컬러가 머무는,\n단아한 도자기',desc:'은은한 베이지 톤이 식탁에 차분히 스며드는 니코트의 베이지무드 컬렉션입니다.',tags:'#베이지무드 #도자기'},
+ '에브리데이':{code:'EVD',kw:['에브리데이'],mod:'매일 쓰는 그릇의\n기본을 다시 생각하다',desc:'가볍고 단단한 우윳빛 도자기. 매일 쓰는 그릇의 기준을 다시 생각하며 만든 니코트의 에브리데이 컬렉션입니다.',tags:'#에브리데이 #데일리그릇'},
+ '블루 스트라이프':{code:'BLS',kw:['스트라이프','블루'],mod:'단정한 줄무늬가 그리는\n청량한 식탁',desc:'손으로 그린 듯한 블루 스트라이프가 식탁에 청량함을 더하는 컬렉션입니다.',tags:'#블루스트라이프 #줄무늬그릇'},
+ '큐티네코':{code:'QTN',kw:['큐티네코','네코'],mod:'식탁 위 작은 장난,\n큐티네코',desc:'슬쩍 웃음이 나는 고양이 패턴. 일상에 작은 즐거움을 더하는 큐티네코 라인입니다.',tags:'#큐티네코 #고양이그릇'},
+ '우드':{code:'WOD',kw:['우드','원목','트레이','도마'],mod:'나무의 결이 담아내는\n따뜻한 온도',desc:'하나하나 결이 다른 원목. 시간이 지날수록 손에 익는 니코트의 우드 컬렉션입니다.',tags:'#우드 #원목'},
+ '하나토쿠사':{code:'HNT',kw:['하나토쿠사'],mod:'화지처럼 번지는 무늬,\n하나토쿠사',desc:'일본 산지에서 만든 하나토쿠사. 은은한 무늬가 식탁의 배경이 되어 줍니다.',tags:'#하나토쿠사 #MADEINJAPAN'}
+};
+const CG_CATS={
+ '접시':{kw:['접시','플레이트'],f:'음식이 예뻐 보이는 비율의 림 디자인',tip:'전자레인지·식기세척기 사용이 가능합니다. 포개어 보관하면 자리를 덜 차지합니다.'},
+ '볼·공기':{kw:['볼','공기','국그릇','밥공기','종지'],f:'국물부터 볶음까지 두루 담기는 깊이',tip:'전자레인지·식기세척기 사용이 가능합니다.'},
+ '머그·컵':{kw:['머그','컵','잔'],f:'손에 편안하게 감기는 비율',tip:'뜨거운 음료를 담기 전 미지근한 물로 한 번 헹구면 온도 충격을 줄일 수 있습니다.'},
+ '유리':{kw:['유리','글라스'],f:'빛과 음료의 색을 그대로 보여주는 투명함',tip:'급격한 온도 변화는 피해 주세요. 부드러운 스펀지로 세척해 주세요.'},
+ '커트러리':{kw:['커트러리','수저','스푼','포크','나이프','젓가락'],f:'입에 닿는 감촉까지 다듬은 마감',tip:'사용 후 물기를 닦아 보관하면 광택이 오래 유지됩니다.'},
+ '우드':{kw:['트레이','도마','조리도구','우드','원목'],f:'하나하나 결이 다른 원목의 표정',tip:'물에 오래 담가두지 마시고, 사용 후 바로 물기를 닦아 통풍이 잘 되는 곳에 보관해 주세요. 식기세척기·전자레인지는 사용할 수 없습니다.'},
+ '패브릭':{kw:['크로스','린넨','패브릭','매트'],f:'식탁의 배경이 되어 주는 자연스러운 결',tip:'첫 세탁 시 단독 세탁을 권장합니다. 중성세제로 부드럽게 세탁해 주세요.'},
+ '세트':{kw:['세트','홈세트'],f:'한 벌로 완성되는 균형 잡힌 구성',tip:'구성품별 소재에 맞는 취급 방법을 함께 확인해 주세요.'}
+};
+const CG={in:{name:'',memo:'',col:'',cat:'',gift:false},v:new Array(41).fill(''),feats:[],busy:''};
+function cgDetect(){
+  const n=(CG.in.name||'').toLowerCase();
+  let col=CG.in.col,cat=CG.in.cat;
+  if(!col)for(const k in CG_COLS)if(CG_COLS[k].kw.some(w=>n.includes(w.toLowerCase()))){col=k;break;}
+  if(!cat)for(const k in CG_CATS)if(CG_CATS[k].kw.some(w=>n.includes(w.toLowerCase()))){cat=k;break;}
+  return{col:col||'',cat:cat||''};
+}
+function cgParse(){
+  const m=CG.in.memo||'',lines=m.split('\n').map(s=>s.trim()).filter(Boolean);
+  const pick=(re)=>{const x=m.match(re);return x?x[0]:'';};
+  const MATS=['내열유리','고온소성 도자기','도자기','유리','스테인리스','원목','린넨','실리콘','옹기'];
+  const mat=MATS.find(w=>m.includes(w))||'';
+  const sizes=(m.match(/\d+(?:\.\d+)?\s*(?:cm|mm|ml|L)/g)||[]).slice(0,5).join(' · ');
+  const comp=pick(/[^,\n·]*\d+\s*[Pp인개][^,\n·]*/);
+  const orgMap={'일본':'일본','국내':'대한민국','대한민국':'대한민국','한국':'대한민국','중국':'중국','베트남':'베트남'};
+  let org='';for(const k in orgMap)if(m.includes(k)){org=orgMap[k];break;}
+  const COLORS=['밀크','화이트','아이보리','베이지','샌드','브라운','그린','블루','블랙','그레이','핑크','옐로우','테라코타'];
+  const colors=COLORS.filter(c=>m.includes(c)).join(' · ');
+  const USES=['커피','라떼','밀크티','차','에이드','아이스티','파스타','샐러드','밥','국','반찬','디저트','과일','브런치','안주'];
+  const use=USES.filter(u=>m.includes(u)).join(' · ');
+  const feats=lines.filter(l=>/^[-·•*]/.test(l)).map(l=>l.replace(/^[-·•*]\s*/,'')).slice(0,3);
+  return{mat,size:sizes,comp:comp.trim(),org,colors,use,feats};
+}
+function cgGen(){
+  const i=CG.in;if(!i.name.trim()){toast('상품명을 입력해 주세요');return false;}
+  const det=cgDetect(),P=CG_COLS[det.col]||{code:'',mod:'',desc:'',tags:''},C=CG_CATS[det.cat]||{f:'',tip:''};
+  const F=cgParse(),short=i.name.replace(/^니코트\s*/,'').replace(/MADE IN \w+/i,'').trim();
+  let feats=F.feats.slice();
+  if(!feats.length){feats=[C.f||'매일 두고 쓰기 좋은 담백한 디자인'];
+    if(F.mat)feats.push(F.mat+'로 만든 기본기');
+    feats.push(i.gift?'선물하기 좋은 패키지':'어떤 식탁에도 어울리는 쓰임새');}
+  while(feats.length<3)feats.push('어떤 식탁에도 어울리는 쓰임새');
+  feats=feats.slice(0,3);CG.feats=feats;
+  const v=new Array(41).fill('');
+  v[0]=P.code||'';v[1]=det.col||'';
+  v[4]=P.mod||(feats[0]+'\n일상에 더하는 니코트의 제안');
+  v[5]=i.name.trim();
+  v[6]=[short+'입니다.','',feats[0]+'.',(F.mat?F.mat+' 소재로 만들어 매일 쓰기 좋습니다.':''),'','특별한 날이 아니어도 좋은 도구를 쓰는 일.','그게 일상에 낭만을 더하는 방법이라고 생각합니다.'].join('\n');
+  v[8]=[(F.comp?'구성은 '+F.comp+'.':''),(F.colors?'컬러는 '+F.colors+' 중에서 고를 수 있습니다.':''),'취향과 식탁에 맞게 선택해 보세요.'].filter(Boolean).join('\n');
+  v[10]=F.use?('추천용도 — '+F.use):'';
+  v[12]=F.colors?('옵션: '+F.colors):'단일 구성';
+  v[13]=i.gift?'기프트 패키지 O':'X';
+  v[14]=['추천 용도',(F.use||'일상 상차림'),'','감성 한 줄','',(feats[0]+'로 완성하는 오늘의 식탁입니다.')].join('\n');
+  v[15]=F.colors?'컬러 사진':'X';v[16]=F.colors?(F.colors+' — 실물 기준 컬러칩 첨부'):'X';v[17]='X';
+  v[19]=(P.tags?P.tags+' ':'')+'#니코트 #지금의식탁 #일상의낭만';
+  v[21]=['CHECK POINT','',short+',','일상이 더 좋아지는 이유','','DESIGN','MATERIAL','PACKAGE',''].concat(feats.map((f,n)=>'POINT.0'+(n+1)+' '+f+'\n')).join('\n').trim();
+  const PT=['DESIGN DETAIL','MATERIAL','HOW TO USE'];
+  feats.forEach((f,n)=>{v[23+n*2]=[PT[n],f,'---------------------','',
+    n===0?'매일 보아도 질리지 않는 담백한 디자인.\n식탁 위 어떤 그릇과도 자연스럽게 어울립니다.'
+    :n===1?((F.mat?F.mat+'. ':'')+'오래 쓸수록 좋은 도구의 기본을 지켰습니다.')
+    :('생활 속에서 이렇게 활용해 보세요.\n'+(F.use||'매일의 식탁에서'))].join('\n');});
+  v[29]=['구성',(F.comp||i.name.trim()),(F.size?'사이즈 — '+F.size:'')].filter(Boolean).join('\n');
+  v[32]=F.org||'';v[34]=P.desc||'';v[35]=C.tip||'';
+  CG.v=v;return true;
+}
+async function cgAI(){
+  const key=DB.settings.aiKey;
+  if(!key){toast('설정 탭에 Anthropic API 키를 넣으면 완전 자동이 켜집니다');return;}
+  if(!cgGen())return;
+  CG.busy='AI가 원고를 쓰는 중… (10~20초)';render();
+  try{
+    const i=CG.in,det=cgDetect(),F=cgParse(),P=CG_COLS[det.col]||{};
+    const spec=['너는 테이블웨어 브랜드 니코트(NICOTT)의 카피라이터다. 상세페이지 원고를 쓴다.','',
+      '## 브랜드 톤','담백하고 차분하게. 감성적이지만 과장 없이. 짧은 문장. 존댓말.',
+      '금지 표현: '+GUIDE.banned.join(', '),'',
+      '## 제품 팩트','상품명: '+i.name,'컬렉션: '+(det.col||'미지정'),'카테고리: '+(det.cat||'미지정'),
+      '메모(발주서·스펙): '+(i.memo||'없음'),'기프트 패키지: '+(i.gift?'있음':'없음'),
+      (P.desc?'컬렉션 설명(참고): '+P.desc:''),'',
+      '## 할 일','메모에서 핵심 특징 3가지를 뽑고, 아래 JSON만 출력한다. 설명 문장 금지. 코드블록 표시 금지.','',
+      '{','"feats": ["특징1(15자 내)","특징2","특징3"],',
+      '"mod": "수식어 두 줄 (줄바꿈은 \\n)",',
+      '"sp1": "대표 소구포인트1 — 4~7문장, 문단 사이 빈 줄",',
+      '"sp2": "대표 소구포인트2 — 구성·선택지 안내 2~4문장",',
+      '"detail": "추천 용도\\n(용도 나열)\\n\\n감성 한 줄\\n\\n(한 문장)",',
+      '"check": "CHECK POINT\\n\\n(제품명),\\n일상이 더 좋아지는 이유\\n\\nDESIGN\\nMATERIAL\\nPACKAGE\\n\\nPOINT.01 …\\n\\nPOINT.02 …\\n\\nPOINT.03 …",',
+      '"points": ["DESIGN DETAIL\\n제목\\n---------------------\\n\\n본문 2~3문장","MATERIAL\\n…","HOW TO USE\\n…"],',
+      '"tags": "#해시태그 5~7개 (공백 구분, #니코트 포함)"','}'].filter(Boolean).join('\n');
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2500,messages:[{role:'user',content:spec}]})});
+    const j=await r.json();
+    if(j.error)throw new Error(j.error.message);
+    const text=(j.content||[]).map(c=>c.text||'').join('');
+    const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('응답에서 JSON을 찾지 못했습니다');
+    const o=JSON.parse(m[0]);
+    const found=GUIDE.banned.filter(b=>JSON.stringify(o).includes(b));
+    if(found.length)throw new Error('금지 표현 포함으로 반려: '+found.join(', '));
+    if(Array.isArray(o.feats)&&o.feats.length)CG.feats=o.feats.slice(0,3);
+    if(o.mod)CG.v[4]=o.mod;if(o.sp1)CG.v[6]=o.sp1;if(o.sp2)CG.v[8]=o.sp2;
+    if(o.detail)CG.v[14]=o.detail;if(o.check)CG.v[21]=o.check;
+    (o.points||[]).slice(0,3).forEach((p,n)=>{if(p)CG.v[23+n*2]=p;});
+    if(o.tags)CG.v[19]=o.tags;
+    toast('AI 원고 완성 — 검토 후 복사하세요');
+  }catch(e){alert('AI 생성 실패 — 규칙 기반 초안을 그대로 둡니다.\n\n'+e.message);}
+  finally{CG.busy='';render();}
+}
+async function cgCopyRow(){
+  if(!CG.v[5]){toast('먼저 원고를 생성하세요');return;}
+  const es=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html='<table><tr>'+CG.v.map(x=>'<td>'+es(x).replace(/\n/g,'<br>')+'</td>').join('')+'</tr></table>';
+  const plain=CG.v.map(x=>String(x).replace(/\t/g,' ')).join('\t');
+  try{await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
+    toast('복사 완료 — 시트 새 행 A열에 붙여넣으세요 (줄바꿈 보존)');}
+  catch(e){try{await navigator.clipboard.writeText(plain);toast('텍스트로 복사했습니다');}catch(e2){toast('복사 실패: '+e2.message);}}
+}
+function cgToIg(){
+  if(!CG.v[5]){toast('먼저 원고를 생성하세요');return;}
+  const F=cgParse(),short=CG.v[5].replace(/^니코트\s*/,'').trim();
+  pickSet('S1');
+  const pg=S.pages;
+  if(pg[0]){pg[0].v.kick='NEW ARRIVAL';pg[0].v.title=short.slice(0,22);pg[0].v.body=(CG.feats[0]||'')+(F.mat?'.\n'+F.mat+'로 만들었습니다.':'.');}
+  if(pg[1]&&F.mat)pg[1].v.s1v=F.mat.slice(0,14);
+  if(pg[2])pg[2].v.name=short.slice(0,16);
+  if(pg[3]){pg[3].v.title=short.slice(0,18);if(F.comp)pg[3].v.r1v=F.comp.slice(0,26);if(F.mat)pg[3].v.r2v=F.mat.slice(0,26);}
+  S.view='make';S.step=2;render();
+  toast('신상품 세트에 채웠습니다 — 사진만 넣으면 됩니다');
+}
+function vCopygen(){
+  const i=CG.in,det=cgDetect(),filled=CG.v.filter(x=>x).length;
+  const colOpt=['<option value="">자동'+(det.col?' — '+det.col:'')+'</option>'].concat(Object.keys(CG_COLS).map(k=>'<option value="'+k+'" '+(i.col===k?'selected':'')+'>'+k+'</option>')).join('');
+  const catOpt=['<option value="">자동'+(det.cat?' — '+det.cat:'')+'</option>'].concat(Object.keys(CG_CATS).map(k=>'<option value="'+k+'" '+(i.cat===k?'selected':'')+'>'+k+'</option>')).join('');
+  const rows=filled?CG_HEADERS.map((h,idx)=>{
+    if(!h&&!CG.v[idx])return '';
+    const open=[4,5,6,8,21].includes(idx)?' open':'';
+    return '<details class="acc"'+open+'><summary><span>'+(idx+1)+'열 · '+(h||'(빈)')+'</span><span class="cnt">'+(CG.v[idx]?CG.v[idx].length+'자':'비움')+'</span></summary><div><textarea style="width:100%;min-height:80px" oninput="CG.v['+idx+']=this.value">'+esc(CG.v[idx])+'</textarea></div></details>';
+  }).join(''):'';
+  const found=filled?GUIDE.banned.filter(b=>CG.v.join(' ').includes(b)):[];
+  return `<div class="ph"><h1>제품 원고</h1><span class="st">GOOGLE SHEET</span>${CG.busy?`<span class="badge t">${esc(CG.busy)}</span>`:''}</div>
+  <div class="psub">신제품 정보 한 번 입력으로 상세페이지(구글시트 41열) 원고와 인스타 신상품 세트를 함께 만듭니다. 시트는 붙여넣기 외에 수정하지 않습니다.</div>
+  <div class="card"><h3>1. 제품 정보 <span class="badge">이것만</span></h3>
+  <div class="hint">상품명에서 컬렉션·카테고리를 자동 인식하고, 메모에서 소재·사이즈·구성·원산지·컬러·용도를 자동으로 뽑습니다. 형식 없이 붙여넣으세요.</div>
+  <div class="field"><label><span>상품명</span></label><input type="text" value="${esc(i.name)}" oninput="CG.in.name=this.value" placeholder="니코트 플리츠 내열 유리 머그컵"></div>
+  <div class="field"><label><span>제품 메모 (발주서·스펙 복붙 가능 · 특징을 강조하려면 줄 앞에 - )</span></label>
+  <textarea style="min-height:96px" oninput="CG.in.memo=this.value" placeholder="내열유리, 지름 8cm 높이 9.5cm 300ml, 머그컵 1P, 중국, 커피 차 에이드&#10;- 빛을 담은 플리츠 디자인&#10;- 영하 20℃부터 120℃까지">${esc(i.memo)}</textarea></div>
+  <div class="tools"><select class="btn sm" onchange="CG.in.col=this.value;render()">${colOpt}</select>
+  <select class="btn sm" onchange="CG.in.cat=this.value;render()">${catOpt}</select>
+  <button class="btn sm ${i.gift?'primary':''}" onclick="CG.in.gift=!CG.in.gift;render()">기프트 패키지 ${i.gift?'O':'X'}</button></div>
+  <div class="tools"><button class="btn terra" onclick="cgAI()">완전 자동 — AI 원고</button>
+  <button class="btn primary" onclick="if(cgGen())render()">빠른 생성 — 규칙</button></div>
+  ${DB.settings.aiKey?'':'<div class="why">설정 탭에 <b style="color:var(--ink-sub)">Anthropic API 키</b>를 넣으면 [완전 자동]이 켜집니다 — 특징 추출부터 카피까지 AI가 씁니다.</div>'}</div>
+  ${filled?`<div class="card"><h3>2. 결과 <span class="badge">41열 · "진짜 최신 버전" 탭 순서</span></h3>
+  <div class="hint">필요한 칸만 고치고 복사하세요. 구글시트 새 행의 <b>A열 한 칸</b>을 클릭하고 붙여넣으면(⌘V) 셀 안 줄바꿈까지 그대로 들어갑니다.</div>
+  <div class="tools"><button class="btn terra" onclick="cgCopyRow()">시트용 한 줄 복사</button>
+  <button class="btn primary" onclick="cgToIg()">이 제품으로 인스타 세트 만들기</button></div>
+  ${found.length?'<div class="gate no">금지 표현 — '+found.join(', ')+'</div>':'<div class="gate yes">금지 표현 없음 — 니코트 톤 검사 통과</div>'}
+  ${rows}</div>`:''}`;
+}
 /* ══ 설정 ══ */
 function vSettings(){
   const s=DB.settings,sum=s.goals.product+s.goals.lifestyle+s.goals.story+s.goals.event;
@@ -1516,6 +1690,9 @@ function vSettings(){
     <textarea style="min-height:70px" oninput="setS('driveLinks',this.value)">${esc(s.driveLinks)}</textarea></div>
    <div class="field"><label><span>Google API 키 (선택)</span></label><input type="text" placeholder="AIza... — 넣으면 선택기가 켜집니다" value="${esc(s.driveKey)}" oninput="setS('driveKey',this.value)"></div>
    <div class="why">키 발급은 구글 클라우드 콘솔에서 대표님 계정으로 진행합니다. 화면 단위 안내가 필요하시면 말씀해 주세요.</div></div>
+  <div class="card"><h3>AI 원고 (선택) <span class="conn ${s.aiKey?'on':'off'}">${s.aiKey?'키 등록됨':'미등록'}</span></h3>
+   <div class="hint">키를 넣으면 <b>제품 원고</b> 탭의 [완전 자동]이 켜집니다. 팩트에서 특징 추출부터 카피 작성까지 AI가 하고, 금지 표현이 포함된 결과는 자동 반려합니다. 키는 이 브라우저에만 저장되고 저장소에는 올라가지 않습니다.</div>
+   <div class="field"><label><span>Anthropic API 키</span></label><input type="text" placeholder="sk-ant-..." value="${esc(s.aiKey||'')}" oninput="setS('aiKey',this.value)"></div></div>
   <div class="card"><h3>데이터</h3>
    <div class="hint">${STORE_OK?'이 브라우저에 자동 저장됩니다.':'⚠ 브라우저 저장이 막혀 있습니다. 백업 파일을 꼭 받아두세요.'} 다른 기기로 옮기려면 백업 파일을 사용하세요.</div>
    <div class="tools"><button class="btn" onclick="backup()">백업 파일 내려받기</button>
