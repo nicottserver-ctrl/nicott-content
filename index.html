@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NICOTT 콘텐츠 대시보드 v1.1</title>
+<title>NICOTT 콘텐츠 대시보드 v1.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700&family=Questrial&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -469,7 +469,7 @@ main{padding:18px 22px 60px;min-width:0}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.1</div>
+    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.2</div>
     <nav class="nav" id="nav"></nav>
     <div class="gm"><h4>이번 달 진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
@@ -778,7 +778,7 @@ const S={view:'make',step:1,set:null,pages:[],cur:0,skin:'sk-ever',speaker:null,
   selDay:null,rep:{days:[],kind:'life',time:'19:00'},busy:''};
 const ALL_SETS=()=>[...DB.mySets,...BASE_SETS];
 const CP=()=>S.pages[S.cur];
-const newPage=id=>{const t=TB(id),v={};t.f.forEach(f=>v[f.k]=f.v||'');return{tpl:id,v,fs:{},ts:1,skin:null};};
+const newPage=id=>{const t=TB(id),v={};t.f.forEach(f=>v[f.k]=f.v||'');return{tpl:id,v,fs:{},ts:1,skin:null,note:''};};
 const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1900);};
 const pushRecent=(arr,id)=>{const i=arr.indexOf(id);if(i>=0)arr.splice(i,1);arr.unshift(id);if(arr.length>10)arr.pop();};
 /* ── 캡션 ── */
@@ -804,7 +804,10 @@ function buildCaptions(){
   }
   if(!o.length)o.push(['기본형',`${name}\n\n오늘도 좋은 식탁 되세요.`]);
   const tags=['#니코트','#'+(col.replace(/\s/g,'')||'에브리데이'),'#'+(String(name).replace(/\s/g,'').slice(0,12)||'테이블웨어'),'#지금의식탁','#일상의낭만'];
-  return o.map(([l,s])=>({label:l,text:s.trim()+'\n\n'+tags.join(' ')}));
+  const NUM=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  const notes=S.pages.map((p,i)=>(p.note||'').trim()?(NUM[i]||(i+1)+'.')+' '+p.note.trim():null).filter(Boolean);
+  const noteBlock=notes.length?'\n\n'+notes.join('\n'):'';
+  return o.map(([l,s])=>({label:l,text:s.trim()+noteBlock+'\n\n'+tags.join(' ')}));
 }
 const curCap=()=>S.capEdited??(S.capList[S.capIdx]?.text||'');
 /* ── 집계·검사 ── */
@@ -991,6 +994,10 @@ function step2(){
   <div class="grid2">${txts.map(f=>`<div class="field"${f.t==='area'?' style="grid-column:1/-1"':''}><label><span>${f.l}</span><span style="display:flex;gap:8px;align-items:center">${f.max?`<span class="cnt">${(p.v[f.k]||'').length}/${f.max}</span>`:''}${fsCtl(f)}</span></label>${inp(f)}</div>`).join('')}</div>
   <div class="field" style="margin-top:3px"><label><span>화자</span></label>
   <div class="tools" style="margin:0"><button class="btn sm ${S.speaker==='NICOTT'?'primary':''}" onclick="setSp('NICOTT')">NICOTT</button><button class="btn sm ${S.speaker==='NINA'?'primary':''}" onclick="setSp('NINA')">NINA</button></div></div></div>
+  <div class="card"><h3>장별 멘트 <span class="badge">캡션에 자동 반영</span></h3>
+  <div class="hint">이 장(사진)에 대한 한 줄 설명입니다. 입력하면 캡션 끝에 ① ② ③ 순서로 자동 조립됩니다. 비워두면 그 장은 생략됩니다.</div>
+  <div class="field"><label><span>${S.cur+1}장 멘트</span><span class="cnt">${(p.note||'').length}/60</span></label>
+  <textarea maxlength="60" oninput="CP().note=this.value;paint()">${esc(p.note||'')}</textarea></div></div>
   ${allImgs()?'':'<div class="why">모든 장에 사진이 들어가야 다음으로 넘어갑니다.</div>'}`;
 }
 function driveBar(){
