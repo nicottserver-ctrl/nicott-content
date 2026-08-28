@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NICOTT 콘텐츠 대시보드 v1.4</title>
+<title>NICOTT 콘텐츠 대시보드 v1.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700&family=Questrial&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -499,7 +499,7 @@ main{padding:18px 22px 60px;min-width:0}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.4</div>
+    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.5</div>
     <nav class="nav" id="nav"></nav>
     <div class="gm"><h4>이번 달 진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
@@ -813,7 +813,7 @@ const BASE_SETS=[
 const KEY='nicott_dash_v1';
 const DEF={settings:{handle:'@nicott_kitchen',perWeek:5,goals:{product:30,lifestyle:30,story:20,event:20},
    metaToken:'',igUserId:'',igUsername:'',ghOwner:'',ghRepo:'',ghBranch:'main',ghToken:'',ghOk:false,
-   driveKey:'',driveLinks:'',aiKey:'',aiModel:'claude-haiku-4-5-20251001',autoPublish:'semi'},
+   driveKey:'',driveFolder:'',driveLinks:'',aiKey:'',aiModel:'claude-haiku-4-5-20251001',autoPublish:'semi'},
   mySets:[],favTpl:[],favSet:[],recentTpl:[],recentSet:[],archivedTpl:[],
   trend:{batches:[{id:'2026-08',date:'2026-08-12',src:'일본 키친·공예 상위 계정 실측 (東屋 9.6천 · 中川政七商店 26.3만 · KINTO 23만 외)',items:['T1','T2','T3','T4','T5','T6']}],saved:[]},
   customTpl:[],pendingTpl:[],lastTplCheck:'',
@@ -827,7 +827,7 @@ function paintStore(){document.getElementById('storeInfo').innerHTML=STORE_OK
 /* ── 상태 ── */
 const S={view:'make',step:1,set:null,pages:[],cur:0,skin:'sk-ever',speaker:null,capIdx:0,capList:[],capEdited:null,
   checks:[],fmtFilter:'ALL',galFilter:'ALL',galTab:'all',builder:null,setName:'',editingId:null,calMonth:null,
-  selDay:null,rep:{days:[],kind:'life',time:'19:00'},busy:'',dtCode:''};
+  selDay:null,rep:{days:[],kind:'life',time:'19:00'},busy:'',dtCode:'',driveFiles:null};
 const ALL_SETS=()=>[...DB.mySets,...BASE_SETS];
 const CP=()=>S.pages[S.cur];
 const newPage=id=>{const t=TB(id),v={};t.f.forEach(f=>v[f.k]=f.v||'');return{tpl:id,v,fs:{},ts:1,skin:null,note:''};};
@@ -1053,15 +1053,31 @@ function step2(){
   <textarea maxlength="60" oninput="CP().note=this.value;paint()">${esc(p.note||'')}</textarea></div></div>
   ${allImgs()?'':'<div class="why">모든 장에 사진이 들어가야 다음으로 넘어갑니다.</div>'}`;
 }
+async function drivePick(){
+  const s=DB.settings;
+  const fm=(s.driveFolder||'').match(/[-\w]{25,}/);
+  if(!s.driveKey||!fm){toast('설정 탭에 API 키와 폴더 링크를 넣어주세요');return;}
+  try{
+    S.busy='드라이브 사진 불러오는 중…';render();
+    const q=encodeURIComponent("'"+fm[0]+"' in parents and mimeType contains 'image/' and trashed=false");
+    const r=await fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&pageSize=100&fields=files(id,name,thumbnailLink)&key='+encodeURIComponent(s.driveKey));
+    const j=await r.json();
+    if(j.error)throw new Error(j.error.message);
+    S.driveFiles=(j.files||[]).map(f=>({n:f.name,t:(f.thumbnailLink||'').replace(/=s\d+$/,'=s400'),u:'https://lh3.googleusercontent.com/d/'+f.id+'=s1600'}));
+    toast(S.driveFiles.length+'장을 불러왔습니다 — 눌러서 장에 넣으세요');
+  }catch(e){alert('드라이브 목록을 불러오지 못했습니다\n\n'+e.message+'\n\n폴더가 "링크가 있는 모든 사용자"로 공유돼 있는지, API 키에 Google Drive API가 켜져 있는지 확인해 주세요.');}
+  finally{S.busy='';render();}
+}
 function driveBar(){
   const links=(DB.settings.driveLinks||'').split('\n').map(s=>s.trim()).filter(Boolean);
   const conv=u=>{const m=u.match(/[-\w]{25,}/);return m?`https://drive.google.com/uc?export=view&id=${m[0]}`:u;};
   return `<div style="margin-top:10px"><div class="hint" style="margin-bottom:5px">구글 드라이브 ${DB.settings.driveKey?'· 연결됨':'· 링크 방식'}</div>
   <div class="tools" style="margin:0"><input type="text" id="dlink" placeholder="드라이브 공유 링크 붙여넣기" style="flex:1;min-width:150px;padding:6px 9px;border:1px solid var(--ui-line);border-radius:8px;font-size:12px">
   <button class="btn sm" onclick="addDrive()">이 장에 넣기</button>
-  <button class="btn sm" ${DB.settings.driveKey?'':'disabled'} onclick="toast('구글 선택기는 키 등록 후 설정 탭에서 켜집니다')">드라이브에서 고르기</button></div>
+  <button class="btn sm" ${DB.settings.driveKey&&DB.settings.driveFolder?'':'disabled'} onclick="drivePick()">드라이브에서 고르기${S.driveFiles?' ('+S.driveFiles.length+')':''}</button></div>
+  ${S.driveFiles&&S.driveFiles.length?`<div class="samples" style="margin-top:7px">${S.driveFiles.slice(0,24).map(f=>`<button style="background-image:url('${f.t}')" title="${esc(f.n)}" onclick="useUrl('${f.u}')"></button>`).join('')}</div>`:''}
   ${links.length?`<div class="samples" style="margin-top:7px">${links.slice(0,12).map(u=>`<button style="background-image:url('${conv(u)}')" onclick="useUrl('${conv(u)}')"></button>`).join('')}</div>`:''}
-  ${DB.settings.driveKey?'':'<div class="why">키를 넣지 않아도 <b style="color:var(--ink-sub)">공유 링크 붙여넣기</b>로 바로 쓸 수 있습니다 (링크 보기 권한 필요).</div>'}</div>`;
+  ${DB.settings.driveKey&&DB.settings.driveFolder?'':'<div class="why">폴더째 공유가 가장 편합니다 — 설정 탭에 <b style="color:var(--ink-sub)">폴더 링크 + API 키</b>를 넣으면 여기서 바로 골라 담을 수 있습니다. 키 없이도 개별 공유 링크 붙여넣기는 됩니다.</div>'}</div>`;
 }
 function addDrive(){const el=document.getElementById('dlink');const u=(el?.value||'').trim();if(!u)return;
   const m=u.match(/[-\w]{25,}/);const url=m?`https://drive.google.com/uc?export=view&id=${m[0]}`:u;
@@ -1757,6 +1773,7 @@ function vSettings(){
    <div style="font-size:12px;line-height:1.9;color:#5f584d">① 파일을 <b>드래그해서 올리기</b> (가장 확실) &nbsp;·&nbsp; ② 드라이브 <b>공유 링크 붙여넣기</b> &nbsp;·&nbsp; ③ 키를 넣으면 <b>드라이브에서 바로 고르기</b></div>
    <div class="field" style="margin-top:9px"><label><span>자주 쓰는 드라이브 링크 (줄바꿈으로 여러 개)</span></label>
     <textarea style="min-height:70px" oninput="setS('driveLinks',this.value)">${esc(s.driveLinks)}</textarea></div>
+   <div class="field"><label><span>사진 폴더 링크 (폴더째 공유 — 안의 사진 전부 사용 가능)</span></label><input type="text" placeholder="https://drive.google.com/drive/folders/..." value="${esc(s.driveFolder||'')}" oninput="setS('driveFolder',this.value)"></div>
    <div class="field"><label><span>Google API 키 (선택)</span></label><input type="text" placeholder="AIza... — 넣으면 선택기가 켜집니다" value="${esc(s.driveKey)}" oninput="setS('driveKey',this.value)"></div>
    <div class="why">키 발급은 구글 클라우드 콘솔에서 대표님 계정으로 진행합니다. 화면 단위 안내가 필요하시면 말씀해 주세요.</div></div>
   <div class="card"><h3>AI 원고 (선택) <span class="conn ${s.aiKey?'on':'off'}">${s.aiKey?'키 등록됨':'미등록'}</span></h3>
