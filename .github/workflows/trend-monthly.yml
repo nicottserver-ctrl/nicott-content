@@ -1,0 +1,77 @@
+name: 월간 트렌드 리서치
+
+# 매월 12일 오전 9시(한국시간)에 벤치마크 계정 지표를 수집하고
+# 새 트렌드 배치를 만들어 이슈로 알려줍니다.
+on:
+  schedule:
+    - cron: '0 0 12 * *'     # UTC 00:00 = 한국 09:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 벤치마크 지표 수집
+        run: |
+          node -e '
+          const fs=require("fs");
+          const LIST="config/benchmark.json";
+          if(!fs.existsSync(LIST)){console.log("config/benchmark.json 없음");process.exit(0);}
+          const accts=JSON.parse(fs.readFileSync(LIST,"utf8")).accounts||[];
+          (async()=>{
+            const out=[];
+            for(const a of accts){
+              try{
+                const r=await fetch(`https://www.instagram.com/${a.handle}/`,{headers:{"User-Agent":"Mozilla/5.0"}});
+                const html=await r.text();
+                const m=html.match(/"description"\s*content="([^"]+)"/);
+                out.push({handle:a.handle,name:a.name,snippet:m?m[1].slice(0,140):"수집 실패"});
+              }catch(e){out.push({handle:a.handle,name:a.name,snippet:"수집 실패: "+e.message});}
+              await new Promise(r=>setTimeout(r,1500));
+            }
+            const ym=new Date().toISOString().slice(0,7);
+            fs.mkdirSync("data/trend",{recursive:true});
+            fs.writeFileSync(`data/trend/${ym}.json`,JSON.stringify({month:ym,collected:new Date().toISOString(),accounts:out},null,2));
+            fs.writeFileSync("data/trend/latest.md",
+              `# ${ym} 벤치마크 스냅샷\n\n수집 ${out.length}건\n\n`+
+              out.map(o=>`- **${o.name}** @${o.handle} — ${o.snippet}`).join("\n"));
+            console.log("수집 완료", out.length);
+          })();
+          '
+
+      - name: 배치 이슈 생성
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          YM=$(date +%Y-%m)
+          {
+            echo "## ${YM} 월간 트렌드 리서치"
+            echo ""
+            echo "자동 수집된 벤치마크 스냅샷: data/trend/${YM}.json"
+            echo ""
+            echo "### 다음 할 일"
+            echo "- [ ] 스냅샷을 보고 이번 달 눈에 띄는 피드 문법 3가지 정리"
+            echo "- [ ] 니코트화한 템플릿 후보 3~6종 디자인"
+            echo "- [ ] 대시보드 갤러리의 TREND ${YM} 섹션에 반영"
+            echo "- [ ] 지난 배치 중 별표 저장되지 않은 항목은 보관함으로 이동"
+            echo ""
+            echo "### 참고"
+            echo "- 지표 수집은 자동입니다. 템플릿 디자인은 사람이 판단합니다."
+            echo "- 별표로 저장한 템플릿은 배치가 바뀌어도 사라지지 않습니다."
+          } > issue_body.md
+          gh issue create --title "트렌드 배치 ${YM} — 템플릿 후보 검토" --body-file issue_body.md || true
+          rm -f issue_body.md
+
+      - name: 결과 커밋
+        run: |
+          git config user.name "nicott-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/trend || true
+          git diff --staged --quiet || git commit -m "월간 트렌드 스냅샷"
+          git push || true
