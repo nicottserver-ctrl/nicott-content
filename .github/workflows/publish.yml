@@ -1,0 +1,74 @@
+name: 예약 발행
+
+# 30분마다 돌면서 data/db.json 의 예약 건 중 시각이 지난 것을 인스타에 게시합니다.
+# 대표님 컴퓨터가 꺼져 있어도 GitHub 서버에서 실행됩니다.
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:        # 수동 실행 버튼
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 예약 건 발행
+        env:
+          IG_TOKEN: ${{ secrets.IG_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: |
+          node -e '
+          const fs=require("fs");
+          const P="data/db.json";
+          if(!fs.existsSync(P)){console.log("db.json 없음 — 대시보드에서 먼저 동기화하세요");process.exit(0);}
+          const DB=JSON.parse(fs.readFileSync(P,"utf8"));
+          const TOKEN=process.env.IG_TOKEN, UID=process.env.IG_USER_ID;
+          if(!TOKEN||!UID){console.log("Secrets 미설정 — IG_TOKEN, IG_USER_ID 를 등록하세요");process.exit(0);}
+          const API="https://graph.instagram.com/v21.0";
+          const post=async(p,b)=>{const r=await fetch(`${API}/${p}`,{method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(Object.assign({access_token:TOKEN},b))});const j=await r.json();
+            if(j.error)throw new Error(j.error.message);return j;};
+          const wait=async id=>{for(let i=0;i<10;i++){await new Promise(r=>setTimeout(r,3000));
+            const r=await fetch(`${API}/${id}?fields=status_code&access_token=${encodeURIComponent(TOKEN)}`);
+            const j=await r.json();if(j.status_code==="FINISHED")return;
+            if(j.status_code==="ERROR"||j.status_code==="EXPIRED")throw new Error("컨테이너 "+j.status_code);}};
+          (async()=>{
+            const now=Date.now();let changed=0;
+            const due=(DB.contents||[]).filter(c=>c.status==="scheduled"&&c.scheduledAt&&new Date(c.scheduledAt).getTime()<=now&&(c.mediaUrls||[]).length);
+            console.log("발행 대상", due.length, "건");
+            for(const c of due){
+              try{
+                let creation;
+                if(c.mediaUrls.length===1){
+                  creation=(await post(`${UID}/media`,{image_url:c.mediaUrls[0],caption:c.caption||""})).id;
+                }else{
+                  const kids=[];
+                  for(const u of c.mediaUrls){kids.push((await post(`${UID}/media`,{image_url:u,is_carousel_item:true})).id);}
+                  creation=(await post(`${UID}/media`,{media_type:"CAROUSEL",children:kids.join(","),caption:c.caption||""})).id;
+                }
+                await wait(creation);
+                const pub=await post(`${UID}/media_publish`,{creation_id:creation});
+                if(!pub.id)throw new Error("게시물 ID 미회수");
+                c.status="published";c.mediaId=pub.id;c.publishedAt=new Date().toISOString();
+                console.log("게시 완료", c.title, pub.id);
+              }catch(e){
+                c.lastError=e.message;c.errorAt=new Date().toISOString();
+                console.log("게시 실패", c.title, e.message);
+              }
+              changed++;
+            }
+            if(changed){fs.writeFileSync(P,JSON.stringify(DB,null,2));}
+          })();
+          '
+
+      - name: 결과 커밋
+        run: |
+          git config user.name "nicott-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/db.json || true
+          git diff --staged --quiet || git commit -m "발행 결과 반영"
+          git push || true
