@@ -1,0 +1,148 @@
+name: 월간 트렌드 → 템플릿 자동 생성
+
+# 매월 13일, 전날 수집한 트렌드 스냅샷을 바탕으로 새 템플릿을 만들어
+# data/templates/pending.json 에 올립니다.
+# 대표님은 대시보드 갤러리에서 "새로 도착한 템플릿"을 보고 [쓸게요] 만 누르면 됩니다.
+#
+# 필요한 Secret: ANTHROPIC_API_KEY   (월 수백 원 수준)
+# 키가 없으면 이 워크플로만 조용히 건너뛰고, 나머지 시스템은 정상 동작합니다.
+
+on:
+  schedule:
+    - cron: '0 1 13 * *'      # UTC 01:00 = 한국 10:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 키 확인
+        id: gate
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "API 키 없음 — 자동 생성을 건너뜁니다."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 템플릿 생성
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          node -e '
+          const fs=require("fs");
+          const ym=new Date().toISOString().slice(0,7);
+          const snapPath="data/trend/"+ym+".json";
+          const snap=fs.existsSync(snapPath)?JSON.parse(fs.readFileSync(snapPath,"utf8")):{accounts:[]};
+          const tokens=fs.existsSync("config/brand-tokens.json")?fs.readFileSync("config/brand-tokens.json","utf8"):"{}";
+          const known=fs.existsSync("config/known-ids.json")?fs.readFileSync("config/known-ids.json","utf8"):"[]";
+          const spec=[
+            "너는 니코트(NICOTT)의 인스타 템플릿을 만드는 디자이너다.",
+            "",
+            "## 출력 형식 — 이 구조를 정확히 지키다",
+            "템플릿은 코드가 아니라 문자열이다. css 와 html 두 필드로 표현한다.",
+            "html 안에서는 다음 자리표시자만 쓴다:",
+            "  {{키}}      한 줄 텍스트",
+            "  {{nl:키}}   여러 줄 텍스트 (줄바꿈 반영)",
+            "  {{bg:키}}   사진 배경 (style 속성 안에 넣는다)",
+            "  {{fs:키}}   글자 크기 조절 (style 속성 안, 주요 텍스트 1개)",
+            "  {{fs2:키}}  글자 크기 조절 (보조 텍스트 1개)",
+            "",
+            "## 반드시 지킬 규칙",
+            "1. 색은 CSS 변수만 쓴다. #hex, rgb() 직접 사용 금지. 흰검 반투명만 예외.",
+            "2. CSS 선택자는 전부 '.아이디' 로 시작한다. 예: .T7 .im{...}",
+            "3. 캔버스는 1080x1350(피드) 또는 1080x1920(세로). 세로형은 하단 250px에 요소를 두지 않는다.",
+            "4. 폰트 크기는 calc(Npx*var(--ts)) 형태. 한글은 굵기 var(--hw) 또는 300 이하.",
+            "5. 사진 슬롯 키는 img1, img2 … 형식.",
+            "6. 광고성 표현 금지: 역대급, 무조건, 지금 바로, 최저가, 대박 등.",
+            "7. 아이디는 아래 목록과 겹치지 않게 정한다: "+known,
+            "8. 기존 템플릿과 레이아웃이 명확히 달라야 한다. 색만 바꾼 변형은 만들지 않는다.",
+            "9. script 태그, on*= 이벤트, javascript: 는 절대 넣지 않는다.",
+            "",
+            "## 브랜드 규칙",
+            tokens,
+            "",
+            "## 이번 달 벤치마크 스냅샷",
+            JSON.stringify(snap.accounts||[],null,1),
+            "",
+            "## 할 일",
+            "스냅샷에서 읽히는 피드 문법 3가지를 뽑고, 니코트 톤으로 옮긴 새 템플릿 3종을 만든다.",
+            "JSON 하나만 출력한다. 설명 문장 금지. 코드블록 표시 금지.",
+            "",
+            "{",
+            '  "insights": ["문법1", "문법2", "문법3"],',
+            '  "templates": [{',
+            '    "id": "T7", "nm": "이름", "role": "page", "fmt": "F1",',
+            '    "sp": "NICOTT", "bk": "product", "trend": "'+ym+'",',
+            '    "ev": "근거 계정과 문법 (필수)",',
+            '    "css": ".T7 .im{position:absolute;top:0;left:0;right:0;height:820px}",',
+            '    "html": "<div class=\\"im\\" style=\\"{{bg:img1}}\\"></div><h4 style=\\"{{fs:title}}\\">{{nl:title}}</h4>",',
+            '    "f": [',
+            '      {"k":"img1","t":"image","l":"사진"},',
+            '      {"k":"title","t":"area","l":"제목","v":"기본 문구","max":22,"fs":1}',
+            '    ]',
+            '  }]',
+            "}"
+          ].join("\n");
+
+          (async()=>{
+            const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+              headers:{"content-type":"application/json","x-api-key":process.env.ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01"},
+              body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:8000,messages:[{role:"user",content:spec}]})});
+            const j=await r.json();
+            if(j.error){console.log("API 오류:",j.error.message);process.exit(1);}
+            const text=(j.content||[]).map(c=>c.text||"").join("");
+            const m=text.match(/\{[\s\S]*\}/);
+            if(!m){console.log("JSON 파싱 실패");process.exit(1);}
+            const out=JSON.parse(m[0]);
+            out.generated=new Date().toISOString();
+            fs.mkdirSync("data/templates",{recursive:true});
+            fs.writeFileSync("data/templates/pending.json",JSON.stringify(out,null,2));
+            console.log("생성",(out.templates||[]).length,"종");
+          })();
+          '
+
+      - name: 규칙 검증 (위반 자동 반려)
+        if: steps.gate.outputs.skip == 'false'
+        run: node scripts/validate-templates.js data/templates/pending.json
+
+      - name: 대시보드로 전달
+        if: steps.gate.outputs.skip == 'false'
+        run: |
+          git config user.name "nicott-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/templates config/known-ids.json || true
+          git diff --staged --quiet && echo "변경 없음" && exit 0
+          git commit -m "$(date +%Y-%m) 트렌드 템플릿"
+          git push
+
+      - name: 알림 이슈
+        if: steps.gate.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          YM=$(date +%Y-%m)
+          N=$(node -e "const f='data/templates/pending.json';const fs=require('fs');console.log(fs.existsSync(f)?(JSON.parse(fs.readFileSync(f,'utf8')).templates||[]).length:0)")
+          {
+            echo "## ${YM} 새 템플릿 ${N}종이 준비됐습니다"
+            echo ""
+            echo "대시보드를 열고 **템플릿 갤러리** 로 가시면 맨 위에 '새로 도착한 템플릿'이 보입니다."
+            echo "미리보기를 보고 마음에 드는 것만 **[쓸게요]** 를 누르시면 됩니다."
+            echo ""
+            echo "- 마음에 안 들면 [보관] — 지워지지 않고 보관함에 남습니다"
+            echo "- 아무것도 안 하셔도 시스템은 그대로 돌아갑니다"
+            echo ""
+            echo "검사 결과: data/templates/_check.md"
+          } > issue_body.md
+          gh issue create --title "${YM} 새 템플릿 ${N}종 도착" --body-file issue_body.md || true
+          rm -f issue_body.md
