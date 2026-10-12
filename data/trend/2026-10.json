@@ -1,0 +1,66 @@
+{
+  "month": "2026-10",
+  "collected": "2026-10-12T00:24:08.280Z",
+  "accounts": [
+    {
+      "handle": "kintojapan",
+      "name": "KINTO",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "nakagawamasa7",
+      "name": "中川政七商店",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "azmaya.co.jp",
+      "name": "東屋",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "iittala",
+      "name": "iittala",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "kwangjuyo_official",
+      "name": "광주요",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "chapter1_official",
+      "name": "책터원",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "official_hasamiporcelain",
+      "name": "HASAMI PORCELAIN",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "fermliving",
+      "name": "ferm LIVING",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "haydesign",
+      "name": "HAY",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "eastforkpottery",
+      "name": "East Fork",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "foglinenwork",
+      "name": "Fog Linen Work",
+      "snippet": "수집 실패"
+    },
+    {
+      "handle": "d_d_department",
+      "name": "D&DEPARTMENT",
+      "snippet": "수집 실패"
+    }
+  ]
+}
