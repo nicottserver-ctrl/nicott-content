@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NICOTT 콘텐츠 대시보드 v1.5</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700&family=Questrial&display=swap" rel="stylesheet">
+<title>NICOTT 콘텐츠 대시보드</title>
+<link rel="icon" href="/assets/nicott-icon.png">
+<link rel="apple-touch-icon" href="/assets/nicott-icon.png">
+<meta name="theme-color" content="#2F4433">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700;900&family=Questrial&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{--sand:#D6C3B0;--terra:#E05A33;--cream:#ECEAE4;--forest:#2F4433;--paper:#FAF8F4;--sand-lt:#EAE0D5;
@@ -492,29 +495,326 @@ main{padding:18px 22px 60px;min-width:0}
 .DT5 .im{position:absolute;top:0;left:0;right:0;height:640px;border-radius:0}
 .DT5 .ln6{position:absolute;top:720px;left:72px;right:72px;text-align:center;font-size:calc(28px*var(--ts)*var(--f,1));line-height:1.9;color:#2A2724;white-space:pre-wrap}
 .DT5 .wm2{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-family:var(--en);letter-spacing:.44em;font-size:calc(24px*var(--ts));color:#2F4433}
-@media (max-width:1180px){.app{grid-template-columns:180px 1fr}.prev{grid-column:1/-1;position:static;height:auto;border-left:0;border-top:1px solid var(--ui-line)}.pvbar{position:static}.prev .stage{max-width:380px;margin:0 auto}}
-@media (max-width:720px){.app{grid-template-columns:1fr}.side{position:static;height:auto;padding:12px}.nav{flex-direction:row;flex-wrap:wrap}.gm,.sfoot{display:none}main{padding:14px 12px 40px}.grid2,.grid3{grid-template-columns:1fr}.cal .d{min-height:52px}}
+/* ═══════ v2.0 — 공용 협업판 UI (가독성·모바일·협업 흐름) ═══════
+   색은 니코트 브랜드 리포트 팔레트 그대로(포레스트·샌드·크림·페이퍼·테라), 글자 대비만 끌어올림 */
+:root{--ink:#1F1C19;--ink-sub:#4A433B;--ink-3:#5E564C;--ui-bg:#F3F0EA;--ui-line:#DCD4C8;--ui-line2:#C9BFB1;
+--ok:#2F6B3A;--bad:#A23A2A;--warn:#8A5A12;--focus:#2F4433;--r-lg:14px;--r-md:10px;--r-sm:7px}
+body{font-size:14px;color:var(--ink);background:var(--ui-bg)}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* 레이아웃 — 미리보기 패널은 '만들기'에서만 */
+.app{grid-template-columns:228px minmax(0,1fr) 400px}
+.app.noprev{grid-template-columns:228px minmax(0,1fr)}
+.app.noprev .prev{display:none}
+.app.noprev main{max-width:1180px;width:100%}
+main{padding:26px 30px 80px}
+
+/* 사이드바 */
+.side{padding:22px 14px 16px;display:flex;flex-direction:column}
+.brandbox{padding:2px 10px 18px}
+.brandbox .logo{height:19px;display:block;filter:invert(1) brightness(1.6)}
+.brandbox .ver{font-size:12px;color:rgba(255,255,255,.82);margin-top:9px;margin-bottom:0}
+.nav{gap:3px}
+.nav button{font-size:14.5px;color:rgba(255,255,255,.9);padding:9px 11px;align-items:center;justify-content:flex-start;gap:10px;border-radius:9px}
+.nav button svg{width:18px;height:18px;flex:0 0 18px;opacity:.9}
+.nav button .lb{flex:1}
+.nav button.on{background:rgba(255,255,255,.16);font-weight:500}
+.nav .nb{font-family:var(--en);font-size:11.5px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--terra);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.gm h4{font-size:12.5px;letter-spacing:0;color:rgba(255,255,255,.86);font-weight:500}
+.gmr .t{font-size:12.5px;color:#fff}
+.gmb{height:5px}
+.side .gnote{font-size:12px;color:rgba(255,255,255,.8);margin-top:6px}
+.sfoot{margin-top:auto;font-size:12.5px;color:#fff;border-top:1px solid rgba(255,255,255,.2);padding-top:12px;line-height:1.5}
+.who{display:flex;align-items:center;gap:9px}
+.ava{width:30px;height:30px;border-radius:50%;background:var(--sand);color:var(--forest);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 30px}
+.who b{display:block;font-size:13.5px;font-weight:500}.who span{font-size:12px;color:rgba(255,255,255,.82)}
+.who a{margin-left:auto;color:#fff;font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.sync{display:flex;align-items:center;gap:7px;font-size:12px;margin-top:10px;color:rgba(255,255,255,.9)}
+.sync i{width:8px;height:8px;border-radius:50%;background:#7FC48A;flex:0 0 8px}
+.sync.busy i{background:var(--sand)}.sync.off i,.sync.err i{background:#F08A6E}
+.sync.boot i{background:rgba(255,255,255,.6)}
+
+/* 머리말 */
+.ph{gap:12px;margin-bottom:4px}
+.ph h1{font-size:25px;font-weight:400;letter-spacing:-.02em}
+.ph .st{font-size:13px;letter-spacing:.04em;color:var(--terra);font-weight:500}
+.psub{color:var(--ink-sub);font-size:14px;margin-bottom:18px;line-height:1.65}
+
+/* 카드·글자 대비 */
+.card{border-radius:var(--r-lg);padding:18px 20px;margin-bottom:14px;border-color:var(--ui-line)}
+.card h3{font-size:15.5px;font-weight:500;margin-bottom:6px;gap:8px}
+.badge{font-size:12px;letter-spacing:0;padding:2px 9px;color:var(--ink-sub);background:#ECE7DF;font-weight:500}
+.badge.t{background:#FBE3DA;color:#9A2F15}
+.hint{font-size:13.5px;color:var(--ink-sub);line-height:1.7;margin-bottom:12px}
+.why{font-size:13px;color:var(--ink-sub);line-height:1.65}
+.why b{color:var(--bad)}
+.field label{font-size:13px;color:var(--ink);font-weight:500}
+.cnt{font-size:12px;color:var(--ink-3)}
+.field input[type=text],.field input[type=number],.field input[type=date],.field input[type=time],.field input[type=password],.field textarea,.field select{padding:10px 12px;border:1.5px solid var(--ui-line2);border-radius:9px;font-size:15px}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,68,51,.14)}
+.steps div{font-size:13px;padding:6px 13px;color:var(--ink-sub);border-color:var(--ui-line2)}
+.chips button{font-size:13px;padding:6px 13px;color:var(--ink);border-color:var(--ui-line2)}
+.chips button .c{font-size:12px;opacity:.75}
+.scard b{font-size:14px}.scard span{font-size:12.5px;color:var(--ink-sub)}
+.tcard .m b{font-size:12.5px}.tcard .m span{font-size:11.5px;color:var(--ink-sub)}
+.tcard .m span[style]{color:var(--ink-3)!important}
+.ratio{font-size:11px;color:var(--ink);font-weight:700}
+.pchip .lb{font-size:11px;color:var(--ink)}
+.padd{font-size:12.5px;color:var(--ink-sub);border-color:var(--ui-line2)}
+.slot b{font-size:12px}.slot span{font-size:11.5px;color:var(--ink-sub)}
+.drop b{font-size:14.5px;font-weight:500}.drop span{font-size:12.5px;color:var(--ink-sub)}
+.capvar{font-size:13.5px;color:var(--ink)}
+.capvar .lbl{font-size:12px;letter-spacing:.02em;font-weight:700}
+.chk{font-size:14px}.chk .auto{font-size:12px;font-weight:500}
+.chk .auto.pass{color:#1F5A2A}.chk .auto.fail{color:#8E2E1F}
+.gate{font-size:13.5px;font-weight:500}
+.qrow .info b{font-size:14px}.qrow .info span{font-size:12.5px;color:var(--ink-sub)}
+.tag{font-size:12px;font-weight:500}
+.empty{font-size:14px;color:var(--ink-sub);padding:28px 14px}
+.acc>summary{font-size:14px}
+.acc>div{font-size:13.5px}
+.acc>div[style],.acc div[style*="#5f584d"]{color:var(--ink)!important}
+.conn{font-size:12.5px;font-weight:500}
+.conn.off{background:#EFE9E1;color:var(--ink-sub)}
+.cal .hd{font-size:12.5px;color:var(--ink-sub);font-weight:500}
+.cal .d{min-height:78px;font-size:12px}
+.cal .d .n{font-size:13px;color:var(--ink)}
+.cal .d.out{color:#8A8176}.cal .d.out .n{color:#8A8176}
+.cal .d .ev{font-size:11.5px;padding:3px 5px;color:var(--ink)}
+.cal .d .ev.planned{background:#fff!important;border:1.5px dashed var(--ui-line2);color:var(--ink-sub)}
+.cal .d .ev.published::before{content:'✓ ';font-weight:700}
+.cal .d .plus{color:var(--ink-3)}
+.wk button{font-size:13px;color:var(--ink)}
+.inl input,.inl select{font-size:14px;padding:8px 10px;border:1.5px solid var(--ui-line2)}
+.kindpill{font-size:12px}
+
+/* 버튼 — 꺼진 버튼도 글자가 보이게 */
+.btn{font-size:13.5px;padding:8px 15px;border:1.5px solid var(--ui-line2);border-radius:9px;color:var(--ink);font-weight:500}
+.btn.sm{font-size:12.5px;padding:5px 11px}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--forest);border-color:var(--forest);color:#fff}
+.btn.primary:hover{background:#243628}
+.btn.terra{background:var(--terra);border-color:var(--terra);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px}
+.btn.danger{color:var(--bad);border-color:#E2B5AA}
+.btn:disabled{opacity:1;background:#EDE8E1;color:#6E655A;border-color:#DCD4C8}
+.btn:disabled:hover{border-color:#DCD4C8}
+
+/* 미리보기 패널 */
+.pvbar .lbl{font-size:12.5px;color:var(--ink)}
+.pnav span{font-size:12.5px;color:var(--ink)}
+.srow label{font-size:12.5px;color:var(--ink)}
+.capprev{font-size:13px;color:var(--ink)}
+.capprev .h{font-size:12px;letter-spacing:.04em;color:var(--ink-sub);font-weight:700}
+.prev .pvclose{display:none}
+
+/* 상태 표시 — 진행 순서를 그대로 색으로 */
+.stt{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;line-height:1.35}
+.st-plan{background:#fff;color:var(--ink-sub);box-shadow:inset 0 0 0 1.5px var(--ui-line2)}
+.st-draft{background:#ECE7DF;color:#3D3731}
+.st-review{background:#FCEBC7;color:#6B4708}
+.st-changes{background:#FBE0D6;color:#8E2E1F}
+.st-appr{background:#E1EEE3;color:#1F5A2A;box-shadow:inset 0 0 0 1.5px #A9CDB0}
+.st-sch{background:#DFE8F4;color:#23456F}
+.st-pub{background:#2F4433;color:#fff}
+.st-fail{background:#A23A2A;color:#fff}
+.st-trash{background:#E5E0D8;color:#4A433B}
+.track{display:flex;gap:4px;margin:10px 0 4px}
+.track span{flex:1;height:6px;border-radius:4px;background:#E2DBD0}
+.track span.on{background:var(--forest)}.track span.cur{background:var(--terra)}
+.track-l{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-sub)}
+
+/* 콘텐츠 보드 */
+.ctool{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.ctool input[type=search]{flex:1;min-width:200px;padding:10px 13px;border:1.5px solid var(--ui-line2);border-radius:10px;font-size:15px;background:#fff}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg button{font-size:13.5px;padding:7px 13px;border-radius:20px;border:1.5px solid var(--ui-line2);background:#fff;color:var(--ink);font-weight:500;display:inline-flex;gap:6px;align-items:center}
+.seg button b{font-family:var(--en);font-weight:400;font-size:13px;color:var(--ink-sub)}
+.seg button.on{background:var(--forest);border-color:var(--forest);color:#fff}.seg button.on b{color:rgba(255,255,255,.85)}
+.seg button.hot b{color:var(--terra);font-weight:700}.seg button.on.hot b{color:#FFD2C2}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.ccard{background:#fff;border:1.5px solid var(--ui-line);border-radius:var(--r-lg);overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.ccard:hover{border-color:var(--ink-3)}
+.ccard .th{width:100%;overflow:hidden;position:relative;background:var(--cream)}
+.ccard .th .sc{position:absolute;top:0;left:0;transform-origin:top left}
+.ccard .th .pg{position:absolute;right:8px;bottom:8px;background:rgba(31,28,25,.82);color:#fff;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;font-family:var(--en)}
+.ccard .cb{padding:11px 13px 13px;display:flex;flex-direction:column;gap:4px}
+.ccard .r1{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.ccard b{font-size:14.5px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ccard .mt{font-size:12.5px;color:var(--ink-sub)}
+.ccard .cm{font-size:12px;font-weight:700;color:var(--ink-sub)}
+.ccard .errl{font-size:12px;color:var(--bad);font-weight:500}
+.ccard.rev{border-color:#E7B95A}
+.ccard.chg{border-color:#E59C84}
+
+/* 상세 서랍 */
+.drawer-bg{position:fixed;inset:0;background:rgba(31,28,25,.38);z-index:60;opacity:0;pointer-events:none;transition:.18s}
+.drawer-bg.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:var(--paper);z-index:61;transform:translateX(102%);transition:transform .22s ease;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(31,28,25,.18)}
+.drawer.on{transform:none}
+.dhd{padding:18px 20px 12px;border-bottom:1px solid var(--ui-line);background:#fff}
+.dhd .x{float:right;width:36px;height:36px;border-radius:10px;font-size:22px;line-height:1;color:var(--ink);border:1.5px solid var(--ui-line2);background:#fff}
+.dhd h2{font-size:19px;font-weight:500;margin:2px 44px 6px 0;line-height:1.4}
+.dhd .mt{font-size:13px;color:var(--ink-sub);margin-top:6px}
+.dbody{flex:1;overflow:auto;padding:16px 20px 28px}
+.dpages{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.dpages .th{flex:0 0 150px;overflow:hidden;position:relative;background:var(--cream);border-radius:8px;box-shadow:0 2px 10px rgba(31,28,25,.1)}
+.dpages .th .sc{position:absolute;top:0;left:0;transform-origin:top left}
+.dsec{background:#fff;border:1px solid var(--ui-line);border-radius:12px;padding:13px 15px;margin-bottom:12px}
+.dsec h4{font-size:13.5px;font-weight:700;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
+.dcap{white-space:pre-wrap;font-size:14px;line-height:1.75;color:var(--ink);max-height:220px;overflow:auto}
+.dact{display:flex;gap:8px;flex-wrap:wrap}
+.dact .when{display:flex;gap:6px;width:100%;margin-bottom:4px}
+.dact .when input{flex:1;padding:9px 10px;border:1.5px solid var(--ui-line2);border-radius:9px;font-size:15px;min-width:0}
+.errbox{background:#FBE7E1;color:#7E2717;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;margin-bottom:12px;line-height:1.6}
+.okbox{background:#E4EFE6;color:#1F4D27;border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500;margin-bottom:12px;line-height:1.6}
+.okbox a,.errbox a{color:inherit}
+.tl{display:flex;flex-direction:column;gap:10px}
+.tl .it{font-size:13.5px;line-height:1.6}
+.tl .it .h{display:flex;gap:8px;align-items:baseline;font-size:12.5px;color:var(--ink-sub)}
+.tl .it .h b{color:var(--ink);font-size:13.5px}
+.tl .it .bd{white-space:pre-wrap;margin-top:3px}
+.tl .it.comment .bd{background:#fff;border:1px solid var(--ui-line);border-radius:4px 12px 12px 12px;padding:8px 11px}
+.tl .it.system .bd{color:var(--ink-sub)}
+.tl .it.changes .bd{background:#FBE7E1;color:#7E2717;border-radius:10px;padding:8px 11px;font-weight:500}
+.tl .it.approve .bd{background:#E4EFE6;color:#1F4D27;border-radius:10px;padding:8px 11px;font-weight:500}
+.cbox{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.cbox textarea{width:100%;min-height:72px;padding:10px 12px;border:1.5px solid var(--ui-line2);border-radius:10px;font-size:15px;resize:vertical;font-family:inherit}
+
+/* 홈 */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:#fff;border:1.5px solid var(--ui-line);border-radius:var(--r-lg);padding:14px 16px;text-align:left}
+.kpi:hover{border-color:var(--ink-3)}
+.kpi .v{font-family:var(--en);font-size:32px;line-height:1.1;color:var(--ink)}
+.kpi .l{font-size:13.5px;color:var(--ink-sub);margin-top:4px;font-weight:500}
+.kpi.hot{border-color:#E59C84}.kpi.hot .v{color:#B23A17}
+.alert{display:flex;gap:12px;align-items:center;border-radius:12px;padding:13px 16px;margin-bottom:12px;font-size:14px;line-height:1.6;font-weight:500}
+.alert.warn{background:#FCEBC7;color:#5E3E06}.alert.bad{background:#FBE0D6;color:#7E2717}.alert.info{background:#E3EAF3;color:#1F3B60}
+.alert .btn{margin-left:auto;flex:0 0 auto}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px}
+.feed .fi{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--ui-line);text-align:left;width:100%}
+.feed .fi:last-child{border-bottom:0}
+.feed .fi .ava{background:var(--cream);color:var(--ink)}
+.feed .fi b{font-weight:500}
+.feed .fi .tx{font-size:13.5px;line-height:1.55;min-width:0}
+.feed .fi .tx em{font-style:normal;color:var(--ink-sub);font-size:12.5px;display:block}
+.feed .fi .tx span{display:block;color:var(--ink-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uprow{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--ui-line);width:100%;text-align:left}
+.uprow:last-child{border-bottom:0}
+.uprow .d{font-family:var(--en);width:54px;flex:0 0 54px;text-align:center;line-height:1.2}
+.uprow .d b{display:block;font-size:20px;font-weight:400}.uprow .d span{font-size:12px;color:var(--ink-sub)}
+.uprow .tx{flex:1;min-width:0}.uprow .tx b{display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uprow .tx span{font-size:12.5px;color:var(--ink-sub)}
+.perf{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--ui-line)}
+.perf .im{width:44px;height:55px;border-radius:6px;background:var(--cream) center/cover;flex:0 0 44px}
+.perf .tx{flex:1;min-width:0;font-size:13px}.perf .tx b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perf .sc{font-family:var(--en);font-size:18px}
+
+/* 표·설정 */
+.utable{width:100%;border-collapse:collapse;font-size:13.5px}
+.utable th{text-align:left;font-weight:700;color:var(--ink-sub);font-size:12.5px;padding:8px 6px;border-bottom:1.5px solid var(--ui-line2)}
+.utable td{padding:10px 6px;border-bottom:1px solid var(--ui-line);vertical-align:middle}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:13.5px;margin:6px 0 12px}
+.kv dt{color:var(--ink-sub);font-weight:500}.kv dd{color:var(--ink)}
+
+/* 모달 */
+.modal-bg{position:fixed;inset:0;background:rgba(31,28,25,.45);z-index:80;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:22px 22px 18px;box-shadow:0 24px 60px rgba(31,28,25,.25)}
+.modal h3{font-size:17px;font-weight:500;margin-bottom:8px}
+.modal p{font-size:14.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap}
+.modal .tools{justify-content:flex-end;margin:18px 0 0}
+.busy-bg{position:fixed;inset:0;background:rgba(250,248,244,.86);z-index:90;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-size:15px;font-weight:500}
+.busy-bg.on{display:flex}
+.busy-bg .sp{width:34px;height:34px;border-radius:50%;border:3px solid var(--ui-line2);border-top-color:var(--forest);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#offstage{position:fixed;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none;z-index:-1}
+
+/* 모바일 상단·하단 바 */
+.mtop,.mtab,.pvfab{display:none}
+@media (max-width:1180px){
+  .app,.app.noprev{grid-template-columns:200px minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hgrid{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  body{font-size:15px}
+  .app,.app.noprev{grid-template-columns:1fr;padding-bottom:74px}
+  .side{display:none}
+  main{padding:14px 14px 30px}
+  .mtop{display:flex;position:sticky;top:0;z-index:40;background:var(--forest);color:#fff;padding:12px 16px;align-items:center;gap:10px}
+  .mtop .logo{height:16px;filter:invert(1) brightness(1.6)}
+  .mtop .sync{margin:0 0 0 auto}
+  .mtop .ava{width:32px;height:32px}
+  .mtab{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;border-top:1px solid var(--ui-line2);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .mtab button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--ink-sub);font-weight:500;padding:4px 0;position:relative}
+  .mtab button svg{width:23px;height:23px}
+  .mtab button.on{color:var(--forest);font-weight:700}
+  .mtab .nb{position:absolute;top:0;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--terra);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .ph h1{font-size:22px}
+  .card{padding:15px 15px;border-radius:12px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .kpis{gap:10px}.kpi{padding:12px 13px}.kpi .v{font-size:28px}
+  .cgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .ccard .cb{padding:9px 10px 11px}.ccard b{font-size:13.5px}
+  .app .prev{display:none}
+  .app.pvopen .prev{display:block;position:fixed;inset:0;z-index:70;height:100%;overflow:auto;padding-bottom:30px}
+  .app.pvopen .prev .stage{max-width:420px;margin:0 auto}
+  .prev .pvclose{display:block}
+  .pvfab{display:flex;position:fixed;right:14px;bottom:86px;z-index:46;background:var(--forest);color:#fff;border-radius:26px;padding:12px 18px;font-size:14.5px;font-weight:700;box-shadow:0 8px 24px rgba(31,28,25,.3);align-items:center;gap:7px}
+  .app.noprev ~ .pvfab{display:none}
+  .drawer{width:100vw}
+  .dhd{padding:14px 16px 10px}.dbody{padding:14px 16px 30px}
+  .dact .btn{flex:1 1 auto}
+  .cal{gap:3px}.cal .d{min-height:58px;padding:4px}.cal .d .ev{font-size:10.5px;padding:2px 3px}
+  .cal .d .ev b{display:none}.cal .d .ev::after{content:attr(data-s);font-weight:500}
+  .utable th:nth-child(3),.utable td:nth-child(3){display:none}
+  .kv{grid-template-columns:1fr}
+  .pvbar{flex-wrap:wrap}
+}
+.sheet-bg{position:fixed;inset:0;background:rgba(31,28,25,.4);z-index:75;display:none}
+.sheet-bg.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:10px 12px calc(16px + env(safe-area-inset-bottom));z-index:76;transform:translateY(105%);transition:transform .2s}
+.sheet.on{transform:none}
+.sheet button{display:flex;align-items:center;gap:12px;width:100%;padding:14px 12px;font-size:15.5px;border-bottom:1px solid var(--ui-line);color:var(--ink)}
+.sheet button:last-child{border-bottom:0}
+.sheet button svg{width:22px;height:22px}
+.mknav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;bottom:0;z-index:20;margin:18px -4px 0;padding:12px 4px;background:linear-gradient(to top,var(--ui-bg) 72%,rgba(243,240,234,0))}
+.mknav .pvbtn{display:none}
+@media (max-width:720px){.mknav{bottom:66px}.mknav .pvbtn{display:inline-flex}.mknav .btn{flex:1 1 auto;padding:11px 12px;font-size:14.5px}.mknav .why{flex-basis:100%}}
+.field input{width:100%}
+.utable select{padding:6px 8px;border:1.5px solid var(--ui-line2);border-radius:8px;font-size:13.5px;background:#fff;color:var(--ink)}
+@media (min-width:721px){.sheet,.sheet-bg{display:none!important}}
+@media (max-width:1180px){.hgrid{grid-template-columns:minmax(0,1fr)}}
+.hgrid>div,.card{min-width:0}
+
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <aside class="side">
-    <div class="brand">Nicott</div><div class="ver">콘텐츠 대시보드 v1.5</div>
-    <nav class="nav" id="nav"></nav>
+    <div class="brandbox"><img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><div class="ver">콘텐츠 대시보드 · v2.0</div></div>
+    <nav class="nav" id="nav" aria-label="메뉴"></nav>
     <div class="gm"><h4>이번 달 진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
   </aside>
+  <header class="mtop" id="mtop"></header>
   <main id="main"></main>
-  <aside class="prev">
+  <aside class="prev" aria-label="미리보기">
     <div class="pvbar" id="pvbar"></div>
     <div class="pvbody">
       <div class="stage" id="stage"><div class="sc" id="scaler"><div class="tpl" id="render"></div></div></div>
       <div class="pnav" id="pnav"></div>
       <div class="srow"><label>글자 크기</label><input type="range" id="tsRange" min="85" max="125" value="100" oninput="setScale(this.value)"><b id="tsVal">100%</b></div>
-      <div class="capprev"><div class="h">CAPTION</div><span id="capText">세트를 고르면 캡션 초안이 만들어집니다.</span></div>
+      <div class="capprev"><div class="h">캡션 미리보기</div><span id="capText">세트를 고르면 캡션 초안이 만들어집니다.</span></div>
     </div>
   </aside>
+  <nav class="mtab" id="mtab" aria-label="하단 메뉴"></nav>
 </div>
+<div class="drawer-bg" id="drawerBg" onclick="closeDetail()"></div><aside class="drawer" id="drawer" aria-label="콘텐츠 상세"></aside>
+<div class="sheet-bg" id="sheetBg" onclick="closeSheet()"></div><div class="sheet" id="sheet"></div>
+<div class="modal-bg" id="modal"></div><div class="busy-bg" id="busy" role="status" aria-live="polite"></div><div id="offstage" aria-hidden="true"></div>
 <div class="toast" id="toast"></div>
 <script>
 /* ═══════════ NICOTT 대시보드 v1.0 ═══════════ */
@@ -810,25 +1110,499 @@ const BASE_SETS=[
  {id:'S7',nm:'단일 게시물',desc:'한 장짜리 피드. 템플릿을 직접 고릅니다',bk:null,sp:null,pages:[]}
 ];
 /* ── 저장소 ── */
-const KEY='nicott_dash_v1';
+const KEY='nicott_dash_v1';            // v1.x 브라우저 저장 — 이관용으로만 읽음(지우지 않음)
+const CACHE_KEY='nicott_dash_v2_cache',ME_KEY='nicott_dash_v2_me';
+const WS_KEYS=['settings','mySets','favTpl','favSet','archivedTpl','customTpl','pendingTpl','lastTplCheck','trend'];
+const COUNTED=['planned','review','approved','scheduled','published','failed'];
+let STORE_OK=true,BOOT_CACHE=null;
 const DEF={settings:{handle:'@nicott_kitchen',perWeek:5,goals:{product:30,lifestyle:30,story:20,event:20},
-   metaToken:'',igUserId:'',igUsername:'',ghOwner:'',ghRepo:'',ghBranch:'main',ghToken:'',ghOk:false,
-   driveKey:'',driveFolder:'',driveLinks:'',aiKey:'',aiModel:'claude-haiku-4-5-20251001',autoPublish:'semi'},
+   driveKey:'',driveFolder:'',driveLinks:''},
   mySets:[],favTpl:[],favSet:[],recentTpl:[],recentSet:[],archivedTpl:[],
   trend:{batches:[{id:'2026-08',date:'2026-08-12',src:'일본 키친·공예 상위 계정 실측 (東屋 9.6천 · 中川政七商店 26.3만 · KINTO 23만 외)',items:['T1','T2','T3','T4','T5','T6']}],saved:[]},
   customTpl:[],pendingTpl:[],lastTplCheck:'',
   contents:[]};
-let DB=load(),STORE_OK=true;
-function load(){try{const r=localStorage.getItem(KEY);if(r)return Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(r));}catch(e){STORE_OK=false;}return JSON.parse(JSON.stringify(DEF));}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){STORE_OK=false;}paintStore();}
-function paintStore(){document.getElementById('storeInfo').innerHTML=STORE_OK
-  ?`저장됨 · 이 브라우저에 보관<br>콘텐츠 ${DB.contents.length}건 · 내 세트 ${DB.mySets.length}개`
-  :`⚠ 브라우저 저장이 막혀 있어 이번 세션에만 유지됩니다`;}
+let DB=load();
+/* ═══════════ v2 — 공용 저장소 · 협업 흐름 ═══════════ */
+const ST={planned:['계획','st-plan'],draft:['임시 저장','st-draft'],review:['검토 대기','st-review'],changes:['수정 요청','st-changes'],approved:['승인됨','st-appr'],scheduled:['예약됨','st-sch'],published:['게시 완료','st-pub'],failed:['게시 실패','st-fail'],trashed:['휴지통','st-trash']};
+const FLOW=['draft','review','approved','scheduled','published'];
+const stTag=s=>{const x=ST[s]||[s,''];return `<span class="stt ${x[1]}">${x[0]}</span>`;};
+const SERVER_FIELDS=['status','version','authorId','authorName','updatedBy','updatedByName','updatedAt','prevStatus','attempts','commentCount','mediaUrls','mediaId','mediaIds','permalink','publishedAt','lastError','errorAt','publishedBy','approvedBy','approvedAt','manual'];
+const Cloud={rev:'',me:null,ready:false,state:'boot',err:'',wsVersion:0,base:{c:{},w:{}},dirty:new Set(),dirtyW:new Set(),removed:new Set(),
+  chain:Promise.resolve(),integrations:{instagram:{connected:false},ai:{connected:false},cron:null},feed:[],insights:null,users:null,timer:null,legacyHidden:false};
+if(BOOT_CACHE){try{Cloud.base=BOOT_CACHE.base||Cloud.base;(BOOT_CACHE.dirty||[]).forEach(i=>Cloud.dirty.add(i));(BOOT_CACHE.dirtyW||[]).forEach(k=>Cloud.dirtyW.add(k));(BOOT_CACHE.removed||[]).forEach(i=>Cloud.removed.add(i));Cloud.me=BOOT_CACHE.me||null;}catch(e){}}
+const isAdmin=()=>Cloud.me?.role==='admin';
+const meName=()=>Cloud.me?.name||'';
+const isOwnImage=v=>typeof v==='string'&&(v.startsWith('data:')||v.startsWith(location.origin+'/media/')||v.startsWith('/media/'));
+const cPayload=c=>{const o={};for(const k in c){if(!SERVER_FIELDS.includes(k)&&k[0]!=='_')o[k]=c[k];}return o;};
+const cKey=c=>JSON.stringify(cPayload(c));
+const rel=t=>{if(!t)return'';const d=(Date.now()-new Date(t).getTime())/1000;if(d<60)return'방금';if(d<3600)return Math.floor(d/60)+'분 전';if(d<86400)return Math.floor(d/3600)+'시간 전';if(d<86400*7)return Math.floor(d/86400)+'일 전';return new Date(t).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});};
+const fmtWhen=t=>t?new Date(t).toLocaleString('ko-KR',{month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'}):'날짜 미정';
+const CFILTERS=[
+  ['active','진행 중',c=>!['published','trashed'].includes(c.status)],
+  ['review','검토 대기',c=>c.status==='review',true],
+  ['changes','수정 요청',c=>c.status==='changes',true],
+  ['scheduled','승인·예약',c=>['approved','scheduled'].includes(c.status)],
+  ['failed','게시 실패',c=>c.status==='failed',true],
+  ['draft','임시 저장',c=>c.status==='draft'],
+  ['planned','계획',c=>c.status==='planned'],
+  ['published','게시 완료',c=>c.status==='published'],
+  ['trashed','휴지통',c=>c.status==='trashed'],
+  ['all','전체',c=>c.status!=='trashed']];
+const svg=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON={home:svg('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>'),
+  make:svg('<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/>'),
+  contents:svg('<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/>'),
+  calendar:svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'),
+  gallery:svg('<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>'),
+  copygen:svg('<path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8Z"/><path d="M14 3v5h5M8.5 13h7M8.5 17h5"/>'),
+  settings:svg('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>'),
+  more:svg('<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>'),
+  eye:svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'),
+  logout:svg('<path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H15M10 16l-4-4 4-4M6 12h10"/>')};
+function navBadge(){if(!Cloud.me)return 0;
+  return isAdmin()?DB.contents.filter(c=>c.status==='review'||c.status==='failed').length
+    :DB.contents.filter(c=>c.status==='changes'&&c.authorId===Cloud.me.id).length;}
+
+/* ── 서버 통신 ── */
+async function api(method,path,body,ct){
+  const opt={method,headers:{},credentials:'same-origin'};
+  if(body!==undefined){if(ct){opt.headers['content-type']=ct;opt.body=body;}else{opt.headers['content-type']='application/json';opt.body=JSON.stringify(body);}}
+  let r;
+  try{r=await fetch('/api/'+path,opt);}catch(e){Cloud.state='offline';paintSync();const er=new Error('서버에 연결할 수 없습니다. 인터넷 연결을 확인해 주세요.');er.offline=true;throw er;}
+  let j={};try{j=await r.json();}catch(e){}
+  if(r.status===401){location.href='/login?next='+encodeURIComponent(location.pathname+location.search);const er=new Error('로그인이 필요합니다');er.status=401;throw er;}
+  if(!r.ok){const er=new Error(j.error||('서버 오류 '+r.status));er.status=r.status;er.data=j;throw er;}
+  if(Cloud.state==='offline'||Cloud.state==='error')Cloud.state='ok';
+  return j;
+}
+function markDirty(){
+  const ids=new Set(DB.contents.map(c=>c.id));
+  DB.contents.forEach(c=>{if(cKey(c)!==Cloud.base.c[c.id])Cloud.dirty.add(c.id);});
+  Object.keys(Cloud.base.c).forEach(id=>{if(!ids.has(id))Cloud.removed.add(id);});
+  WS_KEYS.forEach(k=>{if(JSON.stringify(DB[k]??null)!==Cloud.base.w[k])Cloud.dirtyW.add(k);});
+}
+function persistCache(){
+  const pack=()=>JSON.stringify({at:Date.now(),me:Cloud.me,db:Object.fromEntries([...WS_KEYS,'contents'].map(k=>[k,DB[k]])),base:Cloud.base,dirty:[...Cloud.dirty],dirtyW:[...Cloud.dirtyW],removed:[...Cloud.removed]});
+  try{localStorage.setItem(CACHE_KEY,pack());STORE_OK=true;}
+  catch(e){try{const lite=DB.contents;DB.contents=DB.contents.filter(c=>Cloud.dirty.has(c.id));localStorage.setItem(CACHE_KEY,pack());DB.contents=lite;}catch(e2){STORE_OK=false;}}
+}
+let pushTimer=null;
+function schedulePush(){clearTimeout(pushTimer);pushTimer=setTimeout(()=>flush(),700);paintSync();}
+function flush(){Cloud.chain=Cloud.chain.then(pushOnce,pushOnce);return Cloud.chain;}
+async function pushOnce(){
+  if(!Cloud.ready)return false;
+  if(!Cloud.dirty.size&&!Cloud.dirtyW.size&&!Cloud.removed.size)return true;
+  Cloud.state='busy';paintSync();
+  try{
+    if(Cloud.dirtyW.size){const keys=[...Cloud.dirtyW];const set={};keys.forEach(k=>set[k]=DB[k]);Cloud.dirtyW.clear();
+      try{const r=await api('PATCH','workspace',{set});Cloud.wsVersion=r.version;keys.forEach(k=>Cloud.base.w[k]=JSON.stringify(set[k]??null));}
+      catch(e){keys.forEach(k=>Cloud.dirtyW.add(k));throw e;}}
+    for(const id of [...Cloud.removed]){
+      try{await api('POST',`contents/${id}/action`,{action:'trash'});}catch(e){if(![404,409].includes(e.status))throw e;}
+      Cloud.removed.delete(id);delete Cloud.base.c[id];}
+    for(const id of [...Cloud.dirty]){
+      const c=DB.contents.find(x=>x.id===id);if(!c){Cloud.dirty.delete(id);continue;}
+      await uploadInlineImages(c);
+      const data=cPayload(c);if(!c.version)data.status=c.status==='planned'?'planned':'draft';
+      else if(c.status==='planned'&&c._toDraft)data.status='draft';
+      try{
+        const r=await api('PUT','contents/'+id,{data,baseVersion:c.version||undefined,imported:c._import||undefined});
+        Cloud.dirty.delete(id);mergeServer(r.content);
+        if(r.reset)notice('승인된 콘텐츠의 내용이 바뀌어 예약이 풀렸습니다. 다시 검토·승인이 필요합니다.');
+      }catch(e){
+        if(e.status===409&&e.data?.current){Cloud.dirty.delete(id);mergeServer(e.data.current);notice(`'${c.title||'콘텐츠'}' — ${e.message}\n최신 내용으로 바꿨습니다.`);}
+        else if(e.status===400||e.status===413){Cloud.dirty.delete(id);notice(`'${c.title||'콘텐츠'}' 저장 실패 — ${e.message}`);}
+        else throw e;
+      }}
+    Cloud.state='ok';Cloud.err='';persistCache();return true;
+  }catch(e){Cloud.state=e.offline?'offline':'error';Cloud.err=e.message;persistCache();setTimeout(()=>flush(),8000);return false;}
+  finally{paintSync();if(S.view!=='make'&&!typingNow())softRender();}
+}
+function mergeServer(sc){if(!sc)return;const i=DB.contents.findIndex(x=>x.id===sc.id);
+  if(i>=0)DB.contents[i]=sc;else DB.contents.unshift(sc);Cloud.base.c[sc.id]=cKey(sc);persistCache();}
+function applyState(s){
+  Cloud.rev=s.rev;Cloud.me=s.me;Cloud.integrations=s.integrations||Cloud.integrations;Cloud.feed=s.feed||[];Cloud.insights=s.insights||null;
+  const ws=s.workspace||{};Cloud.wsVersion=ws.version||0;
+  WS_KEYS.forEach(k=>{if(Cloud.dirtyW.has(k))return;
+    if(ws[k]!==undefined)DB[k]=k==='settings'?Object.assign(JSON.parse(JSON.stringify(DEF.settings)),ws[k]):ws[k];
+    else if(Cloud.wsVersion===0&&Cloud.base.w[k]!==undefined)DB[k]=JSON.parse(JSON.stringify(DEF[k]));
+    Cloud.base.w[k]=JSON.stringify(DB[k]??null);});
+  const local=new Map(DB.contents.map(c=>[c.id,c]));
+  const out=[];const seen=new Set();
+  (s.contents||[]).forEach(sc=>{seen.add(sc.id);if(Cloud.removed.has(sc.id))return;
+    if(Cloud.dirty.has(sc.id)&&local.has(sc.id)){const l=local.get(sc.id);l.version=sc.version;out.push(l);}
+    else{out.push(sc);Cloud.base.c[sc.id]=cKey(sc);}});
+  DB.contents.forEach(c=>{if(!seen.has(c.id)&&Cloud.dirty.has(c.id))out.unshift(c);});
+  Object.keys(Cloud.base.c).forEach(id=>{if(!seen.has(id)&&!Cloud.dirty.has(id))delete Cloud.base.c[id];});
+  DB.contents=out;
+}
+async function cloudBoot(){
+  paintSync();
+  try{const s=await api('GET','state');applyState(s);Cloud.ready=true;Cloud.state='ok';persistCache();
+    if(isAdmin())loadUsers();
+    render();startPolling();if(Cloud.dirty.size||Cloud.dirtyW.size||Cloud.removed.size)flush();}
+  catch(e){if(e.status===401)return;Cloud.state=e.offline?'offline':'error';Cloud.err=e.message;paintSync();setTimeout(cloudBoot,10000);}
+}
+function startPolling(){clearInterval(Cloud.timer);Cloud.timer=setInterval(()=>{if(document.visibilityState==='visible')pull();},15000);}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Cloud.ready)pull();});
+window.addEventListener('online',()=>{if(Cloud.ready){flush();pull(true);}});
+async function pull(force){
+  if(!Cloud.ready||Cloud.state==='busy')return;
+  try{const s=await api('GET','state'+(force?'':'?rev='+encodeURIComponent(Cloud.rev)));if(s.unchanged)return;
+    applyState(s);persistCache();softRender();}catch(e){}
+}
+const typingNow=()=>{const a=document.activeElement;return a&&['INPUT','TEXTAREA','SELECT'].includes(a.tagName)&&a.type!=='range'&&a.type!=='checkbox';};
+function softRender(){
+  if(S.view==='make'){paintNav();paintGauge();paintStore();if(S.detail)paintDetail();return;}
+  if(typingNow()){paintNav();paintStore();if(S.detail&&!document.querySelector('#drawer textarea:focus'))paintDetail();return;}
+  render();
+}
+function paintSync(){
+  const n=Cloud.dirty.size+Cloud.dirtyW.size+Cloud.removed.size;
+  const [cls,txt]=Cloud.state==='boot'?['boot','불러오는 중…']:Cloud.state==='offline'?['off',`오프라인 — 이 기기에 보관 중${n?' '+n+'건':''}`]
+    :Cloud.state==='error'?['err','저장 오류 — 자동 재시도']:(Cloud.state==='busy'||n)?['busy','저장 중…']:['ok','공용 저장소에 저장됨'];
+  ['syncSide','syncTop'].forEach(id=>{const el=document.getElementById(id);if(el){el.className='sync '+cls;el.innerHTML=`<i></i><span>${id==='syncTop'&&cls==='ok'?'저장됨':txt}</span>`;el.title=Cloud.err||txt;}});
+}
+
+/* ── 이미지: 줄여서 올리고 공개 주소로 바꾸기 ── */
+const MEDIA_CACHE=new Map();
+async function prepImage(file){
+  const du=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});
+  if(/gif$/i.test(file.type))return du;
+  try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=du;});
+    const MAX=2400,k=Math.min(1,MAX/Math.max(img.naturalWidth,img.naturalHeight));
+    if(k>=1&&file.size<2.5e6&&/jpe?g$/i.test(file.type))return du;
+    const cv=document.createElement('canvas');cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
+    const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
+    return cv.toDataURL('image/jpeg',.9);}catch(e){return du;}
+}
+async function uploadDataUrl(du){
+  if(MEDIA_CACHE.has(du))return MEDIA_CACHE.get(du);
+  const blob=await (await fetch(du)).blob();
+  const r=await api('POST','media',blob,blob.type||'image/jpeg');
+  MEDIA_CACHE.set(du,r.url);return r.url;
+}
+async function uploadInlineImages(c){
+  for(const p of (c.pages||[]))for(const k of Object.keys(p.v||{})){const v=p.v[k];if(typeof v==='string'&&v.startsWith('data:image'))p.v[k]=await uploadDataUrl(v);}
+  if(typeof c.thumb==='string'&&c.thumb.startsWith('data:'))c.thumb=await uploadDataUrl(c.thumb);
+}
+async function preloadImgs(p){
+  const urls=Object.entries(p.v||{}).filter(([k,v])=>typeof v==='string'&&/^(data:|https?:|\/)/.test(v)&&/img|bg|photo/i.test(k)).map(([,v])=>v);
+  await Promise.all(urls.map(u=>new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=i.onerror=()=>r();i.src=u;})));
+}
+async function renderPagesToJpeg(pages,skin){
+  const host=document.getElementById('offstage');const out=[];
+  try{for(const p0 of pages){const p={...p0,skin:p0.skin||skin||S.skin};const t=TB(p.tpl);
+    host.innerHTML=`<div class="tpl ${p.skin} ${t.id}" style="--ts:${p.ts||1};--cw:${CW(t)}px;--ch:${CH(t)}px">${t.r(fullV(p,t),zf(p))}</div>`;
+    await preloadImgs(p);await new Promise(r=>setTimeout(r,150));
+    const cv=await html2canvas(host.firstElementChild,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
+    out.push(cv.toDataURL('image/jpeg',.92));}}
+  finally{host.innerHTML='';}
+  return out;
+}
+async function mediaFor(c){
+  if(!(c.pages||[]).length)throw new Error('장이 없습니다');
+  const bad=c.pages.some(p=>Object.entries(p.v||{}).some(([k,v])=>k.startsWith('img')&&v&&!isOwnImage(v)));
+  if(bad){notice('드라이브 링크·샘플 사진이 들어 있어 게시용 이미지를 만들 수 없습니다.\n콘텐츠를 열어 직접 올린 사진으로 바꿔 주세요.');throw new Error('external');}
+  busy(`게시용 이미지 만드는 중… (0/${c.pages.length})`);
+  const imgs=await renderPagesToJpeg(c.pages,c.skin);const urls=[];
+  for(let i=0;i<imgs.length;i++){busy(`게시용 이미지 올리는 중… (${i+1}/${imgs.length})`);urls.push(await uploadDataUrl(imgs[i]));}
+  return urls;
+}
+
+/* ── 상태 전환 ── */
+async function act(id,action,extra={},quiet){
+  await flush();
+  const c=DB.contents.find(x=>x.id===id);
+  try{const r=await api('POST',`contents/${id}/action`,{action,baseVersion:c?.version,...extra});
+    if(r.purged){DB.contents=DB.contents.filter(x=>x.id!==id);delete Cloud.base.c[id];persistCache();}else mergeServer(r.content);
+    const msg={request_review:'검토를 요청했습니다 — 관리자 화면에 표시됩니다',to_draft:'임시 저장으로 되돌렸습니다',request_changes:'수정을 요청했습니다',approve:'승인했습니다',schedule:'예약했습니다 — 시각이 되면 자동 게시됩니다',
+      unschedule:'예약을 취소했습니다',publish_now:'게시했습니다',mark_published:'게시 완료로 기록했습니다',trash:'휴지통으로 옮겼습니다',restore:'되살렸습니다',purge:'영구 삭제했습니다'}[action];
+    if(msg)toast(msg);
+    pull(true);render();return r;
+  }catch(e){if(e.data?.current)mergeServer(e.data.current);notice(e.message);render();if(quiet)throw e;return null;}
+}
+function buildRec(){
+  const prev=DB.contents.find(c=>c.id===S.editingId);
+  const bk=S.set?.bk||TB(S.pages[0].tpl).bk;
+  const dEl=document.getElementById('schD'),tEl=document.getElementById('schT');
+  const ds=(dEl?.value||'').trim(),ts=/^\d{2}:\d{2}$/.test(tEl?.value||'')?tEl.value:'19:00';
+  const dt=/^\d{4}-\d{2}-\d{2}$/.test(ds)?new Date(ds+'T'+ts):null;
+  const rec=Object.assign({},prev||{},{id:S.editingId||('C'+Date.now()),
+    title:(S.set?.nm||'단일')+' · '+(S.pages[0].v.title||S.pages[0].v.name||S.pages[0].v.head||'').split('\n')[0].slice(0,18),
+    setId:S.set?.id||null,skin:S.skin,speaker:S.speaker,bk,kind:prev?.kind||kindOf({bk}),channel:prev?.channel||(S.set?.story?'story':'feed'),
+    pages:JSON.parse(JSON.stringify(S.pages)),caption:curCap(),
+    scheduledAt:dt&&!isNaN(dt.getTime())?dt.toISOString():(prev?.scheduledAt||null),
+    createdAt:prev?.createdAt||new Date().toISOString(),thumb:S.pages[0].v.img1||''});
+  if(!prev)rec.status='draft';
+  if(prev?.status==='planned')rec._toDraft=true;
+  return rec;
+}
+async function commitRec(rec){
+  const i=DB.contents.findIndex(c=>c.id===rec.id);if(i>=0)DB.contents[i]=rec;else DB.contents.unshift(rec);
+  save();busy('공용 저장소에 저장하는 중…');
+  try{await flush();}finally{busy(false);}
+  const saved=DB.contents.find(c=>c.id===rec.id);
+  if(Cloud.dirty.has(rec.id)||!saved?.version){notice('아직 서버에 저장하지 못했습니다. 이 기기에 보관해 두었다가 연결되면 자동으로 보냅니다.\n'+(Cloud.err||''));return null;}
+  return saved;
+}
+function resetMake(){S.editingId=null;S.set=null;S.pages=[];S.cur=0;S.step=1;S.checks=[];S.capList=[];S.capEdited=null;}
+async function saveDraft(){
+  if(!S.pages.length)return;
+  const saved=await commitRec(buildRec());
+  if(!saved)return;
+  resetMake();S.view='contents';S.cFilter='active';render();toast('임시 저장했습니다 — 팀 모두가 볼 수 있습니다');
+}
+async function submitReview(){
+  if(!gateOpen()){notice('게시 전 검수를 먼저 통과해 주세요.');return;}
+  const saved=await commitRec(buildRec());if(!saved)return;
+  if(['draft','changes','planned'].includes(saved.status)){const r=await act(saved.id,'request_review');if(!r)return;}
+  resetMake();S.view='contents';S.cFilter='review';render();
+}
+async function approveFromEditor(){
+  if(!isAdmin())return submitReview();
+  if(!gateOpen()){notice('게시 전 검수를 먼저 통과해 주세요.');return;}
+  const rec=buildRec();
+  if(!rec.scheduledAt){notice('게시 날짜와 시각을 확인해 주세요.');return;}
+  const saved=await commitRec(rec);if(!saved)return;
+  await scheduleContent(saved.id,rec.scheduledAt);
+}
+async function scheduleContent(id,whenIso){
+  const c=DB.contents.find(x=>x.id===id);if(!c)return;
+  const t=new Date(whenIso);if(isNaN(t.getTime())){notice('예약 날짜와 시각을 확인해 주세요.');return;}
+  if(t.getTime()<Date.now()-60e3&&!await ask('지난 시각입니다','고른 시각이 이미 지났습니다. 예약하면 10분 안에 바로 게시됩니다. 계속할까요?','예약하기'))return;
+  try{const urls=await mediaFor(c);busy('예약하는 중…');
+    const r=await act(id,'schedule',{scheduledAt:t.toISOString(),mediaUrls:urls},true);
+    if(r&&S.view==='make'){resetMake();S.view='contents';S.cFilter='scheduled';render();}
+  }catch(e){}finally{busy(false);}
+}
+
+/* ── 콘텐츠 카드 · 상세 서랍 ── */
+const fullV=(p,t)=>{const d={};(t.f||[]).forEach(f=>d[f.k]=f.v||'');return Object.assign(d,p.v||{});};
+function miniHTML(p,skin){if(!p)return'';const t=TB(p.tpl);if(!t)return'';const q={...p,skin:p.skin||skin||S.skin};
+  return `<div class="tpl ${q.skin} ${t.id}" style="--ts:${q.ts||1};--cw:${CW(t)}px;--ch:${CH(t)}px">${t.r(fullV(q,t),zf(q))}</div>`;}
+function ccard(c){
+  const cls=c.status==='review'?'rev':c.status==='changes'?'chg':'';
+  return `<button class="ccard ${cls}" onclick="openDetail('${c.id}')"><div class="th"><div class="sc">${miniHTML((c.pages||[])[0],c.skin)}</div>${(c.pages||[]).length>1?`<span class="pg">${c.pages.length}</span>`:''}</div>
+   <div class="cb"><div class="r1">${stTag(c.status)}${c.commentCount?`<span class="cm">댓글 ${c.commentCount}</span>`:''}</div>
+   <b>${esc(c.title||'제목 없음')}</b>
+   <span class="mt">${['scheduled','approved','planned'].includes(c.status)||c.scheduledAt?fmtWhen(c.scheduledAt):''}${c.status==='published'&&c.publishedAt?'게시 '+fmtWhen(c.publishedAt):''}</span>
+   <span class="mt">${esc(c.updatedByName||c.authorName||'')}${c.updatedAt?' · '+rel(c.updatedAt):''}</span>
+   ${c.lastError&&['scheduled','failed'].includes(c.status)?`<span class="errl">${esc(c.lastError)}</span>`:''}</div></button>`;
+}
+function openDetail(id){S.detail=id;S.dComments=null;paintDetail(true);loadComments(id);}
+function closeDetail(silent){S.detail=null;const d=document.getElementById('drawer'),b=document.getElementById('drawerBg');if(d)d.classList.remove('on');if(b)b.classList.remove('on');}
+async function loadComments(id){try{const r=await api('GET',`contents/${id}/comments`);if(S.detail===id){S.dComments=r.comments;S.dCount=(DB.contents.find(c=>c.id===id)||{}).updatedAt;paintDetail();}}catch(e){}}
+function paintDetail(first){
+  const c=DB.contents.find(x=>x.id===S.detail);const d=document.getElementById('drawer'),b=document.getElementById('drawerBg');
+  if(!c){closeDetail();return;}
+  if(!first&&S.dCount&&S.dCount!==c.updatedAt){S.dCount=c.updatedAt;loadComments(c.id);}
+  const adm=isAdmin(),st=c.status,pages=c.pages||[];
+  const def=c.scheduledAt&&new Date(c.scheduledAt).getTime()>Date.now()?new Date(c.scheduledAt):(()=>{const x=new Date();x.setDate(x.getDate()+1);x.setHours(19,0,0,0);return x;})();
+  const whenBox=`<div class="when"><input type="date" id="dD" value="${ymd(def)}" aria-label="게시 날짜"><input type="time" id="dT" value="${String(def.getHours()).padStart(2,'0')}:${String(def.getMinutes()).padStart(2,'0')}" aria-label="게시 시각"></div>`;
+  const B=(l,fn,cls='')=>`<button class="btn ${cls}" onclick="${fn}">${l}</button>`;
+  const reels=c.channel==='reels';
+  let acts=[];
+  if(st==='trashed'){acts.push(B('되살리기',`act('${c.id}','restore')`,'primary'));if(adm)acts.push(B('영구 삭제',`purgeContent('${c.id}')`,'danger'));}
+  else{
+    if(adm&&['review','draft','changes','approved','failed','planned'].includes(st)&&!reels&&pages.length)acts.unshift(whenBox,B(st==='approved'||st==='failed'?'예약하기':'승인하고 예약',`scheduleFromDrawer('${c.id}')`,'primary'));
+    if(adm&&['review','draft','changes'].includes(st))acts.push(B('승인만 (예약은 나중에)',`act('${c.id}','approve')`));
+    if(['draft','changes','planned'].includes(st))acts.push(B('검토 요청',`act('${c.id}','request_review')`,adm?'':'primary'));
+    if(st==='review'&&!adm)acts.push(B('검토 요청 취소',`act('${c.id}','to_draft')`));
+    if(adm&&st==='scheduled')acts.push(whenBox,B('예약 시각 바꾸기',`scheduleFromDrawer('${c.id}')`,'primary'),B('예약 취소',`act('${c.id}','unschedule')`));
+    if(adm&&['scheduled','approved','failed','review'].includes(st)&&Cloud.integrations.instagram?.connected&&!reels)acts.push(B('지금 게시',`publishNow('${c.id}')`,'terra'));
+    if(st!=='published')acts.push(B('열어서 편집',`openContent('${c.id}')`));
+    if(st!=='published'&&pages.length)acts.push(B('앱에서 직접 올리기',`publishHelp('${c.id}')`));
+    acts.push(B('복제',`dupContent('${c.id}')`));
+    if(st!=='published')acts.push(B('휴지통',`delContent('${c.id}')`,'danger'));
+  }
+  const step=FLOW.indexOf(st==='changes'?'review':st==='failed'?'scheduled':st);
+  const track=st==='trashed'||st==='planned'?'':`<div class="track">${FLOW.map((f,i)=>`<span class="${i<step?'on':i===step?'cur':''}"></span>`).join('')}</div><div class="track-l">${FLOW.map(f=>`<span>${ST[f][0]}</span>`).join('')}</div>`;
+  const tl=S.dComments===null?'<div class="empty">기록을 불러오는 중…</div>':S.dComments.length?`<div class="tl">${S.dComments.map(m=>`<div class="it ${m.kind}"><div class="h"><b>${esc(m.user_name)}</b><span>${rel(m.created_at)}</span></div><div class="bd">${linkify(esc(m.body))}</div></div>`).join('')}</div>`:'<div class="empty" style="padding:12px">아직 기록이 없습니다.</div>';
+  d.innerHTML=`<div class="dhd"><button class="x" onclick="closeDetail()" aria-label="닫기">×</button>${stTag(st)}<h2>${esc(c.title||'제목 없음')}</h2>
+   <div class="mt">작성 ${esc(c.authorName||'—')} · 최근 수정 ${esc(c.updatedByName||'—')} ${rel(c.updatedAt)}${c.approvedBy?` · 승인 ${esc(c.approvedBy)}`:''}</div>${track}</div>
+   <div class="dbody">
+   ${st==='published'?`<div class="okbox">${c.manual?'앱에서 직접 올린 것으로 기록됨':'인스타에 게시됨'} · ${fmtWhen(c.publishedAt)}${c.permalink?` · <a href="${esc(c.permalink)}" target="_blank" rel="noopener">게시물 보기</a>`:''}</div>`:''}
+   ${st==='scheduled'?`<div class="okbox">${fmtWhen(c.scheduledAt)}에 자동 게시됩니다.${Cloud.integrations.instagram?.connected?'':' <b>단, 인스타가 연결돼야 올라갑니다.</b>'}</div>`:''}
+   ${c.lastError&&['scheduled','failed'].includes(st)?`<div class="errbox">게시 문제 — ${esc(c.lastError)}</div>`:''}
+   ${reels?'<div class="errbox" style="background:#FCEBC7;color:#5E3E06">릴스는 영상이 필요해 자동 게시가 안 됩니다. [앱에서 직접 올리기]를 써 주세요.</div>':''}
+   ${pages.length?`<div class="dpages">${pages.map(p=>`<div class="th"><div class="sc">${miniHTML(p,c.skin)}</div></div>`).join('')}</div>`:'<div class="hint">아직 장이 없습니다.</div>'}
+   <div class="dsec"><h4>캡션 ${c.caption?`<button class="btn sm" onclick="copyCap('${c.id}')">복사</button>`:''}</h4><div class="dcap">${c.caption?esc(c.caption):'<span style="color:var(--ink-sub)">아직 캡션이 없습니다.</span>'}</div></div>
+   <div class="dsec"><div class="dact">${acts.join('')}</div></div>
+   <div class="dsec"><h4>댓글 · 기록</h4>${tl}
+    ${st!=='trashed'?`<div class="cbox"><textarea id="cIn" placeholder="${adm&&st==='review'?'수정할 점이나 확인 메모를 남겨 주세요':'메모나 질문을 남겨 주세요'}"></textarea>
+    <div class="dact"><button class="btn primary" onclick="postComment('${c.id}')">댓글 남기기</button>${adm&&['review','approved','scheduled','failed'].includes(st)?`<button class="btn" onclick="requestChanges('${c.id}')">이 내용으로 수정 요청</button>`:''}</div></div>`:''}</div>
+   </div>`;
+  d.classList.add('on');b.classList.add('on');
+  setTimeout(fit,30);
+}
+const linkify=s=>s.replace(/(https:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+async function postComment(id){const el=document.getElementById('cIn');const t=(el?.value||'').trim();if(!t){el?.focus();return;}
+  try{await api('POST',`contents/${id}/comments`,{body:t});el.value='';await loadComments(id);pull(true);}catch(e){notice(e.message);}}
+async function requestChanges(id){const el=document.getElementById('cIn');const t=(el?.value||'').trim();
+  if(!t){notice('어떤 점을 고쳐야 하는지 댓글 칸에 적은 뒤 눌러 주세요.');el?.focus();return;}
+  const r=await act(id,'request_changes',{note:t});if(r){el.value='';loadComments(id);}}
+async function scheduleFromDrawer(id){const ds=document.getElementById('dD')?.value,ts=document.getElementById('dT')?.value||'19:00';
+  const t=/^\d{4}-\d{2}-\d{2}$/.test(ds||'')?new Date(ds+'T'+ts):null;
+  if(!t||isNaN(t.getTime())){notice('예약 날짜와 시각을 확인해 주세요.');return;}
+  await scheduleContent(id,t.toISOString());loadComments(id);}
+async function purgeContent(id){if(!await ask('영구 삭제할까요?','휴지통에서도 지워져 되돌릴 수 없습니다. 이미지는 남지만 콘텐츠·댓글 기록이 사라집니다.','영구 삭제'))return;closeDetail();await act(id,'purge');}
+
+/* ── 홈 ── */
+function vHome(){
+  const me=Cloud.me||{name:''};const adm=isAdmin();const now=Date.now();
+  const all=DB.contents.filter(c=>c.status!=='trashed');
+  const rev=all.filter(c=>c.status==='review'),chg=all.filter(c=>c.status==='changes'&&(adm||c.authorId===me.id)),fail=all.filter(c=>c.status==='failed');
+  const wk=all.filter(c=>c.status==='scheduled'&&new Date(c.scheduledAt).getTime()-now<7*864e5).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));
+  const plans=all.filter(c=>c.status==='planned'&&c.scheduledAt&&new Date(c.scheduledAt).getTime()>now-864e5&&new Date(c.scheduledAt).getTime()-now<10*864e5).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));
+  const pubM=all.filter(c=>c.status==='published'&&monthKey(c.publishedAt||c.updatedAt)===thisMonth()).length;
+  const target=Math.round(DB.settings.perWeek*4.3);
+  const ig=Cloud.integrations.instagram||{};const left=ig.expiresAt?(new Date(ig.expiresAt)-now)/864e5:null;
+  const h=new Date().getHours(),greet=h<11?'좋은 아침입니다':h<18?'안녕하세요':'오늘도 수고 많으셨습니다';
+  const alerts=[];
+  if(!ig.connected)alerts.push(`<div class="alert warn"><span>인스타그램이 아직 연결되지 않았습니다. 예약은 되지만 <b>연결 전까지 자동 게시가 대기</b>합니다.</span>${adm?`<button class="btn" onclick="go('settings')">연결하기</button>`:''}</div>`);
+  else if(ig.lastError)alerts.push(`<div class="alert bad"><span>인스타 연결 문제 — ${esc(ig.lastError)}</span>${adm?`<button class="btn" onclick="go('settings')">확인</button>`:''}</div>`);
+  else if(left!==null&&left<10)alerts.push(`<div class="alert warn"><span>인스타 토큰이 ${Math.max(0,Math.floor(left))}일 뒤 만료됩니다. 자동 연장이 실패했다면 다시 연결해 주세요.</span>${adm?`<button class="btn" onclick="go('settings')">확인</button>`:''}</div>`);
+  if(fail.length)alerts.push(`<div class="alert bad"><span>게시에 실패한 콘텐츠가 ${fail.length}건 있습니다.</span><button class="btn" onclick="S.cFilter='failed';go('contents')">보기</button></div>`);
+  const kpi=(v,l,fn,hot)=>`<button class="kpi ${hot&&v?'hot':''}" onclick="${fn}"><div class="v">${v}</div><div class="l">${l}</div></button>`;
+  const urow=c=>{const d=new Date(c.scheduledAt);return `<button class="uprow" onclick="openDetail('${c.id}')"><div class="d"><b>${d.getDate()}</b><span>${'일월화수목금토'[d.getDay()]} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span></div><div class="tx"><b>${esc(c.title||'')}</b><span>${(KINDS[kindOf(c)]||{nm:''}).nm}${c.status==='planned'?' · 아직 안 만든 계획':''}</span></div>${stTag(c.status)}</button>`;};
+  const feed=(Cloud.feed||[]).slice(0,10).map(f=>`<button class="fi" onclick="openDetail('${f.content_id}')"><span class="ava">${esc((f.user_name||'?').slice(0,1))}</span><div class="tx"><div><b>${esc(f.user_name)}</b> · ${esc(f.title||'(지워진 콘텐츠)')}</div><span>${esc((f.body||'').split('\n')[0])}</span><em>${rel(f.created_at)}</em></div></button>`).join('');
+  const ins=Cloud.insights;const top=(ins?.items||[]).slice().sort((a,b)=>b.score-a.score).slice(0,5);
+  return `<div class="ph"><h1>${greet}, ${esc(me.name)}님</h1></div>
+  <div class="psub">${new Date().toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'long'})} · ${adm?'확인이 필요한 것부터 보여 드립니다.':'내가 할 일부터 보여 드립니다.'}</div>
+  ${alerts.join('')}${migrateBanner()}
+  <div class="kpis">${adm?kpi(rev.length,'검토 대기',"S.cFilter='review';go('contents')",true):kpi(chg.length,'나에게 온 수정 요청',"S.cFilter='changes';go('contents')",true)}
+   ${kpi(adm?chg.length:all.filter(c=>c.status==='review'&&c.authorId===me.id).length,adm?'수정 요청 보낸 것':'검토 기다리는 내 콘텐츠',`S.cFilter='${adm?'changes':'review'}';go('contents')`)}
+   ${kpi(wk.length,'7일 안 예약',"S.cFilter='scheduled';go('contents')")}
+   ${kpi(pubM+' / '+target,'이번 달 게시',"go('calendar')")}</div>
+  <div class="hgrid"><div>
+   ${(adm?rev:chg).length?`<div class="card"><h3>${adm?'검토를 기다리는 콘텐츠':'고쳐 달라는 요청이 온 콘텐츠'} <span class="badge t">${(adm?rev:chg).length}</span></h3><div class="cgrid">${(adm?rev:chg).slice(0,6).map(ccard).join('')}</div></div>`:''}
+   <div class="card"><h3>다가오는 게시 <span class="badge">7일</span></h3>${wk.length?wk.map(urow).join(''):'<div class="empty">예약된 게시가 없습니다.</div>'}
+    ${plans.length?`<h3 style="margin-top:16px">아직 안 만든 계획 <span class="badge">${plans.length}</span></h3>${plans.slice(0,5).map(urow).join('')}`:''}
+    <div class="tools" style="margin:12px 0 0"><button class="btn primary" onclick="go('make')">새 콘텐츠 만들기</button><button class="btn" onclick="go('calendar')">캘린더 보기</button></div></div>
+  </div><div>
+   <div class="card feed"><h3>최근 활동</h3>${feed||'<div class="empty">아직 활동이 없습니다.</div>'}</div>
+   <div class="card"><h3>최근 성과 <span class="badge">${ins?.at?rel(ins.at)+' 수집':'자동 수집'}</span></h3>
+    ${top.length?top.map(it=>`<a class="perf" href="${esc(it.permalink||'#')}" target="_blank" rel="noopener"><span class="im" style="${bg(it.thumb)}"></span><span class="tx"><b>${esc(it.caption||'(캡션 없음)')}</b>좋아요 ${it.likes} · 댓글 ${it.comments}${it.saved!==undefined?` · 저장 ${it.saved}`:''}${it.reach!==undefined?` · 도달 ${it.reach}`:''}</span><span class="sc" title="반응 점수 = 좋아요 + 댓글×3 + 저장×5 + 공유×5">${it.score}</span></a>`).join('')
+     :`<div class="hint" style="margin:0">${ig.connected?'다음 점검 때 최근 게시물 반응(좋아요·댓글·저장·공유)을 모아 옵니다. 3일마다 갱신됩니다.':'인스타가 연결되면 3일마다 최근 게시물 반응을 자동으로 모아 보여 드립니다.'}</div>`}</div>
+  </div></div>`;
+}
+
+/* ── 이전 버전(이 기기 브라우저 저장) 데이터 옮기기 ── */
+function legacyData(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function legacyPending(){const L=legacyData();if(!L||!Array.isArray(L.contents))return[];
+  const have=new Set(DB.contents.map(c=>c.id));return L.contents.filter(c=>c&&c.id&&!have.has(c.id));}
+function migrateBanner(inSettings){
+  if(!Cloud.ready)return'';const n=legacyPending().length;
+  if(!n||(Cloud.legacyHidden&&!inSettings))return'';
+  return `<div class="alert info"><span>이 기기에만 남아 있는 예전 콘텐츠가 <b>${n}건</b> 있습니다. 공용 저장소로 옮기면 팀 모두가 볼 수 있습니다.</span><button class="btn primary" onclick="migrateLegacy()">공용 저장소로 옮기기</button>${inSettings?'':`<button class="btn ghost" onclick="Cloud.legacyHidden=true;render()">나중에</button>`}</div>`;
+}
+async function migrateLegacy(){
+  const L=legacyData();const list=legacyPending();if(!L)return;
+  busy(`예전 콘텐츠 ${list.length}건을 옮기는 중…`);
+  try{
+    list.forEach(c0=>{const c=JSON.parse(JSON.stringify(c0));['status','version','mediaUrls','mediaId','permalink','publishedAt','lastError'].forEach(k=>delete c[k]);
+      c._import=true;c.status='draft';DB.contents.unshift(c);});
+    if(Cloud.wsVersion===0){['mySets','favTpl','favSet','archivedTpl','customTpl','pendingTpl','trend'].forEach(k=>{if(L[k]&&(!Array.isArray(L[k])||L[k].length))DB[k]=L[k];});
+      if(L.settings){['handle','perWeek','goals','driveKey','driveFolder','driveLinks'].forEach(k=>{if(L.settings[k]!==undefined)DB.settings[k]=L.settings[k];});}}
+    save();await flush();
+    const left=legacyPending().length;
+    try{localStorage.setItem(KEY+'_moved',new Date().toISOString());}catch(e){}
+    busy(false);notice(left?`일부(${left}건)를 아직 못 옮겼습니다. 인터넷 연결을 확인한 뒤 다시 눌러 주세요.`:`${list.length}건을 공용 저장소로 옮겼습니다. 모두 '임시 저장' 상태로 들어갔습니다.\n(이 기기의 예전 데이터는 지우지 않고 그대로 둡니다.)`);
+    render();
+  }catch(e){busy(false);notice('옮기는 중 문제가 생겼습니다 — '+e.message);}
+}
+function clearLocalCache(){ask('이 기기 임시 사본을 비울까요?','공용 저장소의 데이터는 그대로입니다. 이 기기에만 있던 빠른 표시용 사본과 아직 못 보낸 변경이 지워집니다.','비우기').then(ok=>{if(!ok)return;
+  try{localStorage.removeItem(CACHE_KEY);}catch(e){}location.reload();});}
+
+/* ── 연결 · 사용자 관리 ── */
+async function igConnect(useLegacy){const tok=useLegacy?legacyData()?.settings?.metaToken:(document.getElementById('igTok')?.value||'').trim();
+  if(!tok){notice('토큰을 붙여넣어 주세요.');return;}
+  busy('인스타그램에 연결하는 중…');
+  try{const r=await api('POST','integrations/instagram',{token:tok});Cloud.integrations.instagram=r.instagram;busy(false);toast('연결됨 — @'+(r.instagram.username||''));pull(true);render();}
+  catch(e){busy(false);notice(e.message);}}
+async function igCheck(){busy('연결을 점검하는 중…');try{const r=await api('POST','integrations/instagram/check');Cloud.integrations.instagram=r.instagram;busy(false);toast(r.ok?'정상 연결입니다':'연결에 문제가 있습니다');render();}catch(e){busy(false);notice(e.message);}}
+async function igRefreshNow(){busy('토큰을 연장하는 중…');try{const r=await api('POST','integrations/instagram/refresh');Cloud.integrations.instagram=r.instagram;busy(false);toast('토큰을 60일 연장했습니다');render();}catch(e){busy(false);notice(e.message);}}
+async function igDisconnect(){if(!await ask('인스타 연결을 해제할까요?','해제하면 예약된 콘텐츠가 다시 연결될 때까지 게시되지 않습니다.','연결 해제'))return;
+  try{await api('DELETE','integrations/instagram');Cloud.integrations.instagram={connected:false};toast('연결을 해제했습니다');render();}catch(e){notice(e.message);}}
+async function aiSave(useLegacy){const key=useLegacy?legacyData()?.settings?.aiKey:(document.getElementById('aiKey')?.value||'').trim();
+  const model=document.getElementById('aiModel')?.value;
+  if(!key&&!Cloud.integrations.ai?.connected){notice('키를 붙여넣어 주세요.');return;}
+  try{await api('POST','integrations/ai',{key:key||undefined,model});toast('AI 설정을 저장했습니다');pull(true);}catch(e){notice(e.message);}}
+async function aiOff(){if(!await ask('AI를 끌까요?','서버에 저장된 AI 키를 지웁니다. 다시 켜려면 키를 새로 넣어야 합니다.','끄기'))return;
+  try{await api('DELETE','integrations/ai');toast('AI를 껐습니다');pull(true);}catch(e){notice(e.message);}}
+async function loadUsers(){try{const r=await api('GET','users');Cloud.users=r.users;if(S.view==='settings'&&!typingNow())render();}catch(e){Cloud.users=[];}}
+async function userCreate(){const v=id=>(document.getElementById(id)?.value||'').trim();
+  try{await api('POST','users',{name:v('nuName'),login:v('nuLogin'),password:document.getElementById('nuPw')?.value||'',role:v('nuRole')});
+    toast('계정을 만들었습니다 — 아이디와 처음 비밀번호를 본인에게 전달해 주세요');await loadUsers();render();}catch(e){notice(e.message);}}
+async function userPatch(id,p){try{await api('PATCH','users/'+id,p);toast('바꿨습니다');await loadUsers();}catch(e){notice(e.message);await loadUsers();}}
+async function userResetPw(id,name){const pw=await askInput(`${name} — 새 비밀번호`,'8자 이상. 바꾼 뒤 본인에게 전달해 주세요.','password');if(!pw)return;userPatch(id,{password:pw});}
+async function changeMyPw(){const pw=document.getElementById('myPw')?.value||'';if(pw.length<8){notice('비밀번호는 8자 이상이어야 합니다.');return;}
+  try{await api('PATCH','me',{password:pw});document.getElementById('myPw').value='';toast('비밀번호를 바꿨습니다');}catch(e){notice(e.message);}}
+
+/* ── AI 캡션 안 ── */
+async function aiCaptions(){
+  const base=curCap();const p=S.pages[0];const t=p?TB(p.tpl):null;
+  const spec=['너는 테이블웨어 브랜드 니코트(NICOTT)의 인스타그램 캡션 작가다.','톤: 친근하지만 가볍지 않게, 감성적이지만 과장 없이. 존댓말. 이모지는 쓰지 않는다.',
+    '화자: '+(S.speaker||S.set?.sp||'NICOTT')+' (NINA면 대표 개인의 1인칭, NICOTT면 브랜드)','금지 표현: '+GUIDE.banned.join(', '),
+    '콘텐츠 유형: '+(MIXLABEL[S.set?.bk||t?.bk]||''),'현재 초안:\n'+base,'',
+    '초안과 같은 사실만 써서 서로 다른 결의 캡션 3개를 만든다. 해시태그 줄은 초안 것을 그대로 붙인다.','JSON 배열만 출력: [{"label":"짧은 이름","text":"캡션"},…]'].join('\n');
+  busy('AI가 캡션 안을 쓰는 중…');
+  try{const j=await api('POST','ai',{prompt:spec,max_tokens:1400});
+    const m=(j.text||'').match(/\[[\s\S]*\]/);if(!m)throw new Error('응답 형식이 올바르지 않습니다');
+    const arr=JSON.parse(m[0]).filter(x=>x&&x.text).map(x=>({label:'AI · '+(x.label||'안'),text:String(x.text)}));
+    const ok=arr.filter(x=>!GUIDE.banned.some(b=>x.text.includes(b)));
+    if(!ok.length)throw new Error('금지 표현이 들어간 안만 나와 모두 걸렀습니다. 다시 시도해 주세요.');
+    S.capList=[...S.capList.filter(c=>!c.label.startsWith('AI · ')),...ok];S.capIdx=S.capList.length-ok.length;S.capEdited=null;
+    toast(`AI 안 ${ok.length}개를 추가했습니다${arr.length>ok.length?` (금지 표현 ${arr.length-ok.length}개 거름)`:''}`);}
+  catch(e){notice('AI 캡션 실패 — '+e.message);}finally{busy(false);render();}
+}
+
+/* ── 공용 UI: 모달 · 진행 표시 · 모바일 ── */
+function ask(title,msg,okLabel='확인',noLabel='취소'){return new Promise(res=>{const m=document.getElementById('modal');
+  m.innerHTML=`<div class="modal" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="tools">${noLabel?`<button class="btn" id="mNo">${esc(noLabel)}</button>`:''}<button class="btn primary" id="mOk">${esc(okLabel)}</button></div></div>`;
+  m.classList.add('on');const done=v=>{m.classList.remove('on');m.innerHTML='';res(v);};
+  document.getElementById('mOk').onclick=()=>done(true);const no=document.getElementById('mNo');if(no)no.onclick=()=>done(false);
+  m.onclick=e=>{if(e.target===m)done(false);};setTimeout(()=>document.getElementById('mOk')?.focus(),20);});}
+function notice(msg){return ask('안내',msg,'확인',null);}
+function askInput(title,msg,type='text'){return new Promise(res=>{const m=document.getElementById('modal');
+  m.innerHTML=`<div class="modal" role="dialog" aria-modal="true"><h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="field" style="margin-top:12px"><input type="${type}" id="mIn" autocomplete="new-password"></div><div class="tools"><button class="btn" id="mNo">취소</button><button class="btn primary" id="mOk">확인</button></div></div>`;
+  m.classList.add('on');const done=v=>{m.classList.remove('on');m.innerHTML='';res(v);};
+  document.getElementById('mOk').onclick=()=>done(document.getElementById('mIn').value);document.getElementById('mNo').onclick=()=>done(null);
+  setTimeout(()=>document.getElementById('mIn')?.focus(),20);});}
+function busy(msg){const b=document.getElementById('busy');if(!b)return;if(msg){b.innerHTML=`<div class="sp"></div><div>${esc(msg)}</div>`;b.classList.add('on');}else b.classList.remove('on');}
+function openSheet(){const s=document.getElementById('sheet'),b=document.getElementById('sheetBg');
+  s.innerHTML=[['gallery','템플릿 갤러리'],['copygen','제품 원고'],['settings','설정']].map(([k,l])=>`<button onclick="go('${k}')">${ICON[k]}${l}</button>`).join('')+`<button onclick="location.href='/logout'">${ICON.logout}로그아웃</button>`;
+  s.classList.add('on');b.classList.add('on');}
+function closeSheet(){document.getElementById('sheet')?.classList.remove('on');document.getElementById('sheetBg')?.classList.remove('on');}
+function togglePreview(force){const a=document.getElementById('app');const on=force===undefined?!a.classList.contains('pvopen'):force;a.classList.toggle('pvopen',on);if(on)setTimeout(fit,30);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(document.getElementById('modal')?.classList.contains('on'))return;if(S.detail)closeDetail();closeSheet();togglePreview(false);}});
+function load(){
+  // v2: 공용 저장소가 원본. 이 기기에는 '빠른 첫 화면용 사본'과 '아직 못 보낸 변경'만 둔다.
+  const base=JSON.parse(JSON.stringify(DEF));
+  try{const r=localStorage.getItem(CACHE_KEY);if(r){const c=JSON.parse(r);
+    ['settings','mySets','favTpl','favSet','archivedTpl','customTpl','pendingTpl','lastTplCheck','trend','contents'].forEach(k=>{if(c.db&&c.db[k]!==undefined)base[k]=k==='settings'?Object.assign(base.settings,c.db.settings):c.db[k];});
+    BOOT_CACHE=c;}}catch(e){STORE_OK=false;}
+  try{const p=JSON.parse(localStorage.getItem(ME_KEY)||'{}');if(Array.isArray(p.recentTpl))base.recentTpl=p.recentTpl;if(Array.isArray(p.recentSet))base.recentSet=p.recentSet;}catch(e){}
+  return base;
+}
+function save(){
+  // 화면 코드는 그대로 save()를 부르고, 여기서 무엇이 바뀌었는지 비교해 서버로 보낸다
+  if(typeof Cloud!=='undefined'){markDirty();schedulePush();persistCache();}
+  try{localStorage.setItem(ME_KEY,JSON.stringify({recentTpl:DB.recentTpl,recentSet:DB.recentSet}));}catch(e){}
+  paintStore();
+}
+function paintStore(){
+  const el=document.getElementById('storeInfo');if(!el||typeof Cloud==='undefined')return;
+  const me=Cloud.me;
+  el.innerHTML=(me?`<div class="who"><span class="ava">${esc((me.name||'?').slice(0,1))}</span><div><b>${esc(me.name)}</b><span>${me.role==='admin'?'관리자':'작성자'}</span></div><a href="/logout">로그아웃</a></div>`:'')+`<div class="sync" id="syncSide"></div>`;
+  paintSync();
+}
 /* ── 상태 ── */
-const S={view:'make',step:1,set:null,pages:[],cur:0,skin:'sk-ever',speaker:null,capIdx:0,capList:[],capEdited:null,
+const S={view:'home',cFilter:'active',cSearch:'',detail:null,dComments:null,dCount:null,step:1,set:null,pages:[],cur:0,skin:'sk-ever',speaker:null,capIdx:0,capList:[],capEdited:null,
   checks:[],fmtFilter:'ALL',galFilter:'ALL',galTab:'all',builder:null,setName:'',editingId:null,calMonth:null,
   selDay:null,rep:{days:[],kind:'life',time:'19:00'},busy:'',dtCode:'',driveFiles:null};
-const ALL_SETS=()=>[...DB.mySets,...BASE_SETS];
+const ALL_SETS=()=>[...(DB.mySets||[]).filter(s=>s&&Array.isArray(s.pages)),...BASE_SETS];
 const CP=()=>S.pages[S.cur];
 const newPage=id=>{const t=TB(id),v={};t.f.forEach(f=>v[f.k]=f.v||'');return{tpl:id,v,fs:{},ts:1,skin:null,note:''};};
 const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1900);};
@@ -866,17 +1640,19 @@ const curCap=()=>S.capEdited??(S.capList[S.capIdx]?.text||'');
 const monthKey=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');};
 const thisMonth=()=>monthKey(new Date());
 function tally(m){const mm=m||thisMonth();
-  return DB.contents.filter(c=>c.status!=='draft'&&monthKey(c.scheduledAt||c.createdAt)===mm)
+  return DB.contents.filter(c=>COUNTED.includes(c.status)&&monthKey(c.scheduledAt||c.publishedAt||c.createdAt)===mm)
     .reduce((a,c)=>(a[c.bk]=(a[c.bk]||0)+1,a),{product:0,lifestyle:0,story:0,event:0});}
 function autos(){
   const cap=curCap(),bk=S.set?.bk||TB(S.pages[0]?.tpl||'A1').bk;
   const found=GUIDE.banned.filter(b=>cap.includes(b));
-  const c=tally(),total=Object.values(c).reduce((a,b)=>a+b,0),share=total?c.product/total:0;
+  const c=tally();{const ed=DB.contents.find(x=>x.id===S.editingId);const counted=ed&&COUNTED.includes(ed.status)&&ed.status!=='planned'&&monthKey(ed.scheduledAt||ed.createdAt)===thisMonth();if(!counted&&bk)c[bk]=(c[bk]||0)+1;}
+  const total=Object.values(c).reduce((a,b)=>a+b,0),share=total?c.product/total:0;
   const non=(c.lifestyle||0)+(c.story||0);
-  const recent=DB.contents.filter(x=>x.status!=='draft').slice(-2);
+  const recent=DB.contents.filter(x=>['review','approved','scheduled','published'].includes(x.status)).sort((a,b)=>new Date(b.scheduledAt||b.publishedAt||0)-new Date(a.scheduledAt||a.publishedAt||0)).slice(0,2);
   const last2=recent.length===2&&recent.every(p=>['product','event'].includes(p.bk));
   const ev=S.pages.find(p=>p.tpl==='C2');
-  return{ratio:{ok:!(total>=4&&share>.45),msg:total>=4&&share>.45?'제품 편중 '+Math.round(share*100)+'%':'정상'},
+  const heavy=total>=4&&share>.45;
+  return{ratio:{ok:!(heavy&&bk==='product'),msg:heavy?(bk==='product'?'제품 편중 '+Math.round(share*100)+'% — 다른 유형을 먼저 올려 주세요':'제품 편중 '+Math.round(share*100)+'% — 이 콘텐츠가 비율을 맞춥니다'):'정상'},
    nonsales:{ok:total<3||non>0,msg:non+'건 포함'},
    speaker:{ok:!!(S.speaker||S.set?.sp),msg:S.speaker||S.set?.sp||'미지정'},
    banned:{ok:!found.length,msg:found.length?'금지 표현: '+found.join(', '):'없음'},
@@ -887,14 +1663,14 @@ const pageDone=p=>TB(p.tpl).f.filter(f=>f.t==='image').every(f=>p.v[f.k]);
 const allImgs=()=>S.pages.length&&S.pages.every(pageDone);
 const gateOpen=()=>{const a=autos();return ['ratio','nonsales','speaker','banned','event3'].every(k=>a[k].ok)&&GUIDE.checklist.every((c,i)=>c.auto?true:S.checks[i])&&S.checks[9]&&allImgs();};
 /* ── 렌더 ── */
-const zf=p=>(k,slot)=>{const v=p.fs[k];return v?`--f${slot===2?'2':''}:${v}`:'';};
+const zf=p=>(k,slot)=>{const v=(p.fs||{})[k];return v?`--f${slot===2?'2':''}:${v}`:'';};
 const pskin=p=>p.skin||S.skin;
 function tplHTML(p){const t=TB(p.tpl);return `<div class="tpl ${pskin(p)} ${t.id}" style="--ts:${p.ts||1};--cw:${CW(t)}px;--ch:${CH(t)}px">${t.r(p.v,zf(p))}</div>`;}
 function demoHTML(t,skin){const v={};t.f.forEach((f,i)=>v[f.k]=f.t==='image'?SAMPLES[(t.id.charCodeAt(0)+t.id.charCodeAt(1)+i*3)%SAMPLES.length].url:(f.v||''));
   return `<div class="tpl ${skin||S.skin} ${t.id}" style="--ts:1;--cw:${CW(t)}px;--ch:${CH(t)}px">${t.r(v,()=>'')}</div>`;}
 function paint(){
   const el=document.getElementById('render'),p=CP(),st=document.getElementById('stage');
-  if(!p){el.className='tpl';el.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B4AC9F;font-size:30px;font-weight:200">세트를 선택하세요</div>';st.style.aspectRatio='4/5';}
+  if(!p){el.className='tpl';el.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#5E564C;font-size:30px;font-weight:400">세트를 고르면 여기에 미리보기가 나옵니다</div>';st.style.aspectRatio='4/5';}
   else{const t=TB(p.tpl);el.className='tpl '+pskin(p)+' '+t.id;
     el.style.setProperty('--ts',p.ts||1);el.style.setProperty('--cw',CW(t)+'px');el.style.setProperty('--ch',CH(t)+'px');
     el.innerHTML=t.r(p.v,zf(p));st.style.aspectRatio=CW(t)+'/'+CH(t);}
@@ -908,7 +1684,8 @@ function paintBar(){
   const canNext=S.view==='make'&&(S.step===1?S.pages.length>0:S.step===2?allImgs():false);
   b.innerHTML=`<span class="lbl">${p?`${S.cur+1}장 · ${TB(p.tpl).nm} · ${CW(TB(p.tpl))}×${CH(TB(p.tpl))}`:'미리보기'}</span>
    ${S.view==='make'?`<button class="btn sm" ${S.step===1?'disabled':''} onclick="prevStep()">이전</button>
-   <button class="btn sm primary" ${canNext?'':'disabled'} onclick="nextStep()">${S.step===3?'완료':'다음 — '+names[S.step]}</button>`:''}`;
+   ${S.step<3?`<button class="btn sm primary" ${canNext?'':'disabled'} onclick="nextStep()">다음 — ${names[S.step]}</button>`:''}`:''}
+   <button class="btn sm pvclose" onclick="togglePreview(false)">닫기</button>`;
 }
 function nextStep(){if(S.step===1&&S.pages.length)S.step=2;else if(S.step===2&&allImgs()){S.step=3;S.capList=buildCaptions();S.capEdited=null;}render();}
 function prevStep(){if(S.step>1)S.step--;render();}
@@ -928,14 +1705,29 @@ function paintGauge(){
   document.getElementById('gauge').innerHTML=Object.keys(MIXLABEL).map(k=>{
     const pct=Math.min((c[k]||0)/total/(g[k]/100)*100,140);
     return `<div class="gmr"><div class="t"><span>${MIXLABEL[k]}</span><span>${c[k]||0}건</span></div><div class="gmb"><i class="${pct>125?'over':''}" style="width:${Math.min(pct,100)}%"></i></div></div>`;}).join('')
-   +`<div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:6px">목표 ${g.product}/${g.lifestyle}/${g.story}/${g.event} · 주 ${DB.settings.perWeek}회</div>`;}
-const VIEWS=[['make','만들기','01'],['gallery','템플릿 갤러리','02'],['contents','콘텐츠','03'],['calendar','캘린더','04'],['copygen','제품 원고','05'],['settings','설정','06']];
-function paintNav(){document.getElementById('nav').innerHTML=VIEWS.map(([k,l,n])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')"><span>${l}</span><span class="n">${n}</span></button>`).join('');}
-function go(v){S.view=v;render();}
-function render(){paintNav();paintGauge();paintStore();paintCustomCss();
+   +`<div class="gnote">목표 비율 ${g.product}/${g.lifestyle}/${g.story}/${g.event} · 주 ${DB.settings.perWeek}회</div>`;}
+const VIEWS=[['home','홈'],['make','만들기'],['contents','콘텐츠'],['calendar','캘린더'],['gallery','템플릿 갤러리'],['copygen','제품 원고'],['settings','설정']];
+function paintNav(){
+  const bd=navBadge();
+  document.getElementById('nav').innerHTML=VIEWS.map(([k,l])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')" aria-current="${S.view===k?'page':'false'}">${ICON[k]||''}<span class="lb">${l}</span>${k==='contents'&&bd?`<span class="nb" title="확인할 콘텐츠">${bd}</span>`:''}</button>`).join('');
+  const mt=document.getElementById('mtab');
+  if(mt){const tabs=[['home','홈'],['make','만들기'],['contents','콘텐츠'],['calendar','캘린더']];
+    const more=!tabs.some(([k])=>k===S.view);
+    mt.innerHTML=tabs.map(([k,l])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')">${ICON[k]}<span>${l}</span>${k==='contents'&&bd?`<span class="nb">${bd}</span>`:''}</button>`).join('')
+      +`<button class="${more?'on':''}" onclick="openSheet()">${ICON.more}<span>더보기</span></button>`;}
+  const top=document.getElementById('mtop');
+  if(top)top.innerHTML=`<img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><div class="sync" id="syncTop"></div>${Cloud.me?`<button class="ava" onclick="go('settings')" title="${esc(Cloud.me.name)}">${esc(Cloud.me.name.slice(0,1))}</button>`:''}`;
+  document.title=(bd?`(${bd}) `:'')+'NICOTT 콘텐츠 대시보드';
+}
+function go(v){S.view=v;closeSheet();closeDetail(true);document.getElementById('app')?.classList.remove('pvopen');render();window.scrollTo(0,0);}
+function render(){
+  const app=document.getElementById('app');if(app)app.classList.toggle('noprev',S.view!=='make');
+  paintNav();paintGauge();paintStore();paintCustomCss();
   const m=document.getElementById('main');
-  m.innerHTML=S.view==='make'?vMake():S.view==='gallery'?vGallery():S.view==='contents'?vContents():S.view==='calendar'?vCalendar():S.view==='copygen'?vCopygen():vSettings();
-  paint();setTimeout(fit,20);}
+  m.innerHTML=S.view==='home'?vHome():S.view==='make'?vMake():S.view==='gallery'?vGallery():S.view==='contents'?vContents():S.view==='calendar'?vCalendar():S.view==='copygen'?vCopygen():vSettings();
+  paint();setTimeout(fit,20);
+  if(S.detail)paintDetail();
+}
 function skinBar(perPage){
   const cur=perPage?(CP()?.skin||''):S.skin;
   return `<div class="chips">${perPage?`<button class="${!cur?'on':''}" onclick="setPageSkin('')">세트 기본</button>`:''}
@@ -946,10 +1738,18 @@ function setPageSkin(id){CP().skin=id||null;render();}
 function vMake(){
   const names=['세트','편집','캡션·검수'];
   const filled=S.pages.filter(pageDone).length;
-  return `<div class="ph"><h1>만들기</h1><span class="st">STEP ${S.step} / 3</span>${S.editingId?'<span class="badge t">수정 중</span>':''}</div>
+  const ed=DB.contents.find(c=>c.id===S.editingId);
+  const canNext=S.step===1?S.pages.length>0:S.step===2?allImgs():false;
+  const why=S.step===1&&!S.pages.length?'세트나 템플릿을 고르면 다음으로 넘어갑니다':S.step===2&&!allImgs()?`모든 장에 사진이 있어야 넘어갑니다 (${filled}/${S.pages.length})`:'';
+  return `<div class="ph"><h1>${ed?'콘텐츠 고치기':'만들기'}</h1><span class="st">${S.step} / 3 단계</span>${ed?stTag(ed.status):''}</div>
+  ${ed?`<div class="psub">'${esc(ed.title||'')}'을(를) 고치는 중입니다.${['approved','scheduled'].includes(ed.status)?' <b>승인된 콘텐츠라 저장하면 다시 검토가 필요합니다.</b>':''} <button class="btn sm ghost" onclick="cancelEdit()">고치기 그만두기</button></div>`:''}
   <div class="steps">${names.map((s,i)=>`<div class="${S.step===i+1?'on':S.step>i+1?'done':''}">${i+1}. ${s}</div>`).join('')}
-  ${S.pages.length?`<span style="font-size:11px;color:var(--ink-sub)">사진 ${filled}/${S.pages.length}장</span>`:''}</div>
-  ${[step1,step2,step3][S.step-1]()}`;
+  ${S.pages.length?`<span style="font-size:13px;color:var(--ink-sub)">사진 ${filled}/${S.pages.length}장</span>`:''}</div>
+  ${[step1,step2,step3][S.step-1]()}
+  <div class="mknav">${S.step>1?`<button class="btn" onclick="prevStep()">이전 단계</button>`:''}
+   ${S.step<3?`<button class="btn primary" ${canNext?'':'disabled'} onclick="nextStep()">다음 — ${names[S.step]}</button>`:''}
+   ${S.pages.length?`<button class="btn pvbtn" onclick="togglePreview(true)">미리보기</button>`:''}
+   ${why?`<span class="why" style="margin:0">${why}</span>`:''}</div>`;
 }
 function recentBar(){
   const rs=DB.recentSet.map(id=>ALL_SETS().find(s=>s.id===id)).filter(Boolean).slice(0,4);
@@ -962,13 +1762,13 @@ function step1(){
   const single=S.set?.id==='S7',bset=S.builder;
   return `${recentBar()}
   <div class="card"><h3>1. 세트 선택 <span class="badge">한 번에 생성</span></h3>
-  <div class="hint">세트를 고르면 커버·속지·마무리가 자동 구성됩니다. 오른쪽 위 <b>다음</b>으로 이동하세요.</div>
+  <div class="hint">세트를 고르면 커버·속지·마무리가 자동 구성됩니다. 고른 뒤 아래 <b>다음</b>을 누르세요.</div>
   <div class="sgrid">
   ${ALL_SETS().map(s=>`<div class="scard ${S.set?.id===s.id?'on':''}" onclick="pickSet('${s.id}')">
     <button class="btn sm" style="position:absolute;top:8px;right:8px;padding:2px 7px;z-index:2" onclick="event.stopPropagation();favSet('${s.id}')">${DB.favSet.includes(s.id)?'★':'☆'}</button>
     <div class="strip">${(s.pages.length?s.pages:['A1']).slice(0,5).map(id=>`<div class="mini"><div class="sc">${demoHTML(TB(id))}</div></div>`).join('')}</div>
-    <b>${s.nm} ${s.pages.length?`<span style="font-weight:400;color:var(--ink-sub);font-size:10.5px">${s.pages.length}장${s.story?' · 9:16':''}</span>`:''}</b><span>${s.desc}</span></div>`).join('')}
-  <button class="scard new" onclick="startBuilder()">+ 내 세트 직접 만들기<br><span style="font-size:10px">템플릿을 골라 순서대로 담습니다</span></button></div></div>
+    <b>${s.nm} ${s.pages.length?`<span style="font-weight:400;color:var(--ink-sub);font-size:12.5px">${s.pages.length}장${s.story?' · 9:16':''}</span>`:''}</b><span>${s.desc}</span></div>`).join('')}
+  <button class="scard new" onclick="startBuilder()">+ 내 세트 직접 만들기<br><span style="font-size:12px">템플릿을 골라 순서대로 담습니다</span></button></div></div>
   ${bset?`<div class="card"><h3>내 세트 만들기 <span class="badge">${bset.length}장</span></h3>
     <div class="hint">템플릿의 <b>+</b>로 담고 순서를 정한 뒤 저장하세요. 담긴 항목을 누르면 빠집니다.</div>
     <div class="pstrip">${bset.map((id,i)=>`<button class="pchip" onclick="rmBuild(${i})"><div class="th"><div class="sc">${demoHTML(TB(id))}</div></div><div class="lb">${i+1}. ${TB(id).nm}</div></button>`).join('')||'<div class="empty" style="padding:10px">아직 담긴 템플릿이 없습니다</div>'}</div>
@@ -1032,13 +1832,13 @@ function step2(){
     <button class="btn sm" onclick="dupPage()">복제</button>
     <button class="btn sm" onclick="delPage()" ${S.pages.length<2?'disabled':''}>삭제</button>
     <button class="btn sm" onclick="saveCurrentAsSet()">내 세트로 저장</button></div>
-  ${t.role==='detail'?`<div class="tools" style="margin:10px 0 0"><span style="font-size:11px;color:var(--ink-sub)">파일명 코드</span><input type="text" placeholder="예: ACC0005" value="${esc(S.dtCode||'')}" oninput="S.dtCode=this.value" style="padding:6px 9px;border:1px solid var(--ui-line);border-radius:8px;font-size:12px;width:130px"><span style="font-size:10.5px;color:var(--ink-sub)">내보내기 → ${esc(S.dtCode||'코드')}_OP_01.jpg …</span></div>`:''}
+  ${t.role==='detail'?`<div class="tools" style="margin:10px 0 0"><span style="font-size:12.5px;color:var(--ink-sub)">파일명 코드</span><input type="text" placeholder="예: ACC0005" value="${esc(S.dtCode||'')}" oninput="S.dtCode=this.value" style="padding:6px 9px;border:1px solid var(--ui-line);border-radius:8px;font-size:12px;width:130px"><span style="font-size:12.5px;color:var(--ink-sub)">내보내기 → ${esc(S.dtCode||'코드')}_OP_01.jpg …</span></div>`:''}
   <div class="hint" style="margin:12px 0 5px">이 장의 컬러 테마 — '세트 기본'은 전체 설정을 따릅니다</div>${skinBar(true)}</div>
   <div class="card"><h3>사진 <span class="badge">${imgs.length}컷</span></h3>
   <div class="hint">여러 장을 한 번에 놓으면 <b>다음 장까지 이어서</b> 빈자리를 채웁니다.</div>
   <div class="drop" id="drop" onclick="document.getElementById('fileIn').click()"><b>사진을 여기로 끌어다 놓으세요</b><span>여러 장 한 번에 · JPG · PNG</span></div>
   <input type="file" id="fileIn" accept="image/*" multiple hidden onchange="onFiles(this.files)">
-  ${imgs.length?`<div class="slots" style="margin-top:10px">${imgs.map(f=>`<div class="slot"><div class="pv" style="${bg(p.v[f.k])}"></div><b>${f.l}</b><span>${p.v[f.k]?(p.v[f.k].startsWith('data:')?'업로드':'샘플/링크'):'비어 있음'}</span><button class="btn sm" style="width:100%;padding:3px" onclick="clearSlot('${f.k}')">비우기</button></div>`).join('')}</div>`:'<div class="hint" style="margin-top:8px">이 템플릿은 텍스트만 사용합니다.</div>'}
+  ${imgs.length?`<div class="slots" style="margin-top:10px">${imgs.map(f=>`<div class="slot"><div class="pv" style="${bg(p.v[f.k])}"></div><b>${f.l}</b><span>${p.v[f.k]?(p.v[f.k].startsWith('data:')?'올리는 중…':isOwnImage(p.v[f.k])?'업로드됨':'샘플/링크'):'비어 있음'}</span><button class="btn sm" style="width:100%;padding:3px" onclick="clearSlot('${f.k}')">비우기</button></div>`).join('')}</div>`:'<div class="hint" style="margin-top:8px">이 템플릿은 텍스트만 사용합니다.</div>'}
   ${driveBar()}
   <div class="hint" style="margin:10px 0 4px">샘플 사진</div>
   <div class="samples">${SAMPLES.map((s,i)=>`<button style="background-image:url('${s.url}')" title="${s.name}" onclick="useSample(${i})"></button>`).join('')}</div>
@@ -1095,11 +1895,15 @@ function refreshCnt(){const fs=TB(CP().tpl).f.filter(f=>f.t!=='image'&&f.max);
 function bump(k,d){const p=CP();p.fs[k]=Math.min(1.4,Math.max(.7,+((p.fs[k]||1)+d*.06).toFixed(2)));render();}
 function setScale(v){CP().ts=v/100;document.getElementById('tsVal').textContent=v+'%';paint();}
 function setSp(s){S.speaker=s;S.capList=buildCaptions();render();}
-function onFiles(files){const arr=[...files];let idx=0;const tg=[];
+function onFiles(files){const arr=[...files].filter(f=>/^image\//.test(f.type));let idx=0;const tg=[];
+  if(!arr.length){toast('이미지 파일만 올릴 수 있습니다');return;}
   for(let pi=S.cur;pi<S.pages.length&&tg.length<arr.length;pi++)
     TB(S.pages[pi].tpl).f.filter(f=>f.t==='image').forEach(f=>{if(!S.pages[pi].v[f.k]&&tg.length<arr.length)tg.push([pi,f.k]);});
   if(!tg.length){const f0=TB(CP().tpl).f.find(f=>f.t==='image');if(f0)tg.push([S.cur,f0.k]);}
-  tg.forEach(([pi,k])=>{const file=arr[idx++];if(!file)return;const r=new FileReader();r.onload=e=>{S.pages[pi].v[k]=e.target.result;render();};r.readAsDataURL(file);});}
+  tg.forEach(([pi,k])=>{const file=arr[idx++];if(!file)return;
+    prepImage(file).then(du=>{const pg=S.pages[pi];if(!pg)return;pg.v[k]=du;render();
+      uploadDataUrl(du).then(url=>{if(pg.v[k]===du){pg.v[k]=url;if(S.view==='make')render();}}).catch(e=>toast('사진 업로드가 늦어지고 있습니다 — 저장할 때 다시 시도합니다'));})
+     .catch(()=>toast('사진을 읽지 못했습니다: '+file.name));});}
 function useSample(i){useUrl(SAMPLES[i].url);}
 function clearSlot(k){CP().v[k]='';render();}
 function fillAllSamples(){let n=0;S.pages.forEach(p=>TB(p.tpl).f.filter(f=>f.t==='image').forEach(f=>{if(!p.v[f.k]){p.v[f.k]=SAMPLES[n%SAMPLES.length].url;n++;}}));render();}
@@ -1109,65 +1913,45 @@ function step3(){
   const cap=curCap(),found=GUIDE.banned.filter(b=>cap.includes(b)),a=autos(),open=gateOpen();
   const rows=GUIDE.checklist.map((c,i)=>{const au=c.auto?a[c.auto]:null;
     return `<label class="chk"><input type="checkbox" ${au?(au.ok?'checked':''):(S.checks[i]?'checked':'')} ${au?'disabled':''} onchange="S.checks[${i}]=this.checked;render()"><span>${c.t}</span>${au?`<span class="auto ${au.ok?'pass':'fail'}">자동 ${au.ok?'통과':'실패'} · ${au.msg}</span>`:''}</label>`;}).join('');
-  const up=S.pages.every(p=>Object.entries(p.v).filter(([k])=>k.startsWith('img')).every(([,v])=>!v||v.startsWith('data:')));
-  const d=new Date();d.setDate(d.getDate()+1);
-  return `<div class="card"><h3>캡션 <span class="badge">규칙 조립</span></h3>
-  <div class="capvars">${S.capList.map((c,i)=>`<button class="capvar ${S.capIdx===i&&!S.capEdited?'on':''}" onclick="S.capIdx=${i};S.capEdited=null;render()"><span class="lbl">${c.label}</span>${esc(c.text)}</button>`).join('')}</div>
-  <div class="tools"><button class="btn sm" disabled>AI로 다른 안 보기</button><button class="btn sm" onclick="S.capList=buildCaptions();S.capEdited=null;render()">규칙으로 다시 만들기</button></div>
-  <div class="why"><b>미구현</b> AI 초안은 API 키 연결 후 활성화됩니다.</div>
-  <div class="field" style="margin-top:12px"><label><span>최종 캡션</span></label><textarea style="min-height:120px" oninput="S.capEdited=this.value;paint()">${esc(cap)}</textarea></div>
+  const up=S.pages.every(p=>Object.entries(p.v).filter(([k])=>k.startsWith('img')).every(([,v])=>!v||isOwnImage(v)));
+  const prev=DB.contents.find(c=>c.id===S.editingId);
+  const ch=prev?.channel||(S.set?.story?'story':'feed');
+  const reels=ch==='reels'||(S.pages[0]&&TB(S.pages[0].tpl).fmt==='F7');
+  const when=prev?.scheduledAt?new Date(prev.scheduledAt):(()=>{const d=new Date();d.setDate(d.getDate()+1);d.setHours(19,0,0,0);return d;})();
+  const aiOn=Cloud.integrations.ai?.connected;
+  return `<div class="card"><h3>캡션 <span class="badge">규칙 조립${aiOn?' · AI 안':''}</span></h3>
+  <div class="capvars">${S.capList.map((c,i)=>`<button class="capvar ${S.capIdx===i&&!S.capEdited?'on':''}" onclick="S.capIdx=${i};S.capEdited=null;render()"><span class="lbl">${esc(c.label)}</span>${esc(c.text)}</button>`).join('')}</div>
+  <div class="tools"><button class="btn sm" ${aiOn?'':'disabled'} onclick="aiCaptions()">AI로 다른 안 3개 보기</button><button class="btn sm" onclick="S.capList=buildCaptions();S.capEdited=null;render()">규칙으로 다시 만들기</button></div>
+  ${aiOn?'':'<div class="why">AI 안은 설정 → 연결에서 AI 키를 등록하면 켜집니다.</div>'}
+  <div class="field" style="margin-top:12px"><label><span>최종 캡션</span></label><textarea style="min-height:130px" oninput="S.capEdited=this.value;paint()">${esc(cap)}</textarea></div>
   ${found.length?`<div class="gate no">금지 표현 — ${found.join(', ')}</div>`:''}</div>
   <div class="card"><h3>게시 전 검수 <span class="badge">10항</span></h3>${rows}
   ${a.seq.ok?'':'<div class="gate no">직전 2건이 판매성 콘텐츠입니다.</div>'}
-  <div class="gate ${open?'yes':'no'}">${open?'검수 통과 — 저장하거나 예약할 수 있습니다.':'아직 통과하지 못했습니다.'}</div></div>
-  <div class="card"><h3>저장 · 예약</h3>
-  <div class="grid2"><div class="field"><label><span>예약 날짜</span></label><input type="date" id="schD" value="${d.toISOString().slice(0,10)}"></div>
-  <div class="field"><label><span>예약 시각</span></label><input type="time" id="schT" value="19:00"></div></div>
+  <div class="gate ${open?'yes':'no'}">${open?'검수 통과 — 검토 요청이나 예약을 할 수 있습니다.':'아직 통과하지 못했습니다. 위 항목을 확인해 주세요.'}</div></div>
+  <div class="card"><h3>저장 · 검토 · 예약</h3>
+  <div class="hint">${isAdmin()?'관리자는 바로 <b>승인하고 예약</b>할 수 있습니다. 예약 시각이 되면 컴퓨터가 꺼져 있어도 서버가 인스타에 올립니다.':'작성자는 <b>검토 요청</b>까지 합니다. 관리자가 확인하고 승인하면 예약됩니다. 관리자 화면에 바로 표시됩니다.'}</div>
+  <div class="grid2"><div class="field"><label><span>${isAdmin()?'게시 날짜':'희망 게시 날짜'}</span></label><input type="date" id="schD" value="${ymd(when)}"></div>
+  <div class="field"><label><span>${isAdmin()?'게시 시각':'희망 시각'}</span></label><input type="time" id="schT" value="${String(when.getHours()).padStart(2,'0')}:${String(when.getMinutes()).padStart(2,'0')}"></div></div>
   <div class="tools">
-    <button class="btn" onclick="saveContent('draft')">임시 저장</button>
-    <button class="btn primary" ${open?'':'disabled'} onclick="saveContent('scheduled')">예약하기 (${S.pages.length}장)</button>
-    <button class="btn" ${up?'':'disabled'} onclick="exportAll()">이미지 내보내기</button>
-    <button class="btn terra" ${open&&pubReady()&&up?'':'disabled'} onclick="saveAndPublish()">지금 게시</button></div>
-  ${pubReady()?(up?'':'<div class="why">지금 게시 — 샘플·링크 사진이 섞여 있으면 이미지를 만들 수 없습니다. 직접 올린 사진으로 바꿔주세요.</div>')
-   :'<div class="why">지금 게시 — 설정 탭에서 <b style="color:var(--ink-sub)">인스타 토큰</b>과 <b style="color:var(--ink-sub)">이미지 저장소</b>를 연결하면 켜집니다. 심사는 필요 없습니다.</div>'}</div>`;
+    <button class="btn" onclick="saveDraft()">임시 저장</button>
+    <button class="btn ${isAdmin()?'':'primary'}" ${open?'':'disabled'} onclick="submitReview()">검토 요청</button>
+    ${isAdmin()?`<button class="btn primary" ${open&&!reels?'':'disabled'} onclick="approveFromEditor()">승인하고 예약 (${S.pages.length}장)</button>`:''}
+    <button class="btn" ${up?'':'disabled'} onclick="exportAll()">이미지 내려받기</button></div>
+  ${reels?'<div class="why"><b>릴스</b>는 영상이 필요해 자동 게시가 되지 않습니다. 이미지를 내려받아 앱에서 올린 뒤 콘텐츠 탭에서 <b>게시 완료로 기록</b>을 눌러 주세요.</div>':''}
+  ${up?'':'<div class="why">드라이브 링크·샘플 사진이 섞여 있으면 게시용 이미지를 만들 수 없습니다. <b>직접 올린 사진</b>으로 바꿔 주세요.</div>'}
+  ${Cloud.integrations.instagram?.connected?'':`<div class="why">인스타그램이 아직 연결되지 않았습니다. 예약은 되지만 <b>연결될 때까지 게시가 대기</b>합니다.</div>`}</div>`;
 }
-function saveAndPublish(){
-  const id=S.editingId||('C'+Date.now());
-  const bk=S.set?.bk||TB(S.pages[0].tpl).bk;
-  const rec={id,title:(S.set?.nm||'단일')+' · '+(S.pages[0].v.title||S.pages[0].v.name||S.pages[0].v.head||'').split('\n')[0].slice(0,18),
-    setId:S.set?.id||null,skin:S.skin,speaker:S.speaker,bk,kind:kindOf({bk}),channel:S.set?.story?'story':'feed',
-    pages:JSON.parse(JSON.stringify(S.pages)),caption:curCap(),status:'scheduled',scheduledAt:new Date().toISOString(),
-    createdAt:new Date().toISOString(),thumb:S.pages[0].v.img1||''};
-  const i=DB.contents.findIndex(c=>c.id===id);if(i>=0)DB.contents[i]=rec;else DB.contents.push(rec);
-  save();S.view='contents';render();publishNow(id);
+function saveAndPublish(){approveFromEditor();}
+function saveContent(status){return status==='scheduled'?approveFromEditor():saveDraft();}
+async function exportAll(){
+  busy('이미지를 만드는 중…');
+  try{const imgs=await renderPagesToJpeg(S.pages,S.skin);
+    for(let i=0;i<imgs.length;i++){const t=TB(S.pages[i].tpl);
+      const a=document.createElement('a');a.download=(t.role==='detail'&&S.dtCode?S.dtCode+'_OP_'+String(i+1).padStart(2,'0'):`nicott_${String(i+1).padStart(2,'0')}_${t.id}`)+'.jpg';a.href=imgs[i];a.click();
+      await new Promise(r=>setTimeout(r,220));}
+    toast(`${imgs.length}장을 내려받았습니다`);}
+  catch(e){notice('이미지를 만들지 못했습니다 — '+e.message);}finally{busy(false);}
 }
-function saveContent(status){
-  const dEl=document.getElementById('schD'),tEl=document.getElementById('schT');
-  let when=null;
-  if(status==='scheduled'){
-    const ds=(dEl?.value||'').trim(),ts=/^\d{2}:\d{2}$/.test(tEl?.value||'')?tEl.value:'19:00';
-    const dt=/^\d{4}-\d{2}-\d{2}$/.test(ds)?new Date(ds+'T'+ts):null;
-    if(!dt||isNaN(dt.getTime())){alert('예약 날짜와 시각을 확인해 주세요.');return;}
-    when=dt.toISOString();
-  }
-  const bk=S.set?.bk||TB(S.pages[0].tpl).bk;
-  const prev=DB.contents.find(c=>c.id===S.editingId);
-  const rec={id:S.editingId||('C'+Date.now()),title:(S.set?.nm||'단일')+' · '+(S.pages[0].v.title||S.pages[0].v.name||S.pages[0].v.head||'').split('\n')[0].slice(0,18),
-    setId:S.set?.id||null,skin:S.skin,speaker:S.speaker,bk,kind:prev?.kind||kindOf({bk}),channel:prev?.channel||(S.set?.story?'story':'feed'),
-    pages:JSON.parse(JSON.stringify(S.pages)),caption:curCap(),
-    status,scheduledAt:status==='scheduled'?when:null,createdAt:new Date().toISOString(),thumb:S.pages[0].v.img1||''};
-  const i=DB.contents.findIndex(c=>c.id===rec.id);
-  if(i>=0)DB.contents[i]=rec;else DB.contents.push(rec);
-  save();S.editingId=null;S.set=null;S.pages=[];S.cur=0;S.step=1;S.checks=[];S.capList=[];S.capEdited=null;
-  S.view=status==='scheduled'?'calendar':'contents';render();toast(status==='scheduled'?'예약했습니다':'임시 저장했습니다');
-}
-async function exportAll(){const el=document.getElementById('render'),keep=S.cur;
-  for(let i=0;i<S.pages.length;i++){S.cur=i;paint();await new Promise(r=>setTimeout(r,260));
-    const t=TB(S.pages[i].tpl);
-    try{const cv=await html2canvas(el,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
-      const a=document.createElement('a');a.download=(t.role==='detail'&&S.dtCode?S.dtCode+'_OP_'+String(i+1).padStart(2,'0'):`nicott_${String(i+1).padStart(2,'0')}_${t.id}`)+'.jpg';a.href=cv.toDataURL('image/jpeg',.94);a.click();
-      await new Promise(r=>setTimeout(r,220));}catch(e){alert((i+1)+'장 실패: '+e.message);break;}}
-  S.cur=keep;render();}
 /* ══ 갤러리 ══ */
 function vGallery(){
   const ALL=ALLT();
@@ -1179,13 +1963,13 @@ function vGallery(){
   const card=t=>`<div class="tcard"><div class="th"><div class="sc">${demoHTML(t)}</div></div><span class="ratio">${t.w?'9:16':'4:5'}</span>
     <div class="act"><button class="${DB.favTpl.includes(t.id)?'fav':''}" onclick="favTpl('${t.id}')">${DB.favTpl.includes(t.id)?'★':'☆'}</button>
     <button onclick="archiveTpl('${t.id}')" title="${DB.archivedTpl.includes(t.id)?'보관 해제':'보관함으로'}">${DB.archivedTpl.includes(t.id)?'↩':'⌵'}</button></div>
-    <div class="m"><b>${t.id} · ${t.nm}</b><span>${FMT[t.fmt]} · ${t.sp}</span><span style="color:#A79C8D">${t.ev}</span></div></div>`;
+    <div class="m"><b>${t.id} · ${t.nm}</b><span>${FMT[t.fmt]} · ${t.sp}</span><span style="color:var(--ink-3)">${t.ev}</span></div></div>`;
   const sec=(arr,ttl,d,badge)=>arr.length?`<div class="card"><h3>${ttl} <span class="badge${badge?' t':''}">${arr.length}종</span></h3><div class="hint">${d}</div><div class="tgrid">${arr.map(card).join('')}</div></div>`:'';
   const b=DB.trend.batches[0];
   const trendCards=list(ALL.filter(t=>(t.trend===b.id||(t.custom&&t.trend))&&!DB.archivedTpl.includes(t.id)&&!pend.some(p=>p.id===t.id)));
   const arch=ALL.filter(t=>DB.archivedTpl.includes(t.id));
   const pcard=t=>`<div class="tcard" style="border-color:var(--terra)"><div class="th"><div class="sc">${demoHTML(t)}</div></div><span class="ratio">${t.w&&t.h>1400?'9:16':'4:5'}</span>
-    <div class="m"><b>${t.id} · ${t.nm}</b><span>${FMT[t.fmt]||t.fmt} · ${t.sp}</span><span style="color:#A79C8D">${esc(t.ev||'')}</span>
+    <div class="m"><b>${t.id} · ${t.nm}</b><span>${FMT[t.fmt]||t.fmt} · ${t.sp}</span><span style="color:var(--ink-3)">${esc(t.ev||'')}</span>
     <div class="tools" style="margin:7px 0 0"><button class="btn sm primary" onclick="approveTpl('${t.id}')">쓸게요</button>
     <button class="btn sm" onclick="rejectTpl('${t.id}')">보관</button></div></div></div>`;
   return `<div class="ph"><h1>템플릿 갤러리</h1><span class="st">${ALL.length}종 × ${SKINS.length}스타일</span></div>
@@ -1202,7 +1986,7 @@ function vGallery(){
     <div class="hint"><b>매월 자동</b> — 벤치마크 계정을 관찰해 그달의 문법을 반영한 템플릿이 자동으로 만들어져 위 <b>새로 도착한 템플릿</b>에 올라옵니다.<br>★로 저장한 것은 계속 남고, 저장하지 않은 것은 다음 배치 때 보관함으로 옮겨집니다(삭제 아님).</div>
     <div class="tgrid">${trendCards.map(card).join('')}</div>
     <div class="tools" style="margin-top:10px"><button class="btn sm primary" onclick="checkNewTemplates()">새 템플릿 확인</button>
-     <span style="font-size:11px;color:var(--ink-sub)">${DB.lastTplCheck?'마지막 확인 '+new Date(DB.lastTplCheck).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'아직 확인 전 · 매월 13일 자동 생성'}</span></div></div>
+     <span style="font-size:12.5px;color:var(--ink-sub)">${DB.lastTplCheck?'마지막 확인 '+new Date(DB.lastTplCheck).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'아직 확인 전 · 매월 13일 자동 생성'}</span></div></div>
   ${sec(list(base.filter(t=>t.role==='cover')),'커버 · 썸네일','캐러셀 첫 장.')}
   ${sec(list(base.filter(t=>t.role==='page')),'속지','캐러셀 2장째부터.')}
   ${sec(list(base.filter(t=>t.role==='end')),'마무리','캐러셀 마지막 장.')}
@@ -1215,63 +1999,56 @@ function setGal(f){S.galFilter=f;render();}
 function archiveTpl(id){const i=DB.archivedTpl.indexOf(id);i>=0?DB.archivedTpl.splice(i,1):DB.archivedTpl.push(id);save();render();}
 /* ══ 콘텐츠 ══ */
 function vContents(){
-  const now=Date.now();
-  const badge=c=>c.status==='published'?'<span class="tag pub">게시 완료</span>'
-    :c.status==='scheduled'?(new Date(c.scheduledAt).getTime()<=now?'<span class="tag due">발행 시간</span>':'<span class="tag sch">예약</span>')
-    :'<span class="tag draft">임시</span>';
-  const row=c=>`<div class="qrow"><div class="th" style="${bg(c.thumb)}"></div>
-    <div class="info"><b>${esc(c.title)}</b><span>${c.pages.length}장 · ${MIXLABEL[c.bk]||''} · ${c.scheduledAt?new Date(c.scheduledAt).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'미정'}</span></div>
-    ${badge(c)}
-    <div class="tools" style="margin:0"><button class="btn sm" onclick="openContent('${c.id}')">열기</button>
-    ${c.status!=='published'?(pubReady()?`<button class="btn sm primary" onclick="publishNow('${c.id}')">지금 게시</button>`:(c.status==='scheduled'&&new Date(c.scheduledAt).getTime()<=now?`<button class="btn sm primary" onclick="publishHelp('${c.id}')">발행 준비</button>`:'')):''}
-    <button class="btn sm" onclick="copyCap('${c.id}')">캡션 복사</button>
-    <button class="btn sm" onclick="dupContent('${c.id}')">복제</button>
-    <button class="btn sm" onclick="delContent('${c.id}')">삭제</button></div></div>`;
-  const g=k=>DB.contents.filter(c=>c.status===k);
-  const due=g('scheduled').filter(c=>new Date(c.scheduledAt).getTime()<=now);
-  return `<div class="ph"><h1>콘텐츠</h1><span class="st">${DB.contents.length}건</span>${S.busy?`<span class="badge t">${esc(S.busy)}</span>`:''}</div>
-  <div class="psub">만든 콘텐츠가 전부 여기 저장됩니다. 브라우저를 닫아도 남아 있습니다.</div>
-  ${due.length?`<div class="card"><h3>지금 올릴 것 <span class="badge t">${due.length}건</span></h3>
-    <div class="hint">예약 시각이 지났습니다. ${pubReady()?'<b>지금 게시</b>를 누르면 대시보드에서 바로 올라갑니다.':'<b>발행 준비</b>를 누르면 이미지가 내려받아지고 캡션이 복사됩니다. 설정에서 연동을 마치면 바로 게시로 바뀝니다.'}</div>${due.map(row).join('')}</div>`:''}
-  <div class="card"><h3>예약됨 <span class="badge">${g('scheduled').length}</span></h3>${g('scheduled').length?g('scheduled').map(row).join(''):'<div class="empty">예약된 콘텐츠가 없습니다.</div>'}</div>
-  <div class="card"><h3>임시 저장 <span class="badge">${g('draft').length}</span></h3>${g('draft').length?g('draft').map(row).join(''):'<div class="empty">임시 저장된 콘텐츠가 없습니다.</div>'}</div>
-  <div class="card"><h3>게시 완료 <span class="badge">${g('published').length}</span></h3>${g('published').length?g('published').map(row).join(''):'<div class="empty">아직 없습니다.</div>'}</div>`;
+  const f=CFILTERS.find(x=>x[0]===S.cFilter)||CFILTERS[0];
+  const q=(S.cSearch||'').trim().toLowerCase();
+  const list=DB.contents.filter(f[2]).filter(c=>!q||((c.title||'')+' '+(c.caption||'')+' '+(c.authorName||'')).toLowerCase().includes(q))
+    .sort((a,b)=>f[0]==='scheduled'||f[0]==='planned'?new Date(a.scheduledAt||0)-new Date(b.scheduledAt||0):new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0));
+  const seg=CFILTERS.map(([k,l,fn,hot])=>{const n=DB.contents.filter(fn).length;
+    if(!n&&!['active','all'].includes(k)&&S.cFilter!==k)return'';
+    return `<button class="${S.cFilter===k?'on':''} ${hot&&n?'hot':''}" onclick="S.cFilter='${k}';render()">${l}<b>${n}</b></button>`;}).join('');
+  return `<div class="ph"><h1>콘텐츠</h1><span class="st">공용 · ${DB.contents.filter(c=>c.status!=='trashed').length}건</span></div>
+  <div class="psub">팀 모두가 같은 목록을 봅니다. 카드를 누르면 미리보기·댓글·승인을 한 곳에서 처리합니다.</div>
+  ${migrateBanner()}
+  <div class="ctool"><input type="search" placeholder="제목·캡션·작성자 검색" value="${esc(S.cSearch||'')}" oninput="S.cSearch=this.value;clearTimeout(window.__cs);window.__cs=setTimeout(()=>{render();const i=document.querySelector('.ctool input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},250)">
+   <button class="btn primary" onclick="go('make')">새 콘텐츠 만들기</button></div>
+  <div class="seg" role="tablist">${seg}</div>
+  ${list.length?`<div class="cgrid">${list.map(ccard).join('')}</div>`:`<div class="card"><div class="empty">${f[0]==='review'?'검토를 기다리는 콘텐츠가 없습니다.':f[0]==='trashed'?'휴지통이 비어 있습니다.':'해당하는 콘텐츠가 없습니다. 만들기에서 새로 만들어 보세요.'}</div></div>`}`;
 }
 function openContent(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
+  if(c.status==='published'){notice('게시가 끝난 콘텐츠는 고칠 수 없습니다. 복제해서 새로 만들어 주세요.');return;}
+  if(c.status==='trashed'){notice('휴지통에 있는 콘텐츠입니다. 먼저 되살려 주세요.');return;}
   S.set=ALL_SETS().find(s=>s.id===c.setId)||{id:c.setId,nm:c.title,bk:c.bk,sp:c.speaker,pages:[]};
-  S.pages=JSON.parse(JSON.stringify(c.pages));S.skin=c.skin;S.speaker=c.speaker;S.capEdited=c.caption;S.capList=buildCaptions();
-  S.cur=0;S.step=2;S.checks=[];S.editingId=c.id;S.view='make';render();}
+  S.pages=JSON.parse(JSON.stringify(c.pages||[]));if(!S.pages.length){const st=ALL_SETS().find(s=>s.id===c.setId)||BASE_SETS[0];S.pages=st.pages.map(newPage);}
+  S.skin=c.skin||S.skin;S.speaker=c.speaker;S.capEdited=c.caption||null;S.capList=buildCaptions();
+  S.cur=0;S.step=2;S.checks=[];S.editingId=c.id;S.view='make';closeDetail(true);render();
+  if(['approved','scheduled'].includes(c.status))toast('승인된 콘텐츠입니다. 내용을 바꿔 저장하면 다시 검토가 필요합니다');}
 function dupContent(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
-  DB.contents.push(Object.assign({},JSON.parse(JSON.stringify(c)),{id:'C'+Date.now(),status:'draft',scheduledAt:null,title:c.title+' (복제)'}));save();render();toast('복제했습니다');}
-function delContent(id){if(!confirm('이 콘텐츠를 삭제할까요? 되돌릴 수 없습니다.'))return;
-  DB.contents=DB.contents.filter(c=>c.id!==id);save();render();toast('삭제했습니다');}
+  const o=cPayload(JSON.parse(JSON.stringify(c)));
+  Object.assign(o,{id:'C'+Date.now()+Math.floor(Math.random()*90+10),status:'draft',scheduledAt:null,title:(c.title||'')+' (복제)',createdAt:new Date().toISOString()});
+  DB.contents.unshift(o);save();render();toast('복제했습니다 — 임시 저장에 있습니다');}
+async function delContent(id){
+  const c=DB.contents.find(x=>x.id===id);if(!c)return;
+  if(!await ask('휴지통으로 옮길까요?',`'${c.title||'제목 없음'}'을(를) 휴지통으로 옮깁니다. 휴지통에서 언제든 되살릴 수 있습니다.`,'휴지통으로'))return;
+  await act(id,'trash');}
 function copyCap(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
-  navigator.clipboard?.writeText(c.caption).then(()=>toast('캡션을 복사했습니다')).catch(()=>toast('복사에 실패했습니다'));}
+  navigator.clipboard?.writeText(c.caption||'').then(()=>toast('캡션을 복사했습니다')).catch(()=>toast('복사에 실패했습니다 — 캡션을 길게 눌러 직접 복사해 주세요'));}
 async function publishHelp(id){
   const c=DB.contents.find(x=>x.id===id);if(!c)return;
   copyCap(id);
-  const keep={pages:S.pages,cur:S.cur,skin:S.skin};
-  S.pages=JSON.parse(JSON.stringify(c.pages));S.skin=c.skin;
-  const el=document.getElementById('render');let fail=0;
-  for(let i=0;i<S.pages.length;i++){S.cur=i;paint();await new Promise(r=>setTimeout(r,240));
-    const t=TB(S.pages[i].tpl);
-    try{const cv=await html2canvas(el,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
-      const a=document.createElement('a');a.download=`nicott_${c.id}_${String(i+1).padStart(2,'0')}.jpg`;a.href=cv.toDataURL('image/jpeg',.94);a.click();
-      await new Promise(r=>setTimeout(r,200));}catch(e){fail++;}}
-  S.pages=keep.pages;S.cur=keep.cur;S.skin=keep.skin;
-  if(confirm(fail?`이미지 ${fail}장을 내려받지 못했습니다(외부 링크 사진). 캡션은 복사됐습니다.\n\n게시를 완료하셨나요?`:'이미지를 내려받고 캡션을 복사했습니다.\n\n인스타에 올리신 뒤 확인을 누르면 게시 완료로 기록됩니다.')){
-    c.status='published';c.publishedAt=new Date().toISOString();save();}
-  render();
+  busy('이미지를 만드는 중…');
+  let n=0;
+  try{const imgs=await renderPagesToJpeg(c.pages||[],c.skin);
+    for(let i=0;i<imgs.length;i++){const a=document.createElement('a');a.download=`nicott_${c.id}_${String(i+1).padStart(2,'0')}.jpg`;a.href=imgs[i];a.click();n++;await new Promise(r=>setTimeout(r,250));}}
+  catch(e){}finally{busy(false);}
+  if(await ask('인스타 앱에서 올리셨나요?',`이미지 ${n}장을 내려받고 캡션을 복사했습니다.\n앱에서 올린 뒤 [게시 완료로 기록]을 누르면 콘텐츠 상태가 바뀝니다.`,'게시 완료로 기록','아직이요')){
+    if(isAdmin())await act(id,'mark_published');else{await api('POST',`contents/${id}/comments`,{body:'앱에서 직접 올렸습니다. 게시 완료로 기록해 주세요.'});toast('관리자에게 기록을 요청했습니다');pull(true);}}
 }
 /* ══ 자동 생성 템플릿 수신·승인 ══
    매월 AI가 만든 템플릿이 저장소 data/templates/pending.json 에 올라옵니다.
    대시보드가 이를 불러와 미리보기로 보여주고, 승인한 것만 갤러리에 들어갑니다. */
 async function checkNewTemplates(silent){
-  const s=DB.settings;
-  if(!(s.ghOwner&&s.ghRepo)){if(!silent)toast('저장소를 먼저 연결해 주세요');return;}
   try{
-    const url=`https://raw.githubusercontent.com/${s.ghOwner}/${s.ghRepo}/${s.ghBranch||'main'}/data/templates/pending.json?t=`+Date.now();
-    const r=await fetch(url);
+    const r=await fetch('/data/templates/pending.json?t='+Date.now(),{credentials:'same-origin'});
     if(!r.ok){if(!silent)toast('아직 새 템플릿이 없습니다');DB.lastTplCheck=new Date().toISOString();save();return;}
     const j=await r.json();
     const list=(j.templates||[]).filter(t=>t&&t.id&&t.html&&(t.f||t.fields));
@@ -1280,7 +2057,7 @@ async function checkNewTemplates(silent){
     if(fresh.length){DB.pendingTpl=[...(DB.pendingTpl||[]),...fresh];}
     DB.lastTplCheck=new Date().toISOString();save();render();
     if(!silent||fresh.length)toast(fresh.length?`새 템플릿 ${fresh.length}종이 도착했습니다`:'새 템플릿이 없습니다');
-  }catch(e){if(!silent)alert('불러오기 실패\n\n'+e.message);}
+  }catch(e){if(!silent)notice('새 템플릿을 불러오지 못했습니다 — '+e.message);}
 }
 function approveTpl(id){
   const i=(DB.pendingTpl||[]).findIndex(t=>t.id===id);if(i<0)return;
@@ -1293,8 +2070,8 @@ function rejectTpl(id){
   DB.customTpl=[...(DB.customTpl||[]),t];DB.archivedTpl=[...(DB.archivedTpl||[]),t.id];
   save();render();toast('보관함으로 보냈습니다 (지운 게 아닙니다)');
 }
-function delCustomTpl(id){
-  if(!confirm('이 템플릿을 완전히 지웁니다. 되돌릴 수 없습니다.'))return;
+async function delCustomTpl(id){
+  if(!await ask('템플릿을 지울까요?','이 템플릿을 갤러리에서 완전히 지웁니다. 되돌릴 수 없습니다. 보관만 하려면 보관을 누르세요.','완전히 지우기'))return;
   DB.customTpl=(DB.customTpl||[]).filter(t=>t.id!==id);
   DB.pendingTpl=(DB.pendingTpl||[]).filter(t=>t.id!==id);
   save();render();toast('삭제했습니다');
@@ -1302,121 +2079,27 @@ function delCustomTpl(id){
 /* ══ 실 게시 파이프라인 ══
    ① 페이지 → JPEG (html2canvas)  ② GitHub 리포에 커밋 → 공개 raw URL
    ③ Meta: /media 컨테이너 → /media_publish → 게시물 ID 회수 (S-10)          */
-const IG_BASE='https://graph.instagram.com/v21.0';
-const igReady=()=>!!(DB.settings.metaToken&&DB.settings.igUserId);
-const ghReady=()=>!!(DB.settings.ghToken&&DB.settings.ghOwner&&DB.settings.ghRepo);
-const pubReady=()=>igReady()&&ghReady();
-async function testIG(){
-  const s=DB.settings;if(!s.metaToken){toast('토큰을 먼저 넣어주세요');return;}
-  try{const r=await fetch(`${IG_BASE}/me?fields=id,username&access_token=${encodeURIComponent(s.metaToken)}`);
-    const j=await r.json();
-    if(j.error)throw new Error(j.error.message);
-    s.igUserId=j.id;s.igUsername=j.username;save();render();toast('연결됨 — @'+j.username);
-  }catch(e){alert('인스타 연결 실패\n\n'+e.message+'\n\n토큰이 만료됐거나 권한(instagram_business_content_publish)이 없을 수 있습니다.');}
-}
-async function testGH(){
-  const s=DB.settings;if(!ghReady()){toast('저장소 정보와 토큰을 넣어주세요');return;}
-  try{const r=await fetch(`https://api.github.com/repos/${s.ghOwner}/${s.ghRepo}`,{headers:{Authorization:'Bearer '+s.ghToken,Accept:'application/vnd.github+json'}});
-    const j=await r.json();if(!r.ok)throw new Error(j.message||r.status);
-    if(j.private)throw new Error('비공개 저장소입니다. 인스타가 이미지를 가져가려면 공개 저장소여야 합니다.');
-    s.ghBranch=s.ghBranch||j.default_branch;s.ghOk=true;save();render();toast('저장소 연결됨 — '+j.full_name);
-  }catch(e){DB.settings.ghOk=false;save();alert('저장소 연결 실패\n\n'+e.message);}
-}
+// v2: 인스타 게시·토큰은 서버(/api)가 처리. 화면은 연결 상태만 본다.
+const igReady=()=>!!Cloud.integrations.instagram?.connected;
+const ghReady=()=>true;
+const pubReady=()=>igReady();
 /* 저장소 동기화 — 대시보드 데이터를 리포에 올려 Actions가 자동 발행하게 함 */
-async function ghPutText(path,text,msg){
-  const s=DB.settings,url=`https://api.github.com/repos/${s.ghOwner}/${s.ghRepo}/contents/${path}`;
-  let sha=null;
-  try{const g=await fetch(url+'?ref='+(s.ghBranch||'main'),{headers:{Authorization:'Bearer '+s.ghToken}});
-    if(g.ok){const j=await g.json();sha=j.sha;}}catch(e){}
-  const body={message:msg||('update '+path),content:btoa(unescape(encodeURIComponent(text))),branch:s.ghBranch||'main'};
-  if(sha)body.sha=sha;
-  const r=await fetch(url,{method:'PUT',headers:{Authorization:'Bearer '+s.ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-  const j=await r.json();if(!r.ok)throw new Error(j.message||('저장 실패 '+r.status));return j;
-}
-async function syncToRepo(){
-  if(!ghReady()){toast('저장소를 먼저 연결해 주세요');return;}
-  try{
-    S.busy='저장소에 동기화 중…';render();
-    const safe=JSON.parse(JSON.stringify(DB));
-    safe.settings.metaToken='';safe.settings.ghToken='';   // 토큰은 리포에 올리지 않음 (Secrets 사용)
-    await ghPutText('data/db.json',JSON.stringify(safe,null,2),'sync dashboard data');
-    DB.settings.lastSync=new Date().toISOString();save();toast('저장소에 동기화했습니다');
-  }catch(e){alert('동기화 실패\n\n'+e.message);}finally{S.busy='';render();}
-}
-async function pullFromRepo(){
-  if(!ghReady()){toast('저장소를 먼저 연결해 주세요');return;}
-  if(!confirm('저장소의 데이터로 덮어씁니다. 이 브라우저의 최근 변경이 사라질 수 있습니다. 계속할까요?'))return;
-  try{
-    const s=DB.settings;
-    const r=await fetch(`https://raw.githubusercontent.com/${s.ghOwner}/${s.ghRepo}/${s.ghBranch||'main'}/data/db.json?t=`+Date.now());
-    if(!r.ok)throw new Error('저장소에 data/db.json이 없습니다');
-    const j=await r.json();
-    const keep={metaToken:s.metaToken,ghToken:s.ghToken};
-    DB=Object.assign(JSON.parse(JSON.stringify(DEF)),j);
-    DB.settings.metaToken=keep.metaToken;DB.settings.ghToken=keep.ghToken;
-    save();render();toast('저장소에서 불러왔습니다');
-  }catch(e){alert('불러오기 실패\n\n'+e.message);}
-}
-async function ghUpload(path,dataUrl){
-  const s=DB.settings,b64=dataUrl.split(',')[1];
-  const url=`https://api.github.com/repos/${s.ghOwner}/${s.ghRepo}/contents/${path}`;
-  const r=await fetch(url,{method:'PUT',headers:{Authorization:'Bearer '+s.ghToken,Accept:'application/vnd.github+json','Content-Type':'application/json'},
-    body:JSON.stringify({message:'add '+path,content:b64,branch:s.ghBranch||'main'})});
-  const j=await r.json();if(!r.ok)throw new Error(j.message||('업로드 실패 '+r.status));
-  return `https://raw.githubusercontent.com/${s.ghOwner}/${s.ghRepo}/${s.ghBranch||'main'}/${path}`;
-}
 async function shotPage(i){
   S.cur=i;paint();await new Promise(r=>setTimeout(r,300));
   const t=TB(S.pages[i].tpl),el=document.getElementById('render');
   const cv=await html2canvas(el,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
   return cv.toDataURL('image/jpeg',.92);
 }
-async function igCall(path,body){
-  const r=await fetch(`${IG_BASE}/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(Object.assign({access_token:DB.settings.metaToken},body))});
-  const j=await r.json();if(j.error)throw new Error(j.error.message);return j;
-}
-async function waitReady(id){
-  for(let i=0;i<10;i++){await new Promise(r=>setTimeout(r,3000));
-    const r=await fetch(`${IG_BASE}/${id}?fields=status_code&access_token=${encodeURIComponent(DB.settings.metaToken)}`);
-    const j=await r.json();if(j.status_code==='FINISHED')return true;
-    if(j.status_code==='ERROR'||j.status_code==='EXPIRED')throw new Error('컨테이너 상태 '+j.status_code);}
-  return true;
-}
 async function publishNow(id){
   const c=DB.contents.find(x=>x.id===id);if(!c)return;
-  if(!pubReady()){alert('설정 탭에서 인스타와 저장소 연결을 먼저 마쳐주세요.');return;}
-  if(c.channel==='story'||c.channel==='reels'){
-    if(!confirm(`${c.channel==='story'?'스토리':'릴스'}는 API 게시 조건이 피드와 달라 실패할 수 있습니다.\n그래도 시도할까요? (실패해도 이미지는 남습니다)`))return;
-  }
-  const keep={pages:S.pages,cur:S.cur,skin:S.skin};
-  S.pages=JSON.parse(JSON.stringify(c.pages));S.skin=c.skin;
-  S.busy='이미지를 만드는 중…';render();
+  if(!isAdmin()){notice('바로 게시는 관리자만 할 수 있습니다.');return;}
+  if(!Cloud.integrations.instagram?.connected){notice('인스타그램이 아직 연결되지 않았습니다.\n설정 → 연결에서 먼저 연결해 주세요.');return;}
+  if(!await ask('지금 인스타에 올릴까요?',`'${c.title}' ${(c.pages||[]).length}장을 바로 게시합니다.\n게시 후에는 대시보드에서 되돌릴 수 없습니다.`,'지금 게시'))return;
   try{
-    const urls=[];
-    for(let i=0;i<S.pages.length;i++){
-      S.busy=`이미지 ${i+1}/${S.pages.length} 업로드 중…`;render();
-      const data=await shotPage(i);
-      urls.push(await ghUpload(`out/${c.id}_${String(i+1).padStart(2,'0')}.jpg`,data));
-    }
-    S.busy='인스타에 올리는 중…';render();
-    const uid=DB.settings.igUserId;let creation;
-    if(urls.length===1){
-      const r=await igCall(`${uid}/media`,{image_url:urls[0],caption:c.caption});creation=r.id;
-    }else{
-      const kids=[];
-      for(const u of urls){const r=await igCall(`${uid}/media`,{image_url:u,is_carousel_item:true});kids.push(r.id);}
-      const r=await igCall(`${uid}/media`,{media_type:'CAROUSEL',children:kids.join(','),caption:c.caption});creation=r.id;
-    }
-    await waitReady(creation);
-    const pub=await igCall(`${uid}/media_publish`,{creation_id:creation});
-    if(!pub.id)throw new Error('게시물 ID를 받지 못했습니다 (발행 실패로 처리)');
-    c.status='published';c.mediaId=pub.id;c.publishedAt=new Date().toISOString();
-    c.permalink=`https://www.instagram.com/p/`;save();
-    toast('게시 완료 — ID '+pub.id);
-  }catch(e){
-    alert('게시 실패\n\n'+e.message+'\n\n이미지는 저장소에 남아 있습니다. 콘텐츠 탭에서 다시 시도하거나 수동으로 올리세요.');
-  }finally{S.pages=keep.pages;S.cur=keep.cur;S.skin=keep.skin;S.busy='';render();}
+    const urls=await mediaFor(c);
+    busy('인스타에 올리는 중… (최대 1분)');
+    await act(id,'publish_now',{mediaUrls:urls},true);
+  }catch(e){}finally{busy(false);}
 }
 /* ══ 캘린더 ══ */
 function vCalendar(){
@@ -1424,34 +2107,34 @@ function vCalendar(){
   const y=base.getFullYear(),m=base.getMonth(),mk=y+'-'+String(m+1).padStart(2,'0');
   const first=new Date(y,m,1),start=new Date(first);start.setDate(1-first.getDay());
   const today=new Date().toDateString();
-  const evs={};DB.contents.filter(c=>c.scheduledAt).forEach(c=>{const k=new Date(c.scheduledAt).toDateString();(evs[k]=evs[k]||[]).push(c);});
+  const evs={};DB.contents.filter(c=>c.scheduledAt&&c.status!=='trashed').forEach(c=>{const k=new Date(c.scheduledAt).toDateString();(evs[k]=evs[k]||[]).push(c);});
   let cells='';
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);
-    const ds=ymd(d),out=d.getMonth()!==m,list=evs[d.toDateString()]||[];
+    const ds=ymd(d),out=d.getMonth()!==m,list=(evs[d.toDateString()]||[]).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));
     cells+=`<div class="d ${out?'out':''} ${d.toDateString()===today?'today':''} ${S.selDay===ds?'sel':''}" onclick="selDay('${ds}')"><span class="n">${d.getDate()}</span>
-      ${list.slice(0,3).map(c=>`<div class="ev ${c.bk[0]}" title="${esc(c.title)}"><b>${esc(KINDS[kindOf(c)].nm)}</b><i onclick="event.stopPropagation();delContent('${c.id}')">×</i></div>`).join('')}
+      ${list.slice(0,3).map(c=>`<div class="ev ${(c.bk||'l')[0]} ${c.status}" data-s="${(ST[c.status]||[''])[0].slice(0,2)}" title="${esc(c.title)} · ${(ST[c.status]||[''])[0]}" onclick="event.stopPropagation();openDetail('${c.id}')"><b>${esc((KINDS[kindOf(c)]||{nm:''}).nm)}</b>${c.status==='planned'?`<i onclick="event.stopPropagation();delContent('${c.id}')" title="계획 지우기">×</i>`:''}</div>`).join('')}
       ${list.length>3?`<div class="ev">+${list.length-3}</div>`:''}${out?'':'<span class="plus">＋</span>'}</div>`;}
   const c=tally(mk),g=DB.settings.goals,total=Object.values(c).reduce((a,b)=>a+b,0);
   const target=Math.round(DB.settings.perWeek*4.3),lack=Math.max(0,target-total);
   const plan=proposePlan(mk);
-  const sel=S.selDay?DB.contents.filter(x=>x.scheduledAt&&ymd(new Date(x.scheduledAt))===S.selDay):[];
+  const sel=S.selDay?DB.contents.filter(x=>x.scheduledAt&&x.status!=='trashed'&&ymd(new Date(x.scheduledAt))===S.selDay):[];
   const selLabel=S.selDay?(+S.selDay.slice(5,7))+'월 '+(+S.selDay.slice(8,10))+'일':'';
-  return `<div class="ph"><h1>캘린더</h1><span class="st">${y}. ${m+1}</span></div>
-  <div class="psub">날짜를 눌러 일정을 넣고, × 로 지웁니다. 반복은 아래에서 한 번에 적용됩니다.</div>
-  <div class="tools"><button class="btn sm" onclick="moveMonth(-1)">←</button><button class="btn sm" onclick="moveMonth(1)">→</button>
-   <span style="font-size:11.5px;color:var(--ink-sub)">이번 달 ${total}건 / 목표 ${target}건${lack?` · ${lack}건 부족`:' · 충족'}</span>
-   ${plan.length?`<button class="btn sm primary" onclick="autoFill()">${plan.length}건 자동 채우기</button>`:''}</div>
+  return `<div class="ph"><h1>캘린더</h1><span class="st">${y}년 ${m+1}월</span></div>
+  <div class="psub">점선은 <b>계획</b>(아직 안 만든 자리), 색칠된 칸은 실제 콘텐츠입니다. 칸을 누르면 상세가 열립니다. 계획은 자동 게시되지 않습니다.</div>
+  <div class="tools"><button class="btn sm" onclick="moveMonth(-1)" aria-label="이전 달">← 이전 달</button><button class="btn sm" onclick="moveMonth(1)" aria-label="다음 달">다음 달 →</button>
+   <span style="font-size:13.5px;color:var(--ink-sub)">이번 달 ${total}건 / 목표 ${target}건${lack?` · ${lack}건 부족`:' · 충족'}</span>
+   ${plan.length?`<button class="btn sm primary" onclick="autoFill()">부족분 ${plan.length}건 계획 채우기</button>`:''}</div>
   <div class="card"><div class="cal">${['일','월','화','수','목','금','토'].map(d=>`<div class="hd">${d}</div>`).join('')}${cells}</div>
    ${S.selDay?`<div class="dayp"><h4>${selLabel} <span class="badge">${sel.length}건</span></h4>
-     ${sel.map(x=>`<div class="qrow" style="padding:6px 0"><div class="info"><b>${esc(x.title)}</b><span>${new Date(x.scheduledAt).toTimeString().slice(0,5)} · ${KINDS[kindOf(x)].nm}</span></div>
-       <div class="tools" style="margin:0"><button class="btn sm" onclick="openContent('${x.id}')">열기</button><button class="btn sm" onclick="delContent('${x.id}')">삭제</button></div></div>`).join('')}
-     <div class="inl" style="margin-top:8px"><input type="text" id="qTitle" placeholder="제목 (비우면 유형 이름)">
+     ${sel.map(x=>`<div class="qrow" style="padding:8px 0"><div class="info"><b>${esc(x.title)}</b><span>${new Date(x.scheduledAt).toTimeString().slice(0,5)} · ${(KINDS[kindOf(x)]||{nm:''}).nm}</span></div>${stTag(x.status)}
+       <div class="tools" style="margin:0"><button class="btn sm" onclick="openDetail('${x.id}')">열기</button>${x.status==='planned'?`<button class="btn sm" onclick="delContent('${x.id}')">계획 지우기</button>`:''}</div></div>`).join('')}
+     <div class="inl" style="margin-top:10px"><input type="text" id="qTitle" placeholder="제목 (비우면 유형 이름)">
        <select id="qKind">${Object.keys(KINDS).map(k=>`<option value="${k}">${KINDS[k].nm}</option>`).join('')}</select>
        <input type="time" id="qTime" value="19:00" style="width:138px">
-       <button class="btn sm primary" onclick="addDayEvent()">추가</button></div></div>`
-    :'<div class="hint" style="margin:10px 0 0">날짜를 누르면 그날 일정을 보고 바로 추가할 수 있습니다.</div>'}</div>
-  <div class="card"><h3>반복 일정 <span class="badge">한 번에 적용</span></h3>
-   <div class="hint">요일을 고르고 유형·시각을 정한 뒤 적용하면 이번 달(또는 4주) 전체에 한 번에 들어갑니다.</div>
+       <button class="btn sm primary" onclick="addDayEvent()">계획 추가</button></div></div>`
+    :'<div class="hint" style="margin:12px 0 0">날짜를 누르면 그날 일정을 보고 바로 계획을 추가할 수 있습니다.</div>'}</div>
+  <div class="card"><h3>반복 계획 <span class="badge">한 번에 적용</span></h3>
+   <div class="hint">요일을 고르고 유형·시각을 정한 뒤 적용하면 이번 달(또는 4주) 전체에 계획 자리가 한 번에 들어갑니다.</div>
    <div class="inl" style="margin-bottom:8px"><span class="wk">${['일','월','화','수','목','금','토'].map((d,i)=>`<button class="${S.rep.days.includes(i)?'on':''}" onclick="togDay(${i})">${d}</button>`).join('')}</span>
     <button class="btn sm" onclick="presetDays('all')">매일</button><button class="btn sm" onclick="presetDays('wd')">평일</button>
     <button class="btn sm" onclick="presetDays('we')">주말</button><button class="btn sm" onclick="presetDays('none')">해제</button></div>
@@ -1462,9 +2145,9 @@ function vCalendar(){
    ${S.rep.days.length?`<div class="why">선택: ${S.rep.days.map(i=>'일월화수목금토'[i]).join('·')}요일</div>`:''}</div>
   <details class="acc"><summary><span>이번 달 비율 · 목표 대비 ${Object.keys(MIXLABEL).filter(k=>(c[k]||0)<Math.round(target*g[k]/100)).length}개 유형 부족</span><span class="cnt">펼치기</span></summary>
    <div>${Object.keys(MIXLABEL).map(k=>{const want=Math.round(target*g[k]/100),have=c[k]||0;
-     return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--ui-line)">
-       <span>${MIXLABEL[k]}</span><span style="color:${have>=want?'var(--ok)':'var(--warn)'}">${have} / ${want}건</span></div>`;}).join('')}
-   <div class="why" style="margin-top:7px">목표 비율은 설정 탭에서 조정합니다.</div></div></details>`;
+     return `<div style="display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--ui-line)">
+       <span>${MIXLABEL[k]}</span><span style="color:${have>=want?'var(--ok)':'var(--warn)'};font-weight:700">${have} / ${want}건</span></div>`;}).join('')}
+   <div class="why" style="margin-top:7px">목표 비율은 설정에서 조정합니다.</div></div></details>`;
 }
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function selDay(ds){S.selDay=S.selDay===ds?null:ds;render();}
@@ -1476,7 +2159,7 @@ function mkEvent(kind,dateStr,time,title){
   const dt=/^\d{4}-\d{2}-\d{2}$/.test(dateStr)?new Date(dateStr+'T'+tm):null;
   if(!dt||isNaN(dt.getTime()))throw new Error('날짜 형식이 올바르지 않습니다: '+dateStr);
   return {id:'C'+Date.now()+Math.floor(Math.random()*1000),title:title||k.nm,setId:s.id,skin:S.skin,speaker:s.sp,
-    bk:k.bk,kind,channel:k.ch,pages:s.pages.map(newPage),caption:'',status:'scheduled',
+    bk:k.bk,kind,channel:k.ch,pages:s.pages.map(newPage),caption:'',status:'planned',
     scheduledAt:dt.toISOString(),createdAt:new Date().toISOString(),thumb:''};
 }
 function addDayEvent(){
@@ -1500,18 +2183,18 @@ function applyRepeat(){
   for(let d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
     if(!S.rep.days.includes(d.getDay()))continue;
     const ds=ymd(d);
-    if(DB.contents.some(c=>c.scheduledAt&&ymd(new Date(c.scheduledAt))===ds&&c.kind===k))continue;
+    if(DB.contents.some(c=>c.status!=='trashed'&&c.scheduledAt&&ymd(new Date(c.scheduledAt))===ds&&c.kind===k))continue;
     DB.contents.push(mkEvent(k,ds,tm));n++;
   }
-  save();render();toast(n?`${n}건을 일괄 추가했습니다`:'추가할 날짜가 없습니다');
+  save();render();toast(n?`계획 ${n}건을 일괄 추가했습니다`:'추가할 날짜가 없습니다');
 }
 function autoFill(){
   const mk=S.calMonth||thisMonth(),plan=proposePlan(mk);
   if(!plan.length){toast('이미 목표를 충족했습니다');return;}
   plan.forEach(p=>{const kind=Object.keys(KINDS).find(k=>KINDS[k].bk===p.bk&&KINDS[k].ch==='feed')||'life';
-    if(!DB.contents.some(c=>c.scheduledAt&&ymd(new Date(c.scheduledAt))===p.date&&c.bk===p.bk))
+    if(!DB.contents.some(c=>c.status!=='trashed'&&c.scheduledAt&&ymd(new Date(c.scheduledAt))===p.date&&c.bk===p.bk))
       DB.contents.push(mkEvent(kind,p.date,'19:00'));});
-  save();render();toast(`${plan.length}건을 캘린더에 채웠습니다`);
+  save();render();toast(`계획 ${plan.length}건을 캘린더에 채웠습니다`);
 }
 let PLAN=[];
 function proposePlan(mk){
@@ -1533,9 +2216,9 @@ function proposePlan(mk){
 function addPlan(i){const p=PLAN[i];if(!p)return;
   const s=ALL_SETS().find(x=>x.id===p.setId);
   DB.contents.push({id:'C'+Date.now()+i,title:`(계획) ${s.nm}`,setId:s.id,skin:S.skin,speaker:s.sp,bk:p.bk,
-    pages:s.pages.map(newPage),caption:'',status:'scheduled',scheduledAt:new Date(p.date+'T19:00').toISOString(),
+    pages:s.pages.map(newPage),caption:'',status:'planned',scheduledAt:new Date(p.date+'T19:00').toISOString(),
     createdAt:new Date().toISOString(),thumb:''});
-  save();render();toast('캘린더에 추가했습니다');}
+  save();render();toast('캘린더에 계획을 추가했습니다');}
 function addAllPlan(){PLAN.forEach((_,i)=>addPlan(i));toast('제안을 모두 추가했습니다');}
 function startFromPlan(i){const p=PLAN[i];if(!p)return;pickSet(p.setId);S.view='make';S.step=2;render();}
 function moveMonth(d){const base=S.calMonth?new Date(S.calMonth+'-01'):new Date();base.setMonth(base.getMonth()+d);
@@ -1623,8 +2306,7 @@ function cgGen(){
   CG.v=v;return true;
 }
 async function cgAI(){
-  const key=DB.settings.aiKey;
-  if(!key){toast('설정 탭에 Anthropic API 키를 넣으면 완전 자동이 켜집니다');return;}
+  if(!Cloud.integrations.ai?.connected){notice(isAdmin()?'설정 → 연결에서 AI 키를 등록하면 [완전 자동]이 켜집니다.':'AI 키가 아직 등록되지 않았습니다. 관리자에게 요청해 주세요.');return;}
   if(!cgGen())return;
   CG.busy='AI가 원고를 쓰는 중… (10~20초)';render();
   try{
@@ -1644,13 +2326,8 @@ async function cgAI(){
       '"check": "CHECK POINT\\n\\n(제품명),\\n일상이 더 좋아지는 이유\\n\\nDESIGN\\nMATERIAL\\nPACKAGE\\n\\nPOINT.01 …\\n\\nPOINT.02 …\\n\\nPOINT.03 …",',
       '"points": ["DESIGN DETAIL\\n제목\\n---------------------\\n\\n본문 2~3문장","MATERIAL\\n…","HOW TO USE\\n…"],',
       '"tags": "#해시태그 5~7개 (공백 구분, #니코트 포함)"','}'].filter(Boolean).join('\n');
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:DB.settings.aiModel||'claude-haiku-4-5-20251001',max_tokens:2500,messages:[{role:'user',content:spec}]})});
-    const j=await r.json();
-    if(j.error)throw new Error(j.error.message);
-    const text=(j.content||[]).map(c=>c.text||'').join('');
-    const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('응답에서 JSON을 찾지 못했습니다');
+    const j=await api('POST','ai',{prompt:spec,max_tokens:2500});
+    const m=(j.text||'').match(/\{[\s\S]*\}/);if(!m)throw new Error('응답에서 JSON을 찾지 못했습니다');
     const o=JSON.parse(m[0]);
     const found=GUIDE.banned.filter(b=>JSON.stringify(o).includes(b));
     if(found.length)throw new Error('금지 표현 포함으로 반려: '+found.join(', '));
@@ -1660,7 +2337,7 @@ async function cgAI(){
     (o.points||[]).slice(0,3).forEach((p,n)=>{if(p)CG.v[23+n*2]=p;});
     if(o.tags)CG.v[19]=o.tags;
     toast('AI 원고 완성 — 검토 후 복사하세요');
-  }catch(e){alert('AI 생성 실패 — 규칙 기반 초안을 그대로 둡니다.\n\n'+e.message);}
+  }catch(e){notice('AI 생성 실패 — 규칙 기반 초안을 그대로 둡니다.\n\n'+e.message);}
   finally{CG.busy='';render();}
 }
 async function cgCopyRow(){
@@ -1732,77 +2409,84 @@ function vCopygen(){
 /* ══ 설정 ══ */
 function vSettings(){
   const s=DB.settings,sum=s.goals.product+s.goals.lifestyle+s.goals.story+s.goals.event;
-  return `<div class="ph"><h1>설정</h1></div><div class="psub">목표와 연동을 여기서 관리합니다. 값은 즉시 저장됩니다.</div>
+  const ig=Cloud.integrations.instagram||{},ai=Cloud.integrations.ai||{},cron=Cloud.integrations.cron;
+  const L=legacyData(),legacyTok=L?.settings?.metaToken,legacyAi=L?.settings?.aiKey;
+  const dt=v=>v?new Date(v).toLocaleString('ko-KR',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+  const left=ig.expiresAt?Math.round((new Date(ig.expiresAt)-Date.now())/864e5):null;
+  return `<div class="ph"><h1>설정</h1></div><div class="psub">여기 값은 팀 전체에 공통으로 적용됩니다. 연결 정보(토큰·키)는 서버에만 보관되고 화면에는 상태만 보입니다.</div>
+  <div class="card"><h3>내 계정</h3>
+   <dl class="kv"><dt>이름</dt><dd>${esc(Cloud.me?.name||'')}</dd><dt>아이디</dt><dd>${esc(Cloud.me?.login||'')}</dd><dt>권한</dt><dd>${isAdmin()?'관리자 — 승인·예약·연결·사용자 관리':'작성자 — 만들기·검토 요청·댓글'}</dd></dl>
+   ${Cloud.me?.id==='master'?`<div class="hint">지금은 <b>공용 계정(nicott)</b>으로 접속 중입니다. 누가 무엇을 했는지 남도록, 아래 <b>사용자 관리</b>에서 개인 계정을 만들어 쓰시길 권합니다.</div>`
+    :`<div class="grid2"><div class="field"><label><span>새 비밀번호 (8자 이상)</span></label><input type="password" id="myPw" autocomplete="new-password"></div><div class="field" style="display:flex;align-items:flex-end"><button class="btn" onclick="changeMyPw()">비밀번호 바꾸기</button></div></div>`}
+   <div class="tools"><a class="btn" href="/logout">로그아웃</a></div></div>
+  <div class="card"><h3>인스타그램 연결 <span class="conn ${ig.connected?'on':'off'}">${ig.connected?'연결됨 · @'+esc(ig.username||''):'미연결'}</span></h3>
+   ${ig.connected?`<dl class="kv"><dt>연결한 사람</dt><dd>${esc(ig.connectedBy||'')} · ${dt(ig.connectedAt)}</dd>
+     <dt>토큰 만료</dt><dd>${dt(ig.expiresAt)}${ig.expiresEstimated?' (추정)':''}${left!==null?` · ${left}일 남음`:''}</dd>
+     <dt>자동 갱신</dt><dd>켜짐 — 7일마다 서버가 자동으로 연장합니다${ig.refreshedAt?` · 마지막 ${dt(ig.refreshedAt)}`:' · 첫 갱신은 연결 24시간 뒤'}</dd>
+     <dt>자동 발행</dt><dd>${cron?.lastRunAt?`10분마다 점검 · 마지막 ${dt(cron.lastRunAt)}`:'점검 기록 없음 — 예약 점검기가 아직 돌지 않았습니다'}</dd></dl>
+     ${ig.lastError?`<div class="errbox">${esc(ig.lastError)}</div>`:''}
+     ${isAdmin()?`<div class="tools"><button class="btn" onclick="igCheck()">연결 점검</button><button class="btn" onclick="igRefreshNow()">토큰 지금 연장</button><button class="btn danger" onclick="igDisconnect()">연결 해제</button></div>`:''}`
+   :`<div class="hint">연결되면 <b>예약한 콘텐츠가 정해진 시각에 자동으로</b> 올라갑니다(컴퓨터를 꺼 둬도 됩니다). 비즈니스·크리에이터 계정이면 Meta 앱 심사가 필요 없습니다.</div>
+     ${isAdmin()?`${legacyTok?`<div class="alert info">이 기기에 예전 버전에서 넣어 둔 인스타 토큰이 있습니다.<button class="btn primary" onclick="igConnect(true)">그 토큰으로 연결</button></div>`:''}
+     <details class="acc"><summary><span>토큰 발급 방법 (계정 주인이 10분)</span><span class="cnt">펼치기</span></summary><div>
+     ① developers.facebook.com 로그인 → <b>내 앱 → 앱 만들기</b> (사용 사례: 인스타그램 콘텐츠 관리)<br>
+     ② 앱 화면 <b>Instagram → API setup with Instagram login</b><br>
+     ③ <b>Generate access tokens</b>에서 @${esc((s.handle||'').replace('@',''))} 계정을 추가하고 로그인 → 권한 허용<br>
+     ④ 나온 토큰을 복사해 아래 칸에 붙여넣고 <b>연결</b><br>
+     연결 뒤에는 서버가 7일마다 토큰을 자동 연장합니다. 60일마다 다시 발급할 필요가 없습니다.</div></details>
+     <div class="field" style="margin-top:12px"><label><span>액세스 토큰</span></label><input type="password" id="igTok" placeholder="IG… 로 시작하는 긴 문자열" autocomplete="off"></div>
+     <div class="tools"><button class="btn primary" onclick="igConnect()">연결</button></div>`:'<div class="why">연결은 관리자만 할 수 있습니다.</div>'}`}</div>
+  <div class="card"><h3>AI 원고·캡션 <span class="conn ${ai.connected?'on':'off'}">${ai.connected?'켜짐':'꺼짐'}</span></h3>
+   <div class="hint">켜면 <b>제품 원고 [완전 자동]</b>과 <b>캡션 AI 안</b>을 쓸 수 있습니다. 키는 서버에만 저장되고 브라우저로 내려오지 않습니다. 금지 표현이 들어간 결과는 자동으로 걸러집니다.</div>
+   ${isAdmin()?`${legacyAi&&!ai.connected?`<div class="alert info">이 기기에 예전 버전에서 넣어 둔 AI 키가 있습니다.<button class="btn primary" onclick="aiSave(true)">그 키로 켜기</button></div>`:''}
+    <div class="grid2"><div class="field"><label><span>Anthropic API 키 ${ai.connected?'(바꿀 때만)':''}</span></label><input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off"></div>
+    <div class="field"><label><span>모델</span></label><select id="aiModel">${[['claude-haiku-5-5','Haiku — 빠르고 저렴 (권장 시작점)'],['claude-sonnet-5-5','Sonnet — 감성 카피가 더 안정적']].map(([v,l])=>`<option value="${v}" ${(ai.model||'claude-haiku-5-5')===v?'selected':''}>${l}</option>`).join('')}</select></div></div>
+    <div class="tools"><button class="btn primary" onclick="aiSave()">저장</button>${ai.connected?'<button class="btn danger" onclick="aiOff()">끄기</button>':''}</div>`:'<div class="why">설정은 관리자만 바꿀 수 있습니다.</div>'}</div>
+  ${isAdmin()?`<div class="card"><h3>사용자 관리 <span class="badge">${(Cloud.users||[]).length}명</span></h3>
+   <div class="hint">사람마다 계정을 만들면 작성자·승인자·댓글이 이름으로 남습니다. <b>작성자</b>는 만들고 검토 요청까지, <b>관리자</b>는 승인·예약·연결까지 합니다.</div>
+   ${Cloud.users===null?'<div class="empty">불러오는 중…</div>':Cloud.users.length?`<table class="utable"><thead><tr><th>이름</th><th>아이디</th><th>마지막 접속</th><th>권한</th><th></th></tr></thead><tbody>
+     ${Cloud.users.map(u=>`<tr style="${u.active?'':'opacity:.62'}"><td><b>${esc(u.name)}</b>${u.active?'':' (중지)'}</td><td>${esc(u.login)}</td><td>${u.last_login?dt(u.last_login):'—'}</td>
+       <td><select onchange="userPatch('${u.id}',{role:this.value})" aria-label="권한"><option value="editor" ${u.role==='editor'?'selected':''}>작성자</option><option value="admin" ${u.role==='admin'?'selected':''}>관리자</option></select></td>
+       <td style="text-align:right;white-space:nowrap"><button class="btn sm" onclick="userResetPw('${u.id}','${esc(u.name)}')">비밀번호</button> <button class="btn sm" onclick="userPatch('${u.id}',{active:${u.active?0:1}})">${u.active?'중지':'재개'}</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">아직 개인 계정이 없습니다.</div>'}
+   <details class="acc"${Cloud.users&&!Cloud.users.length?' open':''}><summary><span>새 계정 만들기</span><span class="cnt">펼치기</span></summary><div>
+    <div class="grid2"><div class="field"><label><span>이름 (화면에 보이는 이름)</span></label><input type="text" id="nuName" placeholder="예: 니나"></div>
+    <div class="field"><label><span>아이디 (영문 소문자·숫자)</span></label><input type="text" id="nuLogin" placeholder="예: nina" autocapitalize="off"></div>
+    <div class="field"><label><span>처음 비밀번호 (8자 이상 — 본인이 나중에 바꿈)</span></label><input type="password" id="nuPw" autocomplete="new-password"></div>
+    <div class="field"><label><span>권한</span></label><select id="nuRole"><option value="editor">작성자</option><option value="admin">관리자</option></select></div></div>
+    <div class="tools"><button class="btn primary" onclick="userCreate()">계정 만들기</button></div></div></details></div>`:''}
   <div class="card"><h3>게시 목표</h3><div class="hint">주간 게시 횟수와 콘텐츠 비율입니다. 캘린더 제안과 비율 게이지가 이 값을 기준으로 계산됩니다.</div>
    <div class="field"><label><span>주간 게시 횟수</span><span class="cnt">${s.perWeek}회 · 월 약 ${Math.round(s.perWeek*4.3)}건</span></label>
-    <input type="range" min="1" max="10" value="${s.perWeek}" oninput="setGoal('perWeek',this.value)" style="width:100%;accent-color:var(--terra)"></div>
+    <input type="range" min="1" max="10" value="${s.perWeek}" ${isAdmin()?'':'disabled'} oninput="setGoal('perWeek',this.value)" style="width:100%;accent-color:var(--forest)"></div>
    <div class="grid2">${Object.keys(MIXLABEL).map(k=>`<div class="field"><label><span>${MIXLABEL[k]}</span><span class="cnt">${s.goals[k]}%</span></label>
-     <input type="range" min="0" max="60" value="${s.goals[k]}" oninput="setGoal('${k}',this.value)" style="width:100%;accent-color:var(--terra)"></div>`).join('')}</div>
+     <input type="range" min="0" max="60" value="${s.goals[k]}" ${isAdmin()?'':'disabled'} oninput="setGoal('${k}',this.value)" style="width:100%;accent-color:var(--forest)"></div>`).join('')}</div>
    <div class="gate ${sum===100?'yes':'no'}">합계 ${sum}% ${sum===100?'— 정확합니다':'— 100%가 되도록 조정해 주세요'}</div></div>
-  <div class="card"><h3>인스타그램 연동 <span class="conn ${igReady()?'on':'off'}">${igReady()?'연결됨 · @'+esc(s.igUsername||''):'미연결'}</span></h3>
-   <div class="hint"><b>이미 비즈니스 계정이면 앱 심사가 필요 없습니다.</b> 본인 계정만 쓰는 앱은 Standard Access로 충분합니다 (Meta 공식). 토큰만 발급하면 바로 게시됩니다.</div>
-   <details class="acc"><summary><span>토큰 발급 방법 (10분)</span><span class="cnt">펼치기</span></summary><div style="font-size:12px;line-height:1.95;color:#5f584d">
-   ① developers.facebook.com → 개발자 등록 → <b>앱 만들기</b> (유형: 비즈니스)<br>
-   ② 제품에서 <b>Instagram</b> 추가 → <b>API setup with Instagram login</b><br>
-   ③ ‘Instagram 계정 추가’로 @${esc(s.handle.replace('@',''))} 연결<br>
-   ④ 같은 화면의 <b>Generate token</b> → 60일짜리 장기 토큰 복사 → 아래에 붙여넣기<br>
-   ⑤ [연결 테스트]를 누르면 계정 ID가 자동으로 채워집니다<br>
-   <span style="color:var(--warn)">토큰은 60일마다 다시 발급해야 합니다. 만료되면 게시가 실패하고 알려드립니다.</span></div></details>
-   <div class="field" style="margin-top:9px"><label><span>액세스 토큰</span></label><input type="text" placeholder="IGQ... 붙여넣기" value="${esc(s.metaToken)}" oninput="setS('metaToken',this.value)"></div>
-   <div class="tools"><button class="btn primary" onclick="testIG()">연결 테스트</button>
-    <span style="font-size:11px;color:var(--ink-sub)">${s.igUserId?'계정 ID '+esc(s.igUserId):'테스트하면 ID가 채워집니다'}</span></div></div>
-  <div class="card"><h3>이미지 저장소 <span class="conn ${ghReady()&&s.ghOk?'on':'off'}">${ghReady()&&s.ghOk?'연결됨':'미연결'}</span></h3>
-   <div class="hint">인스타는 <b>공개 주소에 있는 이미지</b>만 가져갑니다. 그래서 만든 이미지를 GitHub 공개 저장소에 올린 뒤 그 주소로 게시합니다. 무료입니다.</div>
-   <details class="acc"><summary><span>저장소 만드는 방법 (5분)</span><span class="cnt">펼치기</span></summary><div style="font-size:12px;line-height:1.95;color:#5f584d">
-   ① github.com 가입(구글 계정 가능) → <b>New repository</b> → 이름 예: <code>nicott-media</code> → <b>Public</b> 선택 → Create<br>
-   ② 우측 상단 프로필 → Settings → Developer settings → <b>Personal access tokens (Fine-grained)</b><br>
-   ③ Repository access는 방금 만든 저장소만, 권한은 <b>Contents: Read and write</b><br>
-   ④ 생성된 토큰을 아래에 붙여넣고 [연결 테스트]</div></details>
-   <div class="grid3" style="margin-top:9px"><div class="field"><label><span>사용자명</span></label><input type="text" placeholder="github 아이디" value="${esc(s.ghOwner)}" oninput="setS('ghOwner',this.value)"></div>
-    <div class="field"><label><span>저장소</span></label><input type="text" placeholder="nicott-media" value="${esc(s.ghRepo)}" oninput="setS('ghRepo',this.value)"></div>
-    <div class="field"><label><span>브랜치</span></label><input type="text" value="${esc(s.ghBranch)}" oninput="setS('ghBranch',this.value)"></div></div>
-   <div class="field"><label><span>액세스 토큰</span></label><input type="text" placeholder="github_pat_..." value="${esc(s.ghToken)}" oninput="setS('ghToken',this.value)"></div>
-   <div class="tools"><button class="btn primary" onclick="testGH()">연결 테스트</button>
-    <button class="btn" ${ghReady()?'':'disabled'} onclick="syncToRepo()">저장소에 동기화</button>
-    <button class="btn" ${ghReady()?'':'disabled'} onclick="pullFromRepo()">저장소에서 불러오기</button>
-    <span style="font-size:11px;color:var(--ink-sub)">${s.lastSync?'마지막 동기화 '+new Date(s.lastSync).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'아직 동기화 전'}</span></div>
-   <div class="gate ${pubReady()?'yes':'info'}">${pubReady()?'두 곳 모두 연결됐습니다 — <b>지금 게시</b>가 켜졌습니다.':'두 곳이 모두 연결되면 대시보드에서 바로 게시할 수 있습니다.'}</div>
-   <div class="why">동기화하면 예약 내용이 저장소로 올라가, <b style="color:var(--ink-sub)">컴퓨터를 꺼두어도 GitHub Actions가 예약 시각에 자동 발행</b>합니다. 토큰은 올라가지 않습니다(저장소 Secrets에 별도 보관).</div></div>
   <div class="card"><h3>구글 드라이브 사진</h3>
-   <div class="hint">세 가지 방법 중 편한 것으로 쓰시면 됩니다. ①②는 지금 바로 됩니다.</div>
-   <div style="font-size:12px;line-height:1.9;color:#5f584d">① 파일을 <b>드래그해서 올리기</b> (가장 확실) &nbsp;·&nbsp; ② 드라이브 <b>공유 링크 붙여넣기</b> &nbsp;·&nbsp; ③ 키를 넣으면 <b>드라이브에서 바로 고르기</b></div>
-   <div class="field" style="margin-top:9px"><label><span>자주 쓰는 드라이브 링크 (줄바꿈으로 여러 개)</span></label>
-    <textarea style="min-height:70px" oninput="setS('driveLinks',this.value)">${esc(s.driveLinks)}</textarea></div>
-   <div class="field"><label><span>사진 폴더 링크 (폴더째 공유 — 안의 사진 전부 사용 가능)</span></label><input type="text" placeholder="https://drive.google.com/drive/folders/..." value="${esc(s.driveFolder||'')}" oninput="setS('driveFolder',this.value)"></div>
-   <div class="field"><label><span>Google API 키 (선택)</span></label><input type="text" placeholder="AIza... — 넣으면 선택기가 켜집니다" value="${esc(s.driveKey)}" oninput="setS('driveKey',this.value)"></div>
-   <div class="why">키 발급은 구글 클라우드 콘솔에서 대표님 계정으로 진행합니다. 화면 단위 안내가 필요하시면 말씀해 주세요.</div></div>
-  <div class="card"><h3>AI 원고 (선택) <span class="conn ${s.aiKey?'on':'off'}">${s.aiKey?'키 등록됨':'미등록'}</span></h3>
-   <div class="hint">키를 넣으면 <b>제품 원고</b> 탭의 [완전 자동]이 켜집니다. 팩트에서 특징 추출부터 카피 작성까지 AI가 하고, 금지 표현이 포함된 결과는 자동 반려합니다. 키는 이 브라우저에만 저장되고 저장소에는 올라가지 않습니다.</div>
-   <div class="field"><label><span>Anthropic API 키</span></label><input type="text" placeholder="sk-ant-..." value="${esc(s.aiKey||'')}" oninput="setS('aiKey',this.value)"></div><div class="field"><label><span>모델 (품질 · 비용)</span></label><select onchange="setS('aiModel',this.value)"><option value="claude-haiku-4-5-20251001" ${(s.aiModel||'claude-haiku-4-5-20251001')==='claude-haiku-4-5-20251001'?'selected':''}>Haiku — 절약형 · 회당 약 15원 (권장 시작점)</option><option value="claude-sonnet-4-5" ${s.aiModel==='claude-sonnet-4-5'?'selected':''}>Sonnet — 표준 · 회당 약 50원 (감성 카피 더 안정)</option></select></div></div>
+   <div class="hint">① 파일을 <b>드래그해서 올리기</b>(가장 확실) · ② 드라이브 <b>공유 링크 붙여넣기</b> · ③ 폴더 링크와 키를 넣으면 <b>드라이브에서 바로 고르기</b>. 게시용 이미지는 ①로 올린 사진만 만들 수 있습니다.</div>
+   <div class="field"><label><span>자주 쓰는 드라이브 링크 (줄바꿈으로 여러 개)</span></label>
+    <textarea style="min-height:70px" oninput="setS('driveLinks',this.value)">${esc(s.driveLinks||'')}</textarea></div>
+   <div class="field"><label><span>사진 폴더 링크 (폴더째 공유)</span></label><input type="text" placeholder="https://drive.google.com/drive/folders/..." value="${esc(s.driveFolder||'')}" oninput="setS('driveFolder',this.value)"></div>
+   <div class="field"><label><span>Google API 키 (선택 · 공개 폴더 읽기 전용)</span></label><input type="text" placeholder="AIza... — 넣으면 선택기가 켜집니다" value="${esc(s.driveKey||'')}" oninput="setS('driveKey',this.value)"></div></div>
   <div class="card"><h3>데이터</h3>
-   <div class="hint">${STORE_OK?'이 브라우저에 자동 저장됩니다.':'⚠ 브라우저 저장이 막혀 있습니다. 백업 파일을 꼭 받아두세요.'} 다른 기기로 옮기려면 백업 파일을 사용하세요.</div>
-   <div class="tools"><button class="btn" onclick="backup()">백업 파일 내려받기</button>
-    <button class="btn" onclick="document.getElementById('restoreIn').click()">백업 복원</button>
-    <input type="file" id="restoreIn" accept="application/json" hidden onchange="restore(this.files[0])">
-    <button class="btn" onclick="resetAll()">전체 초기화</button></div>
-   <div class="why">콘텐츠 ${DB.contents.length}건 · 내 세트 ${DB.mySets.length}개 · 즐겨찾기 ${DB.favTpl.length}종 · 보관 ${DB.archivedTpl.length}종</div></div>`;
+   <div class="hint">콘텐츠·세트·설정은 <b>공용 저장소</b>에 저장됩니다. 어느 기기·어느 계정으로 들어와도 같은 내용이 보입니다. 지운 콘텐츠는 휴지통에 남습니다.</div>
+   ${migrateBanner(true)}
+   <div class="tools"><button class="btn" onclick="backup()">백업 파일 내려받기</button><button class="btn" onclick="clearLocalCache()">이 기기 임시 사본 비우기</button></div>
+   <div class="why">콘텐츠 ${DB.contents.filter(c=>c.status!=='trashed').length}건 · 휴지통 ${DB.contents.filter(c=>c.status==='trashed').length}건 · 내 세트 ${DB.mySets.length}개 · 즐겨찾기 ${DB.favTpl.length}종 · 보관 ${DB.archivedTpl.length}종</div></div>`;
 }
 function setS(k,v){DB.settings[k]=v;save();}
-function setGoal(k,v){if(k==='perWeek')DB.settings.perWeek=+v;else DB.settings.goals[k]=+v;save();render();}
-function backup(){const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+function setGoal(k,v){if(!isAdmin())return;if(k==='perWeek')DB.settings.perWeek=+v;else DB.settings.goals[k]=+v;save();render();}
+function backup(){const b=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),by:meName(),workspace:Object.fromEntries(WS_KEYS.map(k=>[k,DB[k]])),contents:DB.contents},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.download='nicott_backup_'+new Date().toISOString().slice(0,10)+'.json';a.href=URL.createObjectURL(b);a.click();toast('백업 파일을 내려받았습니다');}
-function restore(file){if(!file)return;const r=new FileReader();
-  r.onload=e=>{try{DB=Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(e.target.result));save();render();toast('복원했습니다');}catch(err){alert('복원 실패: '+err.message);}};
-  r.readAsText(file);}
-function resetAll(){if(!confirm('모든 데이터를 지웁니다. 되돌릴 수 없습니다. 계속할까요?'))return;
-  DB=JSON.parse(JSON.stringify(DEF));save();render();toast('초기화했습니다');}
+function restore(file){notice('v2부터는 공용 저장소가 원본이라 백업 파일로 덮어쓰지 않습니다. 옛 데이터는 [이 기기 데이터 옮기기]를 써 주세요.');}
+function resetAll(){clearLocalCache();}
 /* ── 이벤트 ── */
 document.addEventListener('dragover',e=>{e.preventDefault();const d=document.getElementById('drop');if(d)d.classList.add('over');});
 document.addEventListener('dragleave',e=>{const d=document.getElementById('drop');if(d&&e.relatedTarget===null)d.classList.remove('over');});
 document.addEventListener('drop',e=>{e.preventDefault();const d=document.getElementById('drop');if(d){d.classList.remove('over');if(S.pages.length&&e.dataTransfer.files.length)onFiles(e.dataTransfer.files);}});
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
   if(e.key==='ArrowLeft')goPage(S.cur-1);if(e.key==='ArrowRight')goPage(S.cur+1);});
+function cancelEdit(){resetMake();S.view='contents';render();}
 render();
+cloudBoot();
 </script>
 </body>
 </html>
