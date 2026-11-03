@@ -788,6 +788,10 @@ main{padding:26px 30px 80px}
 @media (min-width:721px){.sheet,.sheet-bg{display:none!important}}
 @media (max-width:1180px){.hgrid{grid-template-columns:minmax(0,1fr)}}
 .hgrid>div,.card{min-width:0}
+.cal{grid-template-columns:repeat(7,minmax(0,1fr))}
+.cal .d{min-width:0;overflow:hidden}
+.cal .d .ev{min-width:0}
+@media (max-width:720px){.cal .d .ev i{display:none}.cal .d .ev{justify-content:center}}
 
 </style>
 </head>
@@ -796,7 +800,7 @@ main{padding:26px 30px 80px}
   <aside class="side">
     <div class="brandbox"><img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><div class="ver">콘텐츠 대시보드 · v2.0</div></div>
     <nav class="nav" id="nav" aria-label="메뉴"></nav>
-    <div class="gm"><h4>이번 달 진행</h4><div id="gauge"></div></div>
+    <div class="gm"><h4>이번 달 계획·진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
   </aside>
   <header class="mtop" id="mtop"></header>
@@ -1138,7 +1142,7 @@ const cKey=c=>JSON.stringify(cPayload(c));
 const rel=t=>{if(!t)return'';const d=(Date.now()-new Date(t).getTime())/1000;if(d<60)return'방금';if(d<3600)return Math.floor(d/60)+'분 전';if(d<86400)return Math.floor(d/3600)+'시간 전';if(d<86400*7)return Math.floor(d/86400)+'일 전';return new Date(t).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});};
 const fmtWhen=t=>t?new Date(t).toLocaleString('ko-KR',{month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'}):'날짜 미정';
 const CFILTERS=[
-  ['active','진행 중',c=>!['published','trashed'].includes(c.status)],
+  ['active','진행 중',c=>!['published','trashed','planned'].includes(c.status)],
   ['review','검토 대기',c=>c.status==='review',true],
   ['changes','수정 요청',c=>c.status==='changes',true],
   ['scheduled','승인·예약',c=>['approved','scheduled'].includes(c.status)],
@@ -2112,7 +2116,7 @@ function vCalendar(){
   for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);
     const ds=ymd(d),out=d.getMonth()!==m,list=(evs[d.toDateString()]||[]).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));
     cells+=`<div class="d ${out?'out':''} ${d.toDateString()===today?'today':''} ${S.selDay===ds?'sel':''}" onclick="selDay('${ds}')"><span class="n">${d.getDate()}</span>
-      ${list.slice(0,3).map(c=>`<div class="ev ${(c.bk||'l')[0]} ${c.status}" data-s="${(ST[c.status]||[''])[0].slice(0,2)}" title="${esc(c.title)} · ${(ST[c.status]||[''])[0]}" onclick="event.stopPropagation();openDetail('${c.id}')"><b>${esc((KINDS[kindOf(c)]||{nm:''}).nm)}</b>${c.status==='planned'?`<i onclick="event.stopPropagation();delContent('${c.id}')" title="계획 지우기">×</i>`:''}</div>`).join('')}
+      ${list.slice(0,3).map(c=>`<div class="ev ${(c.bk||'l')[0]} ${c.status}" data-s="${(ST[c.status]||[''])[0].slice(0,2)}" title="${esc(c.title)} · ${(ST[c.status]||[''])[0]}" onclick="event.stopPropagation();openDetail('${c.id}')"><b>${c.status==='planned'?'':esc((ST[c.status]||[''])[0])+' · '}${esc((KINDS[kindOf(c)]||{nm:''}).nm)}</b>${c.status==='planned'?`<i onclick="event.stopPropagation();delContent('${c.id}')" title="계획 지우기">×</i>`:''}</div>`).join('')}
       ${list.length>3?`<div class="ev">+${list.length-3}</div>`:''}${out?'':'<span class="plus">＋</span>'}</div>`;}
   const c=tally(mk),g=DB.settings.goals,total=Object.values(c).reduce((a,b)=>a+b,0);
   const target=Math.round(DB.settings.perWeek*4.3),lack=Math.max(0,target-total);
