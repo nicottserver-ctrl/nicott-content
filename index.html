@@ -876,7 +876,8 @@ body{background:var(--oat);word-break:keep-all;overflow-wrap:break-word}
 .tpl .im.contain{background-size:contain!important;background-position:center!important}
 .U1 .wm,.U2 .wm,.U3 .wm{position:absolute;right:64px;bottom:56px;font-size:calc(22px*var(--ts));color:var(--logo)}
 /* v2.2 사진 위치·확대 · 글자 굵기·서체 */
-#render.editing [style*="--pk"]{cursor:grab;touch-action:none}
+#render.editing{touch-action:none}
+#render.editing [style*="--pk"]{cursor:grab}
 #render.editing .dragging{cursor:grabbing;outline:4px solid #F1613E;outline-offset:-4px}
 .pzc{display:grid;grid-template-columns:1fr;gap:4px;margin-top:6px;font-size:12.5px;color:var(--ink)}
 .pzc label{display:flex;justify-content:space-between}.pzc input[type=range]{width:100%;accent-color:#294735}
@@ -1466,7 +1467,7 @@ async function jpegOf(cv,q,max){let b=await canvasBlob(cv,q);while(max&&b.size>m
    · 한글 글꼴은 페이지에 실제로 쓰인 글자·굵기에 해당하는 조각만 받아 넣는다
    · 실패(오래된 사파리 등)하거나 결과가 비면 html2canvas 로 자동 전환 */
 const NR={css:null,gcss:new Map(),data:new Map(),face:new Map(),ok:null};
-const NR_WEBKIT=/AppleWebKit/.test(navigator.userAgent)&&!/Chrome|CriOS|Android/.test(navigator.userAgent);
+const NR_WEBKIT=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)||(/Safari/.test(navigator.userAgent)&&!/Chrome|Chromium|Android|Edg/.test(navigator.userAgent));   // iOS 는 크롬·파이어폭스도 WebKit
 async function nrData(url){
   if(!url||url.startsWith('data:'))return url;
   if(NR.data.has(url))return NR.data.get(url);
@@ -1476,10 +1477,8 @@ async function nrData(url){
   NR.data.set(url,pr);try{return await pr;}catch(e){NR.data.delete(url);throw e;}
 }
 function nrPageCss(){
-  if(NR.css)return NR.css;
   // :root 변수는 SVG 문서에선 <svg> 에 걸리므로 감싸는 상자(.nr-root)에도 걸리게 한다
-  NR.css=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n').replace(/:root\s*\{/g,':root,.nr-root{');
-  return NR.css;
+  return [...document.querySelectorAll('style')].map(s=>s.textContent).join('\n').replace(/:root\s*\{/g,':root,.nr-root{');
 }
 const nrRanges=s=>s.split(',').map(x=>x.trim().replace(/^U\+/i,'')).map(x=>{if(x.includes('?')){return [parseInt(x.replace(/\?/g,'0'),16),parseInt(x.replace(/\?/g,'F'),16)];}const [a,b]=x.split('-');return [parseInt(a,16),parseInt(b||a,16)];});
 async function nrGoogleFaces(){
@@ -1614,7 +1613,7 @@ function buildRec(){
   const dt=/^\d{4}-\d{2}-\d{2}$/.test(ds)?new Date(ds+'T'+ts):null;
   const rec=Object.assign({},prev||{},{id:S.editingId||('C'+Date.now()),
     title:S.set?.raw?`완성 이미지 · ${TB(S.pages[0].tpl).nm.split('· ')[1]||''} ${S.pages.length}장`:(S.set?.nm||'단일')+' · '+(S.pages[0].v.title||S.pages[0].v.name||S.pages[0].v.head||'').split('\n')[0].slice(0,18),
-    setId:S.set?.id||null,skin:S.skin,speaker:S.speaker,bk,kind:prev?.kind||kindOf({bk}),channel:prev?.channel||(S.set?.story?'story':'feed'),
+    setId:S.set?.id||null,skin:S.skin,speaker:S.speaker,bk,kind:prev?.kind||kindOf({bk}),channel:S.set?.raw?(S.set.story?'story':'feed'):prev?.channel||(S.set?.story?'story':'feed'),
     pages:JSON.parse(JSON.stringify(S.pages)),caption:curCap(),captionEdited:!!S.capTouched,
     scheduledAt:dt&&!isNaN(dt.getTime())?dt.toISOString():(prev?.scheduledAt||null),
     createdAt:prev?.createdAt||new Date().toISOString(),thumb:S.pages[0].v.img1||''});
@@ -1720,7 +1719,7 @@ function paintDetail(first){
     <div class="dact"><button class="btn primary" onclick="postComment('${c.id}')">댓글 남기기</button>${canApprove()&&['review','approved','scheduled','failed'].includes(st)?`<button class="btn" onclick="requestChanges('${c.id}')">이 내용으로 수정 요청</button>`:''}</div></div>`:''}</div>
    </div>`;
   d.classList.add('on');b.classList.add('on');
-  setTimeout(fit,30);
+  setTimeout(()=>{fit();applyPhotoZoom(d);},30);
 }
 const linkify=s=>s.replace(/(https:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
 async function postComment(id){const el=document.getElementById('cIn');const t=(el?.value||'').trim();if(!t){el?.focus();return;}
@@ -1972,24 +1971,27 @@ function applyPhotoZoom(root){(root||document).querySelectorAll('[style*="--pz"]
   if(!w||!h||!ar)return;el.style.backgroundSize=ar>w/h?`auto ${(z*100).toFixed(2)}%`:`${(z*100).toFixed(2)}% auto`;});}
 function photoGeom(el,P){const w=el.clientWidth,h=el.clientHeight,z=Math.max(1,P.z||1),ar=P.ar;let iw,ih;if(ar>w/h){ih=h*z;iw=ih*ar;}else{iw=w*z;ih=iw/ar;}return{w,h,iw,ih};}
 const pkOf=el=>el.style.getPropertyValue('--pk').trim();
-let PD=null;
+let PD=null,PRESS=null;
 document.addEventListener('pointerdown',e=>{
   if(S.view!=='make'||S.step!==2||e.button>0)return;
   const rd=document.getElementById('render');if(!rd||!rd.contains(e.target))return;
-  const el=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.closest&&n.closest('#render')&&n.style&&pkOf(n));if(!el)return;
+  const el=document.elementsFromPoint(e.clientX,e.clientY).find(n=>n.closest&&n.closest('#render')&&n.style&&pkOf(n));if(!el||el.classList.contains('contain'))return;
   const k=pkOf(el),p=CP();if(!p||!p.v[k])return;
   e.preventDefault();
-  const sc=el.getBoundingClientRect().width/el.clientWidth||1,id=e.pointerId;
-  imgAR(p.v[k]).then(ar=>{if(!ar)return;p.pos=p.pos||{};const P=p.pos[k]=Object.assign({x:50,y:50,z:1},p.pos[k]||{},{ar:+ar.toFixed(4)});
-    PD={el,k,P,sc,x0:e.clientX,y0:e.clientY,px:+P.x,py:+P.y,g:photoGeom(el,P),id,moved:false};el.classList.add('dragging');
+  const sc=el.getBoundingClientRect().width/el.clientWidth||1,id=e.pointerId,tok={};PRESS=tok;
+  imgAR(p.v[k]).then(ar=>{if(!ar||PRESS!==tok)return;   // 사진 비율을 읽는 사이 손을 뗐으면 끌기를 시작하지 않는다
+    const P=Object.assign({x:50,y:50,z:1},(p.pos||{})[k]||{},{ar:+ar.toFixed(4)});   // 실제로 움직이기 전엔 저장 데이터에 쓰지 않는다
+    PD={el,k,P,p,sc,x0:e.clientX,y0:e.clientY,px:+P.x,py:+P.y,g:photoGeom(el,P),id,moved:false};el.classList.add('dragging');
     try{el.setPointerCapture(id);}catch(_){}});
 },{passive:false});
 document.addEventListener('pointermove',e=>{if(!PD||e.pointerId!==PD.id)return;e.preventDefault();
-  const dx=(e.clientX-PD.x0)/PD.sc,dy=(e.clientY-PD.y0)/PD.sc,g=PD.g;if(Math.abs(dx)+Math.abs(dy)>2)PD.moved=true;
+  const dx=(e.clientX-PD.x0)/PD.sc,dy=(e.clientY-PD.y0)/PD.sc,g=PD.g;
+  if(!PD.moved&&Math.abs(dx)+Math.abs(dy)>2){PD.moved=true;PD.p.pos=PD.p.pos||{};PD.p.pos[PD.k]=PD.P;}
+  if(!PD.moved)return;
   if(g.iw-g.w>.5)PD.P.x=+Math.min(100,Math.max(0,PD.px-dx/(g.iw-g.w)*100)).toFixed(2);
   if(g.ih-g.h>.5)PD.P.y=+Math.min(100,Math.max(0,PD.py-dy/(g.ih-g.h)*100)).toFixed(2);
   PD.el.style.backgroundPosition=`${PD.P.x}% ${PD.P.y}%`;},{passive:false});
-function endPhotoDrag(){if(!PD)return;const d=PD;PD=null;d.el.classList.remove('dragging');if(d.moved){save();render();}}
+function endPhotoDrag(){PRESS=null;if(!PD)return;const d=PD;PD=null;d.el.classList.remove('dragging');if(d.moved){save();render();}}
 document.addEventListener('pointerup',endPhotoDrag);document.addEventListener('pointercancel',endPhotoDrag);
 let zoomRaf=0;
 async function setZoom(k,v,live){const p=CP();if(!p||!p.v[k])return;const ar=await imgAR(p.v[k]);if(!ar)return;
@@ -2001,7 +2003,7 @@ function resetPos(k){const p=CP();if(p&&p.pos){delete p.pos[k];save();render();}
 function setTxtStyle(g,k,v){const p=CP();if(!p)return;p[g]=p[g]||{};if(v)p[g][k]=g==='tw'?+v:v;else delete p[g][k];save();render();}
 /* ── 렌더 ── */
 // v2.2 글자: 크기(fs) + 굵기(tw) + 서체(tf) — 칸마다 따로. 굵기는 --hw 도 같이 바꿔 안쪽 요소까지 따라오게
-const FONT_FAM={sans:"'Noto Sans KR',sans-serif",serif:"'Noto Serif KR',serif",en:"'Questrial','Noto Sans KR',sans-serif"};
+const FONT_FAM={sans:'Noto Sans KR,sans-serif',serif:'Noto Serif KR,serif',en:'Questrial,Noto Sans KR,sans-serif'};
 const FONT_NM={'':'기본',sans:'고딕',serif:'명조',en:'영문'};
 const WEIGHT_NM={'':'기본',200:'가늘게',400:'보통',500:'중간',700:'굵게'};
 const zf=p=>{const f=(k,slot)=>{const v=(p.fs||{})[k],w=(p.tw||{})[k],ff=FONT_FAM[(p.tf||{})[k]];const o=[];
@@ -2053,6 +2055,7 @@ function paintGauge(){
    기준값: 도달 수치가 있으면 '참여율(반응÷도달)', 없으면 '반응 점수(좋아요+댓글×3+저장×5+공유×5)'.
    묶음별 평균을 전체 평균과 비교해 '몇 배'로 보여 준다. 2건 미만 묶음은 추천에서 뺀다(우연일 수 있어서). */
 const DOW=['일','월','화','수','목','금','토'];
+const pd=t=>new Date(String(t||'').replace(/([+-]\d\d)(\d\d)$/,'$1:$2'));   // '+0000' → '+00:00' (사파리)
 const slotOf=h=>h<11?'아침 (~11시)':h<14?'점심 (11~14시)':h<18?'오후 (14~18시)':h<21?'저녁 (18~21시)':'밤 (21시~)';
 const insItems=()=>((Cloud.insights||{}).items||[]).filter(i=>i&&i.product!=='STORY');
 const insBase=items=>items.some(i=>i.er!=null)?'er':'score';
@@ -2072,7 +2075,7 @@ function insRecommend(items,b){
   if(bySet.length){const p=bySet[0];out.push({t:'세트',h:`<b>${esc(setName(p.k))}</b> 세트가 가장 반응이 좋습니다 (평균의 ${fmtX(p.x)})`,s:`${p.n}건 기준`,set:p.k});}
   else{const byTpl=insGroups(items.filter(i=>i.tpls&&i.tpls[0]),i=>i.tpls[0],b).filter(g=>g.n>=2);
     if(byTpl.length){const p=byTpl[0],t=TB(p.k);out.push({t:'첫 장 템플릿',h:`첫 장이 <b>${esc(t?t.nm:p.k)}</b>일 때 반응이 좋습니다 (평균의 ${fmtX(p.x)})`,s:`${p.n}건 기준`});}}
-  const byDow=insGroups(items,i=>DOW[new Date(i.at).getDay()],b).filter(g=>g.n>=2),bySlot=insGroups(items,i=>slotOf(new Date(i.at).getHours()),b).filter(g=>g.n>=2);
+  const byDow=insGroups(items,i=>DOW[pd(i.at).getDay()],b).filter(g=>g.n>=2),bySlot=insGroups(items,i=>slotOf(pd(i.at).getHours()),b).filter(g=>g.n>=2);
   if(byDow.length||bySlot.length)out.push({t:'올리는 때',h:`${byDow.length?`<b>${byDow[0].k}요일</b>`:''}${byDow.length&&bySlot.length?' · ':''}${bySlot.length?`<b>${bySlot[0].k}</b>`:''}에 올린 게시물 반응이 가장 좋습니다`,s:`${byDow.length?`${byDow[0].k}요일 평균의 ${fmtX(byDow[0].x)} (${byDow[0].n}건)`:''}${byDow.length&&bySlot.length?' · ':''}${bySlot.length?`${bySlot[0].k} ${fmtX(bySlot[0].x)} (${bySlot[0].n}건)`:''}`});
   return out;
 }
@@ -2083,7 +2086,7 @@ function insBars(title,groups,lab){if(!groups.length)return '';const mx=Math.max
 function vInsights(){
   const ins=Cloud.insights,ig=Cloud.integrations.instagram||{},items=insItems(),b=insBase(items);
   const sort=S.insSort||'at';
-  const rows=items.slice().sort((p,q)=>sort==='at'?new Date(q.at)-new Date(p.at):(insVal(q,b)??-1)-(insVal(p,b)??-1));
+  const rows=items.slice().sort((p,q)=>sort==='at'?pd(q.at)-pd(p.at):(insVal(q,b)??-1)-(insVal(p,b)??-1));
   const avg=k=>items.length?items.reduce((s,x)=>s+(x[k]||0),0)/items.length:null;
   const recs=items.length?insRecommend(items,b):[];
   const linked=items.filter(i=>i.cid).length;
@@ -2098,20 +2101,23 @@ function vInsights(){
     <div class="kpi"><b>${items.some(i=>i.reach!=null)?n0(Math.round(avg('reach'))):'—'}</b><span>평균 도달</span></div>
     ${ins?.account?.followers!=null?`<div class="kpi"><b>${n0(ins.account.followers)}</b><span>팔로워</span></div>`:''}</div>
   <div class="card"><h3>다음에 올리면 좋은 것 <span class="badge">${b==='er'?'참여율 기준':'반응 점수 기준'}</span></h3>
-    ${recs.length?recs.map(r=>`<div class="rec"><span class="rt">${r.t}</span><div class="rb"><div>${r.h}</div><span>${r.s}</span></div>${r.set?`<button class="btn sm" onclick="go('make');pickSet('${r.set}')">이 세트로 만들기</button>`:''}</div>`).join(''):'<div class="hint" style="margin:0">같은 종류의 게시물이 2건 이상 쌓이면 추천을 시작합니다.</div>'}
+    ${recs.length?recs.map(r=>`<div class="rec"><span class="rt">${r.t}</span><div class="rb"><div>${r.h}</div><span>${r.s}</span></div>${r.set&&ALL_SETS().some(x=>x.id===r.set)&&/^[\w-]+$/.test(r.set)?`<button class="btn sm" onclick="makeFromSet('${r.set}')">이 세트로 만들기</button>`:''}</div>`).join(''):'<div class="hint" style="margin:0">같은 종류의 게시물이 2건 이상 쌓이면 추천을 시작합니다.</div>'}
     <div class="hint" style="margin:10px 0 0">대시보드로 올린 게시물 ${linked}건은 종류·세트까지 연결해 비교합니다. 앱에서 직접 올린 게시물은 요일·시간대 비교에만 쓰입니다.</div></div>
   <div class="card"><h3>묶어서 보기</h3><div class="ibars">
     ${insBars('콘텐츠 종류',insGroups(items,i=>i.bk,b),k=>MIXLABEL[k]||k)}
     ${insBars('세트',insGroups(items.filter(i=>i.setId),i=>i.setId,b),setName)}
-    ${insBars('요일',insGroups(items,i=>DOW[new Date(i.at).getDay()],b),k=>k+'요일')}
-    ${insBars('시간대',insGroups(items,i=>slotOf(new Date(i.at).getHours()),b))}</div></div>
+    ${insBars('요일',insGroups(items,i=>DOW[pd(i.at).getDay()],b),k=>k+'요일')}
+    ${insBars('시간대',insGroups(items,i=>slotOf(pd(i.at).getHours()),b))}</div></div>
   <div class="card"><h3>게시물별 성과 <span class="badge">${items.length}개</span></h3>
     <div class="chips" style="margin-bottom:8px"><button class="${sort==='at'?'on':''}" onclick="S.insSort='at';render()">최신순</button><button class="${sort!=='at'?'on':''}" onclick="S.insSort='best';render()">반응 좋은 순</button></div>
     <div class="ilist">${rows.map(it=>`<a class="irow" href="${esc(it.permalink||'#')}" target="_blank" rel="noopener"><span class="im" style="${bg(it.thumb)}"></span>
-      <span class="tx"><b>${esc(it.title||it.caption||'(캡션 없음)')}</b><span>${fmtWhen(it.at)}${it.bk?' · '+esc(MIXLABEL[it.bk]||it.bk):''}${it.setId?' · '+esc(setName(it.setId)):''}${it.cid?'':' · 앱에서 직접'}</span></span>
+      <span class="tx"><b>${esc(it.title||it.caption||'(캡션 없음)')}</b><span>${fmtWhen(pd(it.at))}${it.bk?' · '+esc(MIXLABEL[it.bk]||it.bk):''}${it.setId?' · '+esc(setName(it.setId)):''}${it.cid?'':' · 앱에서 직접'}</span></span>
       <span class="ms"><span><em>좋아요</em>${n0(it.likes)}</span><span><em>댓글</em>${n0(it.comments)}</span><span><em>저장</em>${n0(it.saved)}</span><span><em>공유</em>${n0(it.shares)}</span><span><em>도달</em>${n0(it.reach)}</span><span><em>참여율</em>${pct(it.er)}</span></span></a>`).join('')}</div></div>`
   :`<div class="card"><div class="empty">${ig.connected?'아직 모은 성과가 없습니다. 다음 자동 점검(하루 한 번) 때 모으거나, 관리자가 [지금 새로 모으기]를 누르면 바로 모읍니다.':'인스타그램 연결 후 첫 성과가 모이면 여기에 표시됩니다.'}</div></div>`}`;
 }
+async function makeFromSet(id){
+  if(S.pages.length&&!await ask('만들던 콘텐츠가 있습니다','새 세트로 시작하면 저장하지 않은 편집 내용이 사라집니다. 계속할까요?','새로 시작'))return;
+  resetMake();go('make');pickSet(id);}
 async function insRefresh(){busy('인스타 게시물 반응을 모으는 중… (최대 1분)');
   try{const r=await api('POST','insights/refresh');Cloud.insights=r.insights||Cloud.insights;toast(`${r.count}개 게시물 성과를 모았습니다${r.perm?'':' (좋아요·댓글만)'}`);render();}
   catch(e){notice(e.message);}finally{busy(false);}}
@@ -2275,7 +2281,7 @@ function step2(){
   <div class="hint">여러 장을 한 번에 놓으면 <b>다음 장까지 이어서</b> 빈자리를 채웁니다.</div>
   <div class="drop" id="drop" onclick="document.getElementById('fileIn').click()"><b>사진을 여기로 끌어다 놓으세요</b><span>여러 장 한 번에 · JPG · PNG</span></div>
   <input type="file" id="fileIn" accept="image/*" multiple hidden onchange="onFiles(this.files)">
-  ${imgs.length?`<div class="slots" style="margin-top:10px">${imgs.map(f=>`<div class="slot"><div class="pv" style="${bg(p.v[f.k])}"></div><b>${f.l}</b><span>${p.v[f.k]?(p.v[f.k].startsWith('data:')?'올리는 중…':isOwnImage(p.v[f.k])?'업로드됨':'샘플/링크'):'비어 있음'}</span><button class="btn sm" style="width:100%;padding:3px" onclick="clearSlot('${f.k}')">비우기</button>${p.v[f.k]?`<div class="pzc"><label for="pz-${f.k}">확대 <b id="pzv-${f.k}">${Math.round(((p.pos||{})[f.k]?.z||1)*100)}%</b></label><input id="pz-${f.k}" type="range" min="100" max="300" step="5" value="${Math.round(((p.pos||{})[f.k]?.z||1)*100)}" oninput="setZoom('${f.k}',this.value,true)" onchange="setZoom('${f.k}',this.value)">${(p.pos||{})[f.k]?`<button class="btn sm" onclick="resetPos('${f.k}')">처음 위치로</button>`:''}</div>`:''}</div>`).join('')}</div><div class="hint" style="margin-top:8px"><b>사진 위치 맞추기</b> — 미리보기에서 사진을 손가락이나 마우스로 끌어 옮기세요. 확대는 각 칸의 막대로 조절합니다.</div>`:'<div class="hint" style="margin-top:8px">이 템플릿은 텍스트만 사용합니다.</div>'}
+  ${imgs.length?`<div class="slots" style="margin-top:10px">${imgs.map(f=>`<div class="slot"><div class="pv" style="${bg(p.v[f.k])}"></div><b>${f.l}</b><span>${p.v[f.k]?(p.v[f.k].startsWith('data:')?'올리는 중…':isOwnImage(p.v[f.k])?'업로드됨':'샘플/링크'):'비어 있음'}</span><button class="btn sm" style="width:100%;padding:3px" onclick="clearSlot('${f.k}')">비우기</button>${p.v[f.k]&&p.v.fit==='전체 보이기'?'<div class="pzc">전체 보이기에서는 위치·확대를 쓰지 않습니다</div>':p.v[f.k]?`<div class="pzc"><label for="pz-${f.k}">확대 <b id="pzv-${f.k}">${Math.round(((p.pos||{})[f.k]?.z||1)*100)}%</b></label><input id="pz-${f.k}" type="range" min="100" max="300" step="5" value="${Math.round(((p.pos||{})[f.k]?.z||1)*100)}" oninput="setZoom('${f.k}',this.value,true)" onchange="setZoom('${f.k}',this.value)">${(p.pos||{})[f.k]?`<button class="btn sm" onclick="resetPos('${f.k}')">처음 위치로</button>`:''}</div>`:''}</div>`).join('')}</div><div class="hint" style="margin-top:8px"><b>사진 위치 맞추기</b> — 미리보기에서 사진을 손가락이나 마우스로 끌어 옮기세요. 확대는 각 칸의 막대로 조절합니다.</div>`:'<div class="hint" style="margin-top:8px">이 템플릿은 텍스트만 사용합니다.</div>'}
   ${driveBar()}
   <div class="hint" style="margin:10px 0 4px">샘플 사진</div>
   <div class="samples">${SAMPLES.map((s,i)=>`<button style="background-image:url('${s.url}')" title="${s.name}" onclick="useSample(${i})"></button>`).join('')}</div>
@@ -2455,8 +2461,9 @@ function openContent(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
   if(c.status==='published'){notice('게시가 끝난 콘텐츠는 고칠 수 없습니다. 복제해서 새로 만들어 주세요.');return;}
   if(c.status==='trashed'){notice('휴지통에 있는 콘텐츠입니다. 먼저 되살려 주세요.');return;}
   S.set=ALL_SETS().find(s=>s.id===c.setId)||{id:c.setId,nm:c.title,bk:c.bk,sp:c.speaker,pages:[]};
+  if(S.set.raw){S.rawFmt=(c.pages||[])[0]?.tpl||'U1';S.set=Object.assign({},S.set,{bk:c.bk||S.set.bk,story:S.rawFmt==='U3'});}
   S.pages=JSON.parse(JSON.stringify(c.pages||[]));if(!S.pages.length){const st=ALL_SETS().find(s=>s.id===c.setId)||BASE_SETS[0];S.pages=st.pages.map(newPage);}
-  S.skin=c.skin||S.skin;S.speaker=c.speaker;S.capEdited=c.caption||null;S.capList=buildCaptions();S.capTouched=!!c.caption&&(!!c.captionEdited||!S.capList.some(x=>x.text===c.caption));
+  S.skin=c.skin||S.skin;S.speaker=c.speaker;S.capEdited=c.caption||null;S.capList=buildCaptions();{const ix=S.capList.findIndex(x=>x.text===c.caption);S.capIdx=ix>=0?ix:Math.min(S.capIdx||0,Math.max(0,S.capList.length-1));}S.capTouched=!!c.caption&&(!!c.captionEdited||!S.capList.some(x=>x.text===c.caption));
   S.cur=0;S.step=2;S.checks=[];S.editingId=c.id;S.view='make';closeDetail(true);render();
   if(['approved','scheduled'].includes(c.status))toast('승인된 콘텐츠입니다. 내용을 바꿔 저장하면 다시 검토가 필요합니다');}
 function dupContent(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
@@ -2478,7 +2485,8 @@ async function publishHelp(id){
     for(let i=0;i<imgs.length;i++){saveBlob(imgs[i],`nicott_${c.id}_${String(i+1).padStart(2,'0')}.jpg`);n++;await new Promise(r=>setTimeout(r,280));}}
   catch(e){}finally{busy(false);}
   if(await ask('인스타 앱에서 올리셨나요?',`이미지 ${n}장을 내려받고 캡션을 복사했습니다.\n앱에서 올린 뒤 [게시 완료로 기록]을 누르면 콘텐츠 상태가 바뀝니다.`,'게시 완료로 기록','아직이요')){
-    if(isAdmin())await act(id,'mark_published');else{await api('POST',`contents/${id}/comments`,{body:'앱에서 직접 올렸습니다. 게시 완료로 기록해 주세요.'});toast('관리자에게 기록을 요청했습니다');pull(true);}}
+    const cc=DB.contents.find(x=>x.id===id);
+    if(isAdmin()&&(!POL().required||canApprove()||['approved','scheduled','failed'].includes(cc?.status)))await act(id,'mark_published');else{await api('POST',`contents/${id}/comments`,{body:'앱에서 직접 올렸습니다. 게시 완료로 기록해 주세요.'});toast('관리자에게 기록을 요청했습니다');pull(true);}}
 }
 /* ══ 자동 생성 템플릿 수신·승인 ══
    매월 AI가 만든 템플릿이 저장소 data/templates/pending.json 에 올라옵니다.
@@ -2924,12 +2932,12 @@ function igTokenBox(s,replace){return `<details class="acc"${replace?' open':''}
   <div class="field" style="margin-top:12px"><label><span>${replace?'새 액세스 토큰':'액세스 토큰'}</span></label><input type="password" id="igTok" placeholder="EA… 로 시작하는 긴 문자열" autocomplete="off"></div>
   <div class="tools"><button class="btn primary" onclick="igConnect()">${replace?'새 토큰으로 바꾸기':'연결'}</button></div>`;}
 /* v2.2 게시 전 승인(컨펌) 설정 카드 */
-function approvalCard(){const pol=POL(),us=(Cloud.users||[]).filter(u=>u.active);
+function approvalCard(){const pol=POL(),us=(Cloud.users||[]).filter(u=>u.active||pol.approvers.includes(String(u.id)));
   return `<div class="card"><h3>게시 전 승인 (컨펌) <span class="badge">${pol.required?'켜짐':'꺼짐'}</span></h3>
   <div class="hint">켜 두면 담당자는 <b>검토 요청</b>까지만 하고, <b>승인자</b>가 확인해야 예약·게시됩니다. 고칠 점이 있으면 승인자가 댓글로 <b>수정 요청</b>을 보냅니다.</div>
   <label class="chk"><input type="checkbox" ${pol.required?'checked':''} onchange="setApproval(this.checked)"><span>게시 전 승인 필수</span></label>
   <div class="field" style="margin-top:10px"><label><span>승인자 (대표·MD)</span><span style="font-size:12.5px;color:var(--ink-sub)">체크한 분만 승인·수정 요청을 할 수 있습니다</span></label>
-  ${us.length?`<div class="aplist">${us.map(u=>`<label class="chk"><input type="checkbox" ${pol.approvers.includes(String(u.id))?'checked':''} onchange="setApprover('${u.id}',this.checked)"><span><b>${esc(u.name)}</b> · ${u.role==='admin'?'관리자':'작성자'}</span></label>`).join('')}</div>`:'<div class="empty" style="padding:10px">개인 계정이 아직 없습니다 — 아래 [사용자 관리]에서 대표님·MD 계정을 먼저 만드세요.</div>'}</div>
+  ${us.length?`<div class="aplist">${us.map(u=>`<label class="chk"><input type="checkbox" ${pol.approvers.includes(String(u.id))?'checked':''} onchange="setApprover('${u.id}',this.checked)"><span><b>${esc(u.name)}</b> · ${u.role==='admin'?'관리자':'작성자'}${u.active?'':' (중지됨)'}</span></label>`).join('')}</div>`:'<div class="empty" style="padding:10px">개인 계정이 아직 없습니다 — 아래 [사용자 관리]에서 대표님·MD 계정을 먼저 만드세요.</div>'}</div>
   ${pol.required&&!pol.approvers.length?'<div class="why">승인자를 지정하지 않으면 <b>관리자 누구나</b> 승인할 수 있어 컨펌 절차가 형식에 그칩니다. 대표님·MD 개인 계정을 만들어 승인자로 체크하고, 담당자는 공용 계정 대신 <b>작성자 개인 계정</b>으로 쓰는 것을 권합니다.</div>':''}</div>`;}
 function setApproval(on){if(!isAdmin())return;DB.settings.requireApproval=!!on;save();render();toast(on?'게시 전 승인을 켰습니다':'게시 전 승인을 껐습니다');}
 function setApprover(id,on){if(!isAdmin())return;const a=new Set((DB.settings.approvers||[]).map(String));on?a.add(String(id)):a.delete(String(id));DB.settings.approvers=[...a];save();render();}
