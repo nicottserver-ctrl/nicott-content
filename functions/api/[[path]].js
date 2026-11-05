@@ -3,7 +3,7 @@
 import {
   ensureSchema, json, err, now, kvGet, kvSet, randomId, hashPassword, ROLES, STATUSES, WORKSPACE_KEYS, cleanSettings,
   verifyLogin, loginThrottle, makeSession, sessionCookie, masterSecret, setMasterPassword,
-  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh,
+  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh, igAuth, igConnectToken, FB_HOST, FB_VERSION,
 } from '../_core.js';
 
 const isAdmin = (u) => u && u.role === 'admin';
@@ -189,7 +189,7 @@ async function cronTick(env, origin, force) {
   if (ig?.token) {
     const since = Date.now() - new Date(ig.refreshedAt || ig.connectedAt).getTime();
     const age = Date.now() - new Date(ig.connectedAt).getTime();
-    const left = ig.expiresAt ? new Date(ig.expiresAt).getTime() - Date.now() : 0;
+    const left = ig.expiresAt ? new Date(ig.expiresAt).getTime() - Date.now() : (ig.kind === 'suat' ? Infinity : 0);
     if (age > 24 * 3600e3 && (since > 7 * 864e5 || left < 10 * 864e5)) {
       try { ig = await igRefresh(env, ig); summary.refreshed = true; }
       catch (e) { ig.lastError = '토큰 자동 갱신 실패 — ' + e.message; ig.lastCheckAt = now(); await kvSet(env, 'secret:ig', ig, 'system'); summary.notes.push(ig.lastError); }
@@ -206,12 +206,12 @@ async function cronTick(env, origin, force) {
 }
 
 async function collectInsights(env, ig) {
-  const list = await igRequest('GET', `${ig.userId}/media`, { fields: 'id,caption,media_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url', limit: '20' }, ig.token);
+  const list = await igRequest('GET', `${ig.userId}/media`, { fields: 'id,caption,media_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url', limit: '20' }, igAuth(ig));
   const items = [];
   for (const m of (list.data || []).slice(0, 12)) {
     const it = { id: m.id, caption: (m.caption || '').slice(0, 80), type: m.media_type, at: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
     try {
-      const r = await igRequest('GET', `${m.id}/insights`, { metric: 'reach,saved,shares' }, ig.token);
+      const r = await igRequest('GET', `${m.id}/insights`, { metric: 'reach,saved,shares' }, igAuth(ig));
       (r.data || []).forEach((d) => { it[d.name] = d.values?.[0]?.value ?? d.total_value?.value ?? 0; });
     } catch { it.insightsError = true; }
     it.score = (it.likes || 0) + (it.comments || 0) * 3 + (it.saved || 0) * 5 + (it.shares || 0) * 5;
@@ -386,11 +386,11 @@ export async function onRequest(context) {
         const p = await body(request);
         const token = String(p.token || '').trim();
         if (token.length < 20) return err(400, '토큰을 붙여넣어 주세요');
-        let me;
-        try { me = await igRequest('GET', 'me', { fields: 'user_id,username' }, token); }
-        catch (e) { return err(400, '인스타 연결 실패 — ' + e.message + ' (토큰이 만료됐거나 권한 instagram_business_content_publish 가 없을 수 있습니다)'); }
-        const ig = { token, userId: me.user_id || me.id, username: me.username || '', connectedAt: now(), connectedBy: user.name, refreshedAt: null,
-          expiresAt: new Date(Date.now() + 60 * 864e5).toISOString(), expiresEstimated: true, lastError: null, lastCheckAt: now() };
+        const ws = (await kvGet(env, 'workspace'))?.value || {};
+        let got;
+        try { got = await igConnectToken(token, p.username || ws.settings?.handle); }
+        catch (e) { return err(400, '인스타 연결 실패 — ' + e.message + ' (토큰을 끝까지 복사했는지, 권한 instagram_basic·instagram_content_publish 가 구성에 들어 있는지 확인해 주세요)'); }
+        const ig = { ...got, connectedAt: now(), connectedBy: user.name, refreshedAt: null, lastError: null, lastCheckAt: now() };
         await kvSet(env, 'secret:ig', ig, user.name);
         return json({ ok: true, instagram: igPublicStatus(ig) });
       }
@@ -398,12 +398,20 @@ export async function onRequest(context) {
         const ig = await igGetSecret(env);
         if (!ig?.token) return err(400, '연결된 토큰이 없습니다');
         try { return json({ ok: true, instagram: igPublicStatus(await igRefresh(env, ig)) }); }
-        catch (e) { return err(400, e.message + ' (발급 후 24시간이 지나야 갱신할 수 있습니다)'); }
+        catch (e) { return err(400, e.message + (ig.kind === 'suat' ? '' : ' (발급 후 24시간이 지나야 갱신할 수 있습니다)')); }
       }
       if (b === 'instagram' && c === 'check' && M === 'POST') {
         const ig = await igGetSecret(env);
         if (!ig?.token) return err(400, '연결된 토큰이 없습니다');
-        try { const me = await igRequest('GET', 'me', { fields: 'user_id,username' }, ig.token); ig.username = me.username || ig.username; ig.lastError = null; }
+        try {
+          if (ig.kind === 'suat') {
+            const list = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username' }, igAuth(ig));
+            const a = (list.data || []).find((x) => String(x.id) === String(ig.userId));
+            if (!a) throw new Error('연결했던 인스타 계정이 더 이상 공유되어 있지 않습니다 — 다시 연결해 주세요');
+            ig.username = a.username || ig.username;
+          } else { const me = await igRequest('GET', 'me', { fields: 'user_id,username' }, ig.token); ig.username = me.username || ig.username; }
+          ig.lastError = null;
+        }
         catch (e) { ig.lastError = e.message; }
         ig.lastCheckAt = now();
         await kvSet(env, 'secret:ig', ig, user.name);
