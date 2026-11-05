@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NICOTT 콘텐츠 대시보드</title>
-<link rel="icon" href="/assets/nicott-icon.png">
-<link rel="apple-touch-icon" href="/assets/nicott-icon.png">
-<meta name="theme-color" content="#2F4433">
+<link rel="icon" href="/assets/nicott-favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/nicott-favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/nicott-touch-icon.png">
+<meta name="theme-color" content="#E8E4DD">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;200;300;400;500;700;900&family=Questrial&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-:root{--sand:#D6C3B0;--terra:#E05A33;--cream:#ECEAE4;--forest:#2F4433;--paper:#FAF8F4;--sand-lt:#EAE0D5;
---ink:#2A2724;--ink-sub:#8C8377;--ui-bg:#F4F2EE;--ui-line:#E4DFD7;--ok:#4E7A52;--bad:#B24A3C;--warn:#B8842F;
+:root{--sand:#D8BFAF;--terra:#F1613E;--cream:#E8E4DD;--forest:#294735;--paper:#FAF8F4;--sand-lt:#EAE0D5;
+--ink:#231F20;--ink-sub:#8C8377;--ui-bg:#F4F2EE;--ui-line:#E4DFD7;--ok:#4E7A52;--bad:#B24A3C;--warn:#B8842F;
 --en:'Questrial',sans-serif;--kr:'Noto Sans KR',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--kr);color:var(--ink);background:var(--ui-bg);line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -177,7 +178,7 @@ main{padding:18px 22px 60px;min-width:0}
 .pvbar{position:sticky;top:0;z-index:5;background:rgba(222,218,211,.96);backdrop-filter:blur(6px);padding:11px 15px;border-bottom:1px solid #CFC8BC;display:flex;gap:7px;align-items:center}
 .pvbar .lbl{font-size:11px;color:#5b544a;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pvbody{padding:13px 15px 0}
-.stage{width:100%;background:#fff;border-radius:5px;overflow:hidden;position:relative;box-shadow:0 8px 26px rgba(42,39,36,.15)}
+.stage{width:100%;background:#fff;border-radius:5px;overflow:hidden;position:relative;box-shadow:0 8px 26px rgba(35,31,32,.15)}
 .stage .sc{position:absolute;top:0;left:0;transform-origin:top left}
 .pnav{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:9px}
 .pnav button{width:25px;height:25px;border-radius:6px;background:#fff;font-size:13px;color:var(--ink-sub)}
@@ -194,12 +195,12 @@ main{padding:18px 22px 60px;min-width:0}
 /* ═══ 템플릿 캔버스 ═══ */
 .tpl{position:relative;overflow:hidden;font-family:var(--kr);font-weight:300;--ts:1;width:var(--cw,1080px);height:var(--ch,1350px);background:var(--bg);color:var(--fg)}
 .tpl .im{background-position:center;background-size:cover;background-repeat:no-repeat;background-color:#E7E2DA;border-radius:var(--rad)}
-.sk-ever{--bg:#FAF8F4;--bg2:#EAE0D5;--panel:#ECEAE4;--fg:#2A2724;--sub:#8C8377;--acc:#E05A33;--edge:#DCD3C8;--rad:0px;--hw:200;--sh:0 44px 90px rgba(42,39,36,.16);--band:#D6C3B0;--dark:#2F4433}
-.sk-edit{--bg:#ECEAE4;--bg2:#FAF8F4;--panel:#FAF8F4;--fg:#231F1C;--sub:#6E6558;--acc:#231F1C;--edge:#C6BDAE;--rad:0px;--hw:500;--sh:none;--band:#CFC6B6;--dark:#231F1C}
-.sk-soft{--bg:#FBF7F1;--bg2:#F3EBDD;--panel:#FFFDFA;--fg:#4A423A;--sub:#9C9285;--acc:#C9A98C;--edge:#EBE3D7;--rad:30px;--hw:300;--sh:0 30px 66px rgba(42,39,36,.10);--band:#E7D9C6;--dark:#5C4C40}
-.sk-bold{--bg:#2F4433;--bg2:#E05A33;--panel:#FAF8F4;--fg:#FAF8F4;--sub:rgba(250,248,244,.74);--acc:#D6C3B0;--edge:rgba(250,248,244,.3);--rad:0px;--hw:500;--sh:none;--band:#D6C3B0;--dark:#E05A33}
-.wm{font-family:var(--en);letter-spacing:.44em;text-transform:uppercase;font-size:calc(26px*var(--ts));color:var(--fg)}
-.wm.lt{color:#fff}
+.sk-ever{--bg:#E8E4DD;--bg2:#EADFD6;--panel:#F7F5F1;--fg:#231F20;--sub:#5C544B;--acc:#F1613E;--edge:#D3CBBF;--rad:0px;--hw:200;--sh:0 44px 90px rgba(35,31,32,.16);--band:#D8BFAF;--dark:#294735}
+.sk-edit{--bg:#E8E4DD;--bg2:#F7F5F1;--panel:#F7F5F1;--fg:#231F20;--sub:#4F483F;--acc:#231F20;--edge:#C6BDAE;--rad:0px;--hw:500;--sh:none;--band:#CFC6B6;--dark:#231F20}
+.sk-soft{--bg:#E8E4DD;--bg2:#F3EBDD;--panel:#FFFDFA;--fg:#3D362F;--sub:#5C544B;--acc:#294735;--edge:#DDD4C7;--rad:30px;--hw:300;--sh:0 30px 66px rgba(35,31,32,.10);--band:#D8BFAF;--dark:#5C4C40}
+.sk-bold{--bg:#294735;--bg2:#F1613E;--panel:#F7F5F1;--fg:#FAF8F4;--sub:rgba(250,248,244,.86);--acc:#D8BFAF;--edge:rgba(250,248,244,.3);--rad:0px;--hw:500;--sh:none;--band:#D8BFAF;--dark:#F1613E;--logo:#E8E4DD}
+.wm{font-family:'NICOTT Logo',var(--en);font-weight:700;letter-spacing:0;font-size:calc(26px*var(--ts));color:var(--logo)}
+.wm.lt{color:var(--logo-inv)}
 .hair{height:1px;background:var(--edge)}
 .A1{display:flex;flex-direction:column;align-items:center}
 .A1 .wm{margin-top:80px}.A1 .im{width:756px;height:756px;margin-top:80px}
@@ -216,13 +217,13 @@ main{padding:18px 22px 60px;min-width:0}
 .A2 .br i{width:56px;height:1px;background:var(--acc);margin-right:24px;display:block}
 .A2 .br span{font-size:calc(25px*var(--ts));color:var(--sub)}
 .A3 .bd{position:absolute;top:0;left:0;right:0;height:64%;background:var(--band)}
-.A3 .wm{position:absolute;top:72px;left:0;right:0;text-align:center;color:rgba(42,39,36,.82)}
+.A3 .wm{position:absolute;top:72px;left:0;right:0;text-align:center;color:var(--logo)}
 .A3 .im{position:absolute;top:194px;left:208px;width:664px;height:664px;box-shadow:var(--sh)}
 .A3 .lb{position:absolute;top:926px;left:0;right:0;text-align:center;font-family:var(--en);font-size:calc(20px*var(--ts));letter-spacing:.4em;color:var(--acc)}
 .A3 .nm{position:absolute;top:962px;left:0;right:0;text-align:center;font-size:calc(42px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .A3 .cs{position:absolute;top:1088px;left:0;right:0;display:flex;justify-content:center;gap:46px}
 .A3 .cp{display:flex;flex-direction:column;align-items:center;gap:14px;font-size:calc(22px*var(--ts));color:var(--sub)}
-.A3 .cp i{width:82px;height:82px;border-radius:50%;border:1px solid rgba(42,39,36,.1);display:block}
+.A3 .cp i{width:82px;height:82px;border-radius:50%;border:1px solid rgba(35,31,32,.1);display:block}
 .A4 .im{position:absolute;inset:0;border-radius:0}
 .A4 .tt{position:absolute;inset:0;background:linear-gradient(180deg,rgba(30,28,24,.46),rgba(30,28,24,.05) 42%,rgba(30,28,24,.54))}
 .A4 .lk{position:absolute;top:84px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:22px}
@@ -248,25 +249,25 @@ main{padding:18px 22px 60px;min-width:0}
 .A7{background:var(--panel)}
 .A7 .im{position:absolute;top:0;left:0;width:1080px;height:748px;border-radius:0}
 .A7 .pn{position:absolute;left:78px;right:78px;top:684px;background:var(--bg);padding:50px 54px;border-radius:var(--rad)}
-.A7 .pn .wm{font-size:calc(21px*var(--ts));color:var(--sub)}
+.A7 .pn .wm{font-size:calc(21px*var(--ts));color:var(--logo)}
 .A7 .pn h4{font-size:calc(40px*var(--ts)*var(--f,1));font-weight:var(--hw);margin:12px 0 26px}
 .A7 .rw{display:flex;justify-content:space-between;gap:20px;font-size:calc(27px*var(--ts)*var(--f2,1));padding:16px 0;border-top:1px solid var(--edge);color:var(--sub)}
 .A7 .rw b{color:var(--fg);font-weight:400;text-align:right}
 .A7 .rw.pt{border-top:1px solid var(--acc)}.A7 .rw.pt b{color:var(--acc);font-weight:500}
 .A8 .im{position:absolute;inset:0;border-radius:0}
 .A8 .ln2{position:absolute;left:104px;right:104px;bottom:168px;text-align:center;color:#fff;font-size:calc(38px*var(--ts)*var(--f,1));line-height:1.75;text-shadow:0 2px 22px rgba(0,0,0,.34)}
-.A8 .wm{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-size:calc(22px*var(--ts));color:rgba(255,255,255,.9)}
+.A8 .wm{position:absolute;left:0;right:0;bottom:90px;text-align:center;font-size:calc(22px*var(--ts));color:var(--logo-inv)}
 .B1 .im{position:absolute;top:0;left:0;right:0;height:680px;border-radius:0}
 .B1 .cd{position:absolute;left:78px;right:78px;top:618px;bottom:116px;background:var(--panel);padding:52px 56px;display:flex;flex-direction:column;border-radius:var(--rad)}
 .B1 .by{font-family:var(--en);font-size:calc(19px*var(--ts));letter-spacing:.32em;color:var(--acc)}
 .B1 .tx{margin-top:30px;font-size:calc(33px*var(--ts)*var(--f,1));line-height:1.78;color:var(--fg)}
 .B1 .sg{margin-top:auto;display:flex;align-items:center;gap:16px;color:var(--sub);font-size:calc(23px*var(--ts))}
 .B1 .sg i{width:38px;height:1px;background:var(--edge);display:block}
-.B1 .wm{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-size:calc(21px*var(--ts));color:var(--sub)}
+.B1 .wm{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-size:calc(21px*var(--ts));color:var(--logo)}
 .B2{background:var(--dark)}
 .B2 .im{position:absolute;top:102px;left:84px;width:912px;height:758px}
 .B2 .tg{position:absolute;top:52px;left:84px;font-family:var(--en);font-size:calc(20px*var(--ts));letter-spacing:.34em;color:rgba(255,255,255,.8)}
-.B2 .wt{position:absolute;top:50px;right:84px;font-family:var(--en);font-size:calc(20px*var(--ts));letter-spacing:.44em;color:rgba(255,255,255,.78)}
+.B2 .wt{position:absolute;top:50px;right:84px;font-family:'NICOTT Logo',var(--en);font-weight:700;font-size:calc(20px*var(--ts));letter-spacing:0;color:var(--logo-inv)}
 .B2 .tx{position:absolute;left:84px;right:84px;top:912px;color:#fff;font-size:calc(35px*var(--ts)*var(--f,1));line-height:1.66}
 .B2 .mt{position:absolute;left:84px;bottom:76px;color:rgba(255,255,255,.64);font-size:calc(23px*var(--ts))}
 .C1{background:var(--panel)}
@@ -281,12 +282,12 @@ main{padding:18px 22px 60px;min-width:0}
 .C2 .rs{display:flex;gap:52px}
 .C2 .rs div{font-size:calc(26px*var(--ts)*var(--f2,1));line-height:1.68;color:rgba(255,255,255,.85)}
 .C2 .rs div b{display:block;font-family:var(--en);font-size:calc(18px*var(--ts));letter-spacing:.24em;color:rgba(255,255,255,.7);margin-bottom:9px;font-weight:400}
-.C2 .wt{position:absolute;right:84px;bottom:60px;font-family:var(--en);font-size:calc(19px*var(--ts));letter-spacing:.44em;color:rgba(255,255,255,.72)}
+.C2 .wt{position:absolute;right:84px;bottom:60px;font-family:'NICOTT Logo',var(--en);font-weight:700;font-size:calc(19px*var(--ts));letter-spacing:0;color:var(--logo-inv)}
 .P1 .im{position:absolute;top:0;left:0;right:0;height:700px;border-radius:0}
 .P1 .no{position:absolute;top:756px;left:84px;font-family:var(--en);font-size:calc(96px*var(--ts));color:var(--acc);line-height:1}
 .P1 .ti{position:absolute;top:770px;left:250px;right:84px;font-size:calc(44px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.4}
 .P1 .ds{position:absolute;top:938px;left:250px;right:84px;font-size:calc(28px*var(--ts)*var(--f2,1));line-height:1.72;color:var(--sub)}
-.P1 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.P1 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .P2{display:grid;grid-template-columns:1fr 1fr}
 .P2 .im{height:100%;border-radius:0}
 .P2 .bx{padding:96px 62px;display:flex;flex-direction:column;justify-content:center;background:var(--bg)}
@@ -299,20 +300,20 @@ main{padding:18px 22px 60px;min-width:0}
 .P3 .b{position:absolute;top:730px;left:84px;width:912px;height:440px}
 .P3 .l1{position:absolute;top:668px;left:84px;font-size:calc(25px*var(--ts));color:var(--sub)}
 .P3 .l2{position:absolute;top:1188px;left:84px;font-size:calc(25px*var(--ts));color:var(--sub)}
-.P3 .wm{position:absolute;right:84px;bottom:70px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.P3 .wm{position:absolute;right:84px;bottom:70px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .P4{background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 120px;text-align:center}
 .P4 .qm{font-family:var(--en);font-size:calc(74px*var(--ts));color:rgba(255,255,255,.55);line-height:1;margin-bottom:34px}
 .P4 .qt{font-size:calc(46px*var(--ts)*var(--f,1));line-height:1.68;color:#fff;font-weight:300}
 .P4 .by{margin-top:44px;font-size:calc(24px*var(--ts));color:rgba(255,255,255,.7)}
-.P4 .wm{position:absolute;left:0;right:0;bottom:78px;text-align:center;font-size:calc(19px*var(--ts));color:rgba(255,255,255,.6)}
+.P4 .wm{position:absolute;left:0;right:0;bottom:78px;text-align:center;font-size:calc(19px*var(--ts));color:var(--logo-inv)}
 .P5 .im{position:absolute;top:0;left:0;right:0;height:612px;border-radius:0}
 .P5 .ti{position:absolute;top:678px;left:84px;right:84px;font-size:calc(42px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .P5 ul{position:absolute;top:800px;left:84px;right:84px;list-style:none}
 .P5 li{display:flex;gap:26px;padding:24px 0;border-top:1px solid var(--edge);font-size:calc(28px*var(--ts)*var(--f2,1));color:var(--sub);line-height:1.6}
 .P5 li b{font-family:var(--en);color:var(--acc);font-weight:400;flex:0 0 46px}
-.P5 .wm{position:absolute;left:84px;bottom:70px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.P5 .wm{position:absolute;left:84px;bottom:70px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .P6{background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 110px}
-.P6 .wm{font-size:calc(36px*var(--ts));color:#fff;margin-bottom:52px}
+.P6 .wm{font-size:calc(36px*var(--ts));color:var(--logo-inv);margin-bottom:52px}
 .P6 .ln3{font-size:calc(38px*var(--ts)*var(--f,1));line-height:1.7;color:rgba(255,255,255,.94)}
 .P6 i{width:54px;height:1px;background:rgba(255,255,255,.45);display:block;margin:52px 0}
 .P6 .hd2{font-family:var(--en);font-size:calc(25px*var(--ts));letter-spacing:.2em;color:rgba(255,255,255,.78)}
@@ -321,13 +322,13 @@ main{padding:18px 22px 60px;min-width:0}
 .D1 .im{width:100%;height:100%}
 .D1 .ft{padding:44px 0 0;display:flex;justify-content:space-between;align-items:flex-start}
 .D1 .ft h4{font-size:calc(40px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.4}
-.D1 .ft .wm{font-size:calc(19px*var(--ts));color:var(--sub);padding-top:10px}
+.D1 .ft .wm{font-size:calc(19px*var(--ts));color:var(--logo);padding-top:10px}
 .D2 .im{position:absolute;top:0;left:0;right:0;height:900px;border-radius:0}
 .D2 .cd{position:absolute;left:120px;right:120px;top:772px;background:var(--panel);padding:54px 52px;box-shadow:var(--sh);border-radius:var(--rad)}
 .D2 .cd .kk{font-family:var(--en);font-size:calc(18px*var(--ts));letter-spacing:.3em;color:var(--acc)}
 .D2 .cd h4{font-size:calc(44px*var(--ts)*var(--f,1));font-weight:var(--hw);margin:16px 0 20px;line-height:1.38}
 .D2 .cd p{font-size:calc(27px*var(--ts)*var(--f2,1));line-height:1.72;color:var(--sub)}
-.D2 .wm{position:absolute;left:0;right:0;bottom:62px;text-align:center;font-size:calc(19px*var(--ts));color:var(--sub)}
+.D2 .wm{position:absolute;left:0;right:0;bottom:62px;text-align:center;font-size:calc(19px*var(--ts));color:var(--logo)}
 .D3{padding:96px 84px;display:flex;flex-direction:column}
 .D3 .wm{font-size:calc(21px*var(--ts))}
 .D3 h4{margin-top:70px;font-size:calc(84px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.28;letter-spacing:-.035em}
@@ -336,8 +337,8 @@ main{padding:18px 22px 60px;min-width:0}
 .D3 .im{width:100%;height:100%}
 .D4{display:grid;grid-template-columns:210px 1fr}
 .D4 .sd{background:var(--band);position:relative}
-.D4 .sd .vt{position:absolute;bottom:80px;left:50%;transform:translateX(-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;font-family:var(--en);font-size:calc(22px*var(--ts));letter-spacing:.38em;color:rgba(42,39,36,.72)}
-.D4 .sd .no{position:absolute;top:74px;left:0;right:0;text-align:center;font-family:var(--en);font-size:calc(30px*var(--ts));color:rgba(42,39,36,.6)}
+.D4 .sd .vt{position:absolute;bottom:80px;left:50%;transform:translateX(-50%) rotate(180deg);writing-mode:vertical-rl;white-space:nowrap;font-family:var(--en);font-size:calc(22px*var(--ts));letter-spacing:.38em;color:rgba(35,31,32,.72)}
+.D4 .sd .no{position:absolute;top:74px;left:0;right:0;text-align:center;font-family:var(--en);font-size:calc(30px*var(--ts));color:rgba(35,31,32,.6)}
 .D4 .im{height:100%;border-radius:0}
 .D4 .ov{position:absolute;left:274px;right:64px;bottom:74px;color:#fff}
 .D4 .ov h4{font-size:calc(50px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.36;text-shadow:0 2px 20px rgba(0,0,0,.35)}
@@ -348,24 +349,24 @@ main{padding:18px 22px 60px;min-width:0}
 .D5 h4{margin-top:76px;font-size:calc(46px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .D5 p{margin-top:22px;font-size:calc(27px*var(--ts)*var(--f2,1));color:var(--sub);text-align:center;line-height:1.7}
 .D6 .tb{position:absolute;top:0;left:0;right:0;height:230px;background:var(--band);display:flex;align-items:center;justify-content:center}
-.D6 .tb span{font-family:var(--en);font-size:calc(26px*var(--ts));letter-spacing:.4em;color:rgba(42,39,36,.78)}
+.D6 .tb span{font-family:var(--en);font-size:calc(26px*var(--ts));letter-spacing:.4em;color:rgba(35,31,32,.78)}
 .D6 .im{position:absolute;top:230px;left:0;right:0;height:790px;border-radius:0}
 .D6 .bb{position:absolute;bottom:0;left:0;right:0;height:330px;background:var(--bg);padding:52px 84px;text-align:center}
 .D6 .bb h4{font-size:calc(44px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .D6 .bb p{margin-top:20px;font-size:calc(26px*var(--ts)*var(--f2,1));color:var(--sub);line-height:1.7}
 .D7{background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.D7 .fm{background:#fff;padding:56px 56px 0;box-shadow:0 26px 60px rgba(42,39,36,.14)}
+.D7 .fm{background:#fff;padding:56px 56px 0;box-shadow:0 26px 60px rgba(35,31,32,.14)}
 .D7 .im{width:720px;height:720px;border-radius:0}
 .D7 .fm .cap{padding:44px 0 52px;text-align:center;font-size:calc(30px*var(--ts)*var(--f,1));color:#3c352d;line-height:1.6}
-.D7 .wm{margin-top:56px;font-size:calc(20px*var(--ts));color:var(--sub)}
+.D7 .wm{margin-top:56px;font-size:calc(20px*var(--ts));color:var(--logo)}
 .D8 .im{position:absolute;inset:0;border-radius:0;clip-path:polygon(0 0,100% 0,100% 52%,0 76%)}
 .D8 .bx{position:absolute;left:84px;right:84px;bottom:150px}
 .D8 .bx .kk{font-family:var(--en);font-size:calc(19px*var(--ts));letter-spacing:.32em;color:var(--acc)}
 .D8 .bx h4{margin-top:20px;font-size:calc(52px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.36}
-.D8 .wm{position:absolute;right:84px;bottom:60px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.D8 .wm{position:absolute;right:84px;bottom:60px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .D9 .im{position:absolute;inset:0;border-radius:0}
 .D9 .tt{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,0) 38%,rgba(20,17,14,.55))}
-.D9 .wm{position:absolute;top:74px;left:84px;font-size:calc(22px*var(--ts));color:#fff}
+.D9 .wm{position:absolute;top:74px;left:84px;font-size:calc(22px*var(--ts));color:var(--logo-inv)}
 .D9 .ln4{position:absolute;left:84px;right:84px;bottom:82px;color:#fff;font-size:calc(30px*var(--ts)*var(--f,1));line-height:1.6;text-shadow:0 2px 18px rgba(0,0,0,.4)}
 .D10 .im{position:absolute;inset:0;border-radius:0}
 .D10 .vl{position:absolute;inset:0;background:rgba(28,25,20,.52)}
@@ -373,11 +374,11 @@ main{padding:18px 22px 60px;min-width:0}
 .D10 .cs2 .kk{font-family:var(--en);font-size:calc(24px*var(--ts));letter-spacing:.5em}
 .D10 .cs2 h4{margin-top:34px;font-size:calc(60px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .D10 .cs2 span{display:block;margin-top:30px;font-size:calc(27px*var(--ts));color:rgba(255,255,255,.82)}
-.D10 .wm{position:absolute;left:0;right:0;bottom:84px;text-align:center;font-size:calc(20px*var(--ts));color:rgba(255,255,255,.8)}
+.D10 .wm{position:absolute;left:0;right:0;bottom:84px;text-align:center;font-size:calc(20px*var(--ts));color:var(--logo-inv)}
 /* ── TREND 2026-08 (일본 리서치 반영) ── */
-.T1{background:#231F1C}
+.T1{background:#231F20}
 .T1 .im{position:absolute;top:180px;left:190px;width:700px;height:700px;border-radius:var(--rad)}
-.T1 .wm{position:absolute;top:74px;left:0;right:0;text-align:center;color:rgba(255,255,255,.76);font-size:calc(22px*var(--ts))}
+.T1 .wm{position:absolute;top:74px;left:0;right:0;text-align:center;color:var(--logo-inv);font-size:calc(22px*var(--ts))}
 .T1 .nm{position:absolute;top:986px;left:0;right:0;text-align:center;color:#fff;font-size:calc(44px*var(--ts)*var(--f,1));font-weight:300}
 .T1 .ds{position:absolute;top:1064px;left:120px;right:120px;text-align:center;color:rgba(255,255,255,.62);font-size:calc(26px*var(--ts)*var(--f2,1));line-height:1.7}
 .T1 .ln{position:absolute;bottom:96px;left:calc(50% - 20px);width:40px;height:1px;background:rgba(255,255,255,.4)}
@@ -385,20 +386,20 @@ main{padding:18px 22px 60px;min-width:0}
 .T2 .tt{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0) 52%,rgba(24,21,18,.62))}
 .T2 .vt{position:absolute;top:110px;right:96px;bottom:180px;writing-mode:vertical-rl;color:#fff;font-size:calc(54px*var(--ts)*var(--f,1));font-weight:var(--hw);letter-spacing:.12em;line-height:1.5;text-shadow:0 2px 18px rgba(0,0,0,.4)}
 .T2 .sb{position:absolute;bottom:104px;right:96px;writing-mode:vertical-rl;color:rgba(255,255,255,.8);font-size:calc(24px*var(--ts));letter-spacing:.2em}
-.T2 .wm{position:absolute;left:84px;bottom:84px;color:#fff;font-size:calc(20px*var(--ts))}
+.T2 .wm{position:absolute;left:84px;bottom:84px;color:var(--logo-inv);font-size:calc(20px*var(--ts))}
 .T3{background:var(--bg)}
 .T3 .hd3{position:absolute;top:88px;left:84px;right:84px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--edge);padding-bottom:26px}
 .T3 .hd3 .se{font-size:calc(34px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .T3 .hd3 .mo{font-family:var(--en);font-size:calc(24px*var(--ts));letter-spacing:.3em;color:var(--acc)}
 .T3 .im{position:absolute;top:222px;left:84px;right:84px;height:700px}
 .T3 .tx{position:absolute;top:970px;left:84px;right:84px;font-size:calc(30px*var(--ts)*var(--f2,1));line-height:1.78;color:var(--sub)}
-.T3 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.T3 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .T4 .im{position:absolute;top:0;left:0;right:0;height:940px;border-radius:0}
 .T4 .bx{position:absolute;left:0;right:0;bottom:0;height:410px;background:var(--panel);padding:52px 84px}
 .T4 .bx .kk{font-family:var(--en);font-size:calc(19px*var(--ts));letter-spacing:.34em;color:var(--acc)}
 .T4 .bx h4{margin-top:18px;font-size:calc(40px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.4}
 .T4 .bx p{margin-top:18px;font-size:calc(26px*var(--ts)*var(--f2,1));color:var(--sub);line-height:1.7}
-.T4 .wm{position:absolute;right:84px;bottom:52px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.T4 .wm{position:absolute;right:84px;bottom:52px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .T5{background:var(--bg)}
 .T5 .ti{position:absolute;top:96px;left:84px;right:84px;font-size:calc(40px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .T5 .row3{position:absolute;top:236px;left:84px;right:84px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
@@ -406,7 +407,7 @@ main{padding:18px 22px 60px;min-width:0}
 .T5 .row3 .cap2{margin-top:22px;font-size:calc(26px*var(--ts)*var(--f2,1));color:var(--fg);line-height:1.5}
 .T5 .row3 .pr{margin-top:8px;font-size:calc(23px*var(--ts));color:var(--sub)}
 .T5 .nt{position:absolute;top:960px;left:84px;right:84px;font-size:calc(27px*var(--ts));color:var(--sub);line-height:1.7;border-top:1px solid var(--edge);padding-top:34px}
-.T5 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--sub)}
+.T5 .wm{position:absolute;left:84px;bottom:76px;font-size:calc(19px*var(--ts));color:var(--logo)}
 .T6{background:var(--panel)}
 .T6 .im{position:absolute;top:0;left:0;right:0;height:700px;border-radius:0}
 .T6 .cd{position:absolute;left:78px;right:78px;top:640px;bottom:130px;background:var(--bg);padding:46px 52px;border-radius:var(--rad)}
@@ -414,15 +415,15 @@ main{padding:18px 22px 60px;min-width:0}
 .T6 .cd h4{margin:14px 0 22px;font-size:calc(38px*var(--ts)*var(--f,1));font-weight:var(--hw)}
 .T6 .cd .ing{font-size:calc(25px*var(--ts)*var(--f2,1));color:var(--sub);line-height:1.7;border-bottom:1px solid var(--edge);padding-bottom:20px;margin-bottom:20px}
 .T6 .cd ol{margin-left:26px;font-size:calc(25px*var(--ts)*var(--f2,1));color:var(--sub);line-height:1.85}
-.T6 .wm{position:absolute;left:0;right:0;bottom:56px;text-align:center;font-size:calc(19px*var(--ts));color:var(--sub)}
+.T6 .wm{position:absolute;left:0;right:0;bottom:56px;text-align:center;font-size:calc(19px*var(--ts));color:var(--logo)}
 /* 스토리 */
 .ST1 .im{position:absolute;inset:0;border-radius:0}
 .ST1 .tt{position:absolute;inset:0;background:linear-gradient(180deg,rgba(28,25,20,.42),rgba(28,25,20,.05) 40%,rgba(28,25,20,.6))}
-.ST1 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(26px*var(--ts));color:#fff}
+.ST1 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(26px*var(--ts));color:var(--logo-inv)}
 .ST1 h4{position:absolute;left:90px;right:90px;bottom:360px;text-align:center;color:#fff;font-size:calc(74px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.38}
 .ST1 span{position:absolute;left:90px;right:90px;bottom:270px;text-align:center;color:rgba(255,255,255,.85);font-size:calc(30px*var(--ts))}
 .ST2{background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 100px}
-.ST2 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:rgba(255,255,255,.8)}
+.ST2 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo-inv)}
 .ST2 h4{color:#fff;font-size:calc(60px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.5;text-align:center}
 .ST2 .gz{margin-top:70px;width:100%;border:2px dashed rgba(255,255,255,.42);border-radius:20px;padding:46px 0;text-align:center;color:rgba(255,255,255,.62);font-size:calc(26px*var(--ts))}
 .ST3{background:var(--bg)}
@@ -432,7 +433,7 @@ main{padding:18px 22px 60px;min-width:0}
 .ST3 .l1,.ST3 .l2{position:absolute;left:0;right:0;text-align:center;font-size:calc(38px*var(--ts)*var(--f,1))}
 .ST3 .l1 span,.ST3 .l2 span{display:inline-block;padding:16px 44px;border-radius:60px;background:rgba(28,25,20,.62);color:#fff}
 .ST3 .l1{top:672px}.ST3 .l2{bottom:120px}
-.ST3 .wm{position:absolute;top:120px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:#fff;z-index:3}
+.ST3 .wm{position:absolute;top:120px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo-inv);z-index:3}
 .ST4{background:var(--bg)}
 .ST4 .im{position:absolute;top:0;left:0;right:0;height:1180px;border-radius:0}
 .ST4 .pn{position:absolute;left:80px;right:80px;top:1096px;background:var(--panel);padding:56px 52px;border-radius:var(--rad)}
@@ -442,63 +443,63 @@ main{padding:18px 22px 60px;min-width:0}
 .ST4 .cta{position:absolute;left:0;right:0;bottom:150px;text-align:center;font-size:calc(28px*var(--ts));color:var(--sub)}
 .ST4 .cta i{display:block;font-size:calc(34px*var(--ts));margin-bottom:8px;font-style:normal}
 .ST5{background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 90px}
-.ST5 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:rgba(255,255,255,.8)}
+.ST5 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo-inv)}
 .ST5 .dd{font-family:var(--en);font-size:calc(150px*var(--ts));color:#fff;line-height:1}
 .ST5 h4{margin-top:44px;font-size:calc(52px*var(--ts)*var(--f,1));font-weight:var(--hw);color:#fff;line-height:1.42}
 .ST5 span{margin-top:34px;font-size:calc(30px*var(--ts));color:rgba(255,255,255,.78)}
 .ST5 i{width:60px;height:1px;background:rgba(255,255,255,.4);display:block;margin:44px 0 0}
 .RL1 .im{position:absolute;inset:0;border-radius:0}
 .RL1 .tt{position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,21,18,.34),rgba(24,21,18,0) 38%,rgba(24,21,18,.66))}
-.RL1 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:#fff}
+.RL1 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo-inv)}
 .RL1 .kk{position:absolute;left:0;right:0;bottom:560px;text-align:center;font-family:var(--en);font-size:calc(22px*var(--ts));letter-spacing:.4em;color:var(--acc)}
 .RL1 h4{position:absolute;left:80px;right:80px;bottom:400px;text-align:center;color:#fff;font-size:calc(76px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.34;letter-spacing:-.025em;text-shadow:0 2px 20px rgba(0,0,0,.3)}
 .RL1 .sb{position:absolute;left:90px;right:90px;bottom:310px;text-align:center;color:rgba(255,255,255,.86);font-size:calc(30px*var(--ts)*var(--f2,1));line-height:1.6}
 .RL1 .safe{position:absolute;left:0;right:0;bottom:250px;height:1px;background:rgba(255,255,255,.22)}
 .RL2{background:var(--dark);display:flex;flex-direction:column;justify-content:center;padding:0 96px}
-.RL2 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:rgba(255,255,255,.78)}
+.RL2 .wm{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo-inv)}
 .RL2 .no{font-family:var(--en);font-size:calc(120px*var(--ts));color:var(--acc);line-height:1;margin-bottom:34px}
 .RL2 h4{color:#fff;font-size:calc(62px*var(--ts)*var(--f,1));font-weight:var(--hw);line-height:1.36;letter-spacing:-.02em}
 .RL2 p{margin-top:34px;color:rgba(255,255,255,.78);font-size:calc(30px*var(--ts)*var(--f2,1));line-height:1.7}
 .RL2 i{width:56px;height:1px;background:rgba(255,255,255,.4);display:block;margin-top:44px}
-.ST6{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 90px;text-align:center;background:var(--tone,#D6C3B0)}
+.ST6{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 90px;text-align:center;background:var(--tone,#D8BFAF)}
 .ST6 .im{width:760px;height:760px;border-radius:var(--rad)}
-.ST6 h4{margin-top:70px;font-size:calc(46px*var(--ts)*var(--f,1));font-weight:var(--hw);color:var(--ontone,rgba(42,39,36,.92));line-height:1.5}
-.ST6 span{margin-top:26px;font-size:calc(28px*var(--ts));color:var(--ontone2,rgba(42,39,36,.64))}
-.ST6 .wm{position:absolute;top:140px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--ontone2,rgba(42,39,36,.72))}
+.ST6 h4{margin-top:70px;font-size:calc(46px*var(--ts)*var(--f,1));font-weight:var(--hw);color:var(--ontone,rgba(35,31,32,.92));line-height:1.5}
+.ST6 span{margin-top:26px;font-size:calc(28px*var(--ts));color:var(--ontone2,rgba(35,31,32,.64))}
+.ST6 .wm{position:absolute;top:140px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:var(--logo)}
 /* ── 상세페이지 템플릿 (900px 세로 · 자사몰 실페이지 추출) ── */
-.DT1{background:#fff;color:#2A2724}
+.DT1{background:#fff;color:#231F20}
 .DT1 .lg{position:absolute;top:64px;left:0;right:0;text-align:center}
-.DT1 .lg .wm{font-size:calc(30px*var(--ts));color:#2A2724}
-.DT1 .lg .sl{margin-top:12px;font-size:calc(18px*var(--ts));color:#2F4433;letter-spacing:.08em}
+.DT1 .lg .wm{font-size:calc(30px*var(--ts));color:var(--logo)}
+.DT1 .lg .sl{margin-top:12px;font-size:calc(18px*var(--ts));color:#294735;letter-spacing:.08em}
 .DT1 .im{position:absolute;top:172px;left:0;right:0;height:1050px;border-radius:0}
 .DT1 .bx{position:absolute;top:1300px;left:72px;right:72px}
 .DT1 .bx h4{font-size:calc(46px*var(--ts)*var(--f,1));font-weight:700;letter-spacing:-.02em;line-height:1.4}
-.DT1 .bx .sb2{margin-top:24px;font-size:calc(26px*var(--ts));color:#2F4433;font-weight:500}
+.DT1 .bx .sb2{margin-top:24px;font-size:calc(26px*var(--ts));color:#294735;font-weight:500}
 .DT1 .bx .bd2{margin-top:48px;font-size:calc(24px*var(--ts)*var(--f2,1));line-height:2.0;color:#5b544a;white-space:pre-wrap}
 .DT2{background:#fff}
 .DT2 .a{position:absolute;top:0;left:0;right:0;height:1100px;border-radius:0}
 .DT2 .b{position:absolute;top:1160px;left:0;right:0;height:1100px;border-radius:0}
 .DT2 .cp2{position:absolute;left:72px;right:72px;bottom:40px;font-size:calc(23px*var(--ts)*var(--f,1));color:#5b544a;line-height:1.8;text-align:center}
-.DT3{background:#fff;color:#2A2724}
-.DT3 .no2{position:absolute;top:110px;left:72px;font-family:var(--en);font-size:calc(22px*var(--ts));letter-spacing:.3em;color:#2F4433}
+.DT3{background:#fff;color:#231F20}
+.DT3 .no2{position:absolute;top:110px;left:72px;font-family:var(--en);font-size:calc(22px*var(--ts));letter-spacing:.3em;color:#294735}
 .DT3 .tt2{position:absolute;top:160px;left:72px;right:72px;font-size:calc(38px*var(--ts)*var(--f,1));font-weight:700;line-height:1.45}
 .DT3 .bd3{position:absolute;top:300px;left:72px;right:72px;font-size:calc(24px*var(--ts)*var(--f2,1));line-height:1.95;color:#5b544a;white-space:pre-wrap}
 .DT3 .im{position:absolute;left:0;right:0;bottom:0;height:960px;border-radius:0}
-.DT4{background:#fff;color:#2A2724;padding:120px 72px 0}
+.DT4{background:#fff;color:#231F20;padding:120px 72px 0}
 .DT4 .pi{font-family:var(--en);font-size:calc(30px*var(--ts));letter-spacing:.28em;font-weight:700}
 .DT4 .rw2{display:flex;gap:34px;margin-top:44px;font-size:calc(25px*var(--ts)*var(--f2,1));line-height:1.75}
 .DT4 .rw2 b{flex:0 0 150px;font-weight:500;letter-spacing:.14em}
 .DT4 .rw2 span{color:#4a443b;white-space:pre-wrap}
 .DT4 .hr2{height:1px;background:#D9D4CB;margin-top:64px}
-.DT4 .ln5{margin-top:56px;font-size:calc(26px*var(--ts)*var(--f,1));line-height:1.9;color:#2A2724;white-space:pre-wrap}
+.DT4 .ln5{margin-top:56px;font-size:calc(26px*var(--ts)*var(--f,1));line-height:1.9;color:#231F20;white-space:pre-wrap}
 .DT5{background:#fff}
 .DT5 .im{position:absolute;top:0;left:0;right:0;height:640px;border-radius:0}
-.DT5 .ln6{position:absolute;top:720px;left:72px;right:72px;text-align:center;font-size:calc(28px*var(--ts)*var(--f,1));line-height:1.9;color:#2A2724;white-space:pre-wrap}
-.DT5 .wm2{position:absolute;bottom:70px;left:0;right:0;text-align:center;font-family:var(--en);letter-spacing:.44em;font-size:calc(24px*var(--ts));color:#2F4433}
+.DT5 .ln6{position:absolute;top:720px;left:72px;right:72px;text-align:center;font-size:calc(28px*var(--ts)*var(--f,1));line-height:1.9;color:#231F20;white-space:pre-wrap}
+.DT5 .wm2{position:absolute;bottom:70px;left:0;right:0;display:flex;justify-content:center;font-family:'NICOTT Logo',var(--en);font-weight:700;font-size:calc(24px*var(--ts));color:#294735}
 /* ═══════ v2.0 — 공용 협업판 UI (가독성·모바일·협업 흐름) ═══════
    색은 니코트 브랜드 리포트 팔레트 그대로(포레스트·샌드·크림·페이퍼·테라), 글자 대비만 끌어올림 */
-:root{--ink:#1F1C19;--ink-sub:#4A433B;--ink-3:#5E564C;--ui-bg:#F3F0EA;--ui-line:#DCD4C8;--ui-line2:#C9BFB1;
---ok:#2F6B3A;--bad:#A23A2A;--warn:#8A5A12;--focus:#2F4433;--r-lg:14px;--r-md:10px;--r-sm:7px}
+:root{--ink:#1F1C19;--ink-sub:#4A433B;--ink-3:#5E564C;--ui-bg:#E8E4DD;--ui-line:#DCD4C8;--ui-line2:#C9BFB1;
+--ok:#2F6B3A;--bad:#A23A2A;--warn:#8A5A12;--focus:#294735;--r-lg:14px;--r-md:10px;--r-sm:7px}
 body{font-size:14px;color:var(--ink);background:var(--ui-bg)}
 :focus-visible{outline:2.5px solid var(--focus);outline-offset:2px;border-radius:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -552,7 +553,7 @@ main{padding:26px 30px 80px}
 .field label{font-size:13px;color:var(--ink);font-weight:500}
 .cnt{font-size:12px;color:var(--ink-3)}
 .field input[type=text],.field input[type=number],.field input[type=date],.field input[type=time],.field input[type=password],.field textarea,.field select{padding:10px 12px;border:1.5px solid var(--ui-line2);border-radius:9px;font-size:15px}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(47,68,51,.14)}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--forest);box-shadow:0 0 0 3px rgba(41,71,53,.14)}
 .steps div{font-size:13px;padding:6px 13px;color:var(--ink-sub);border-color:var(--ui-line2)}
 .chips button{font-size:13px;padding:6px 13px;color:var(--ink);border-color:var(--ui-line2)}
 .chips button .c{font-size:12px;opacity:.75}
@@ -617,7 +618,7 @@ main{padding:26px 30px 80px}
 .st-changes{background:#FBE0D6;color:#8E2E1F}
 .st-appr{background:#E1EEE3;color:#1F5A2A;box-shadow:inset 0 0 0 1.5px #A9CDB0}
 .st-sch{background:#DFE8F4;color:#23456F}
-.st-pub{background:#2F4433;color:#fff}
+.st-pub{background:#294735;color:#fff}
 .st-fail{background:#A23A2A;color:#fff}
 .st-trash{background:#E5E0D8;color:#4A433B}
 .track{display:flex;gap:4px;margin:10px 0 4px}
@@ -793,12 +794,73 @@ main{padding:26px 30px 80px}
 .cal .d .ev{min-width:0}
 @media (max-width:720px){.cal .d .ev i{display:none}.cal .d .ev{justify-content:center}}
 
+/* ══ v2.1 — 니코트 브랜드 가이드 26ver 반영 ══
+   · 로고: 가이드 PDF 벡터 원본(심볼·워드마크 기본형/볼드형)을 그대로 옮긴 전용 글꼴 'NICOTT Logo'
+     N·I·C·O·T 와 심볼(U+E000)만 들어 있음. 글자 간격도 원본 그대로라 letter-spacing 을 주지 않는다.
+   · 작은 로고는 가이드 규정대로 볼드형(700), 기본형(400)은 크게 쓸 때만.
+   · 색: 가이드 PDF 공식값 — 오트 #E8E4DD · 베이지 #D8BFAF · 오렌지 #F1613E · 그린 #294735 · 로고 검정 #231F20 */
+@font-face{font-family:'NICOTT Logo';font-style:normal;font-weight:400;font-display:block;src:url(data:font/woff2;base64,d09GMk9UVE8AAAWYAAkAAAAAB+gAAAVRAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYhvBmAAgQQBNgIkAyAEBgWCUwcgG0UHUZQwTifEj4TsDPNWA6nUytL2wINeTGIlJhiIU///e9Z9ZVYjpIOsgFE7C2bGhVMoA2tlfdlfKk8Inp1/r8IvhjgYeYKDycxm2nxzr7InTAdo5Kr7qjc7BayKnOT/Aw7QBa6AIMxYgjI8cTn9ue1xNvDJMpxTf3lrYh53nlAU+F6YkAbqgTaMXebGQQgnAQrkL4xaKFq1KpaSUaN/XxRtckugPYz1urycL51s7pvBwzjb77cvsALxQvsY7zBLUIz4LAAgY40wyDiT4wEsAcLBM9QUJ9AGpGfb7WVelV7OzY4Ox6ZAzyYj333G/pL776WpprKFbz/jFmHYvZXvZT/8f3E75f84/5124bzu7Ha4/ocGSpOT5WuMmGHtqtx4waKo7gOiSNFB8qzsFvb+Vsb9p/jTrvsHb0UcvHX27M2D2IGb97ufCK5ezLOcizxvPqE+JM6iQ57PG3ekv2BDcrZWHJmu0YgtJGYh8xeNxkc3L9pERmwid4uPajDtkZPZ5wT/ud/+T88iO2iul/Ou48D/xa2bzzY/+YZ/y39iPhthOas5In76Grby9nn7urtPk7MpaT+BvfdeCa5OzOr+w/21tf3ZC9D361LrzfcX5I4QbD+uozrwDjpKLox4LyRJkQzLTSOaXjiV1z39SL+/FenlFP7ucWwK7Hfl/C9z4Q7iyl6w/2pZiF/ptX12IOvkSqlhRmJUJiCHoHUQn6jJElkP1JPpmBoRGBqoznqdXlL2+gGCXJOHxBdBcIfVIhcVX5OrYhXIebSo54nlVlhwyPYO75yRM3b6IJIJDR/QEAvkT9bWks4t89SCZcFaqUt6oTB1QiccTemKzjAnamZOTDRUWs+Z2XreZFHK0+Z5/4FiT7Zs2LYtUX5xgnwMFJHYx+VElVdOmtw8w+SkhQmMXTNZZ8eZqpB6rEEGZA6zAtay+rc68Af9/hMv2xMHbJcEWCANYNhIGuH7VcWWZtNYa61tMaO0RnRVEDlB8rdhPllkxwZLWSrDxmKLpF3blC3f4uR5UxNZLSorXZcOF5ZC6CEPjsO85tR0Vm5WPjYyTmdYc9SZZr3OpLHITQa9US82W/QlxQyyJmj3F7bj8lmQ8gwP2lBb+kj3ztXOks8TX1u+UlBKXZAc+IrFd2bUnJh5oGe4ZVakOqUR0zwQOvrY/BZ85LPLTSM31TrdUkBvbsnNu7EIqXtHdio11kiSJbINgL9DEimR9FjSvirDrcxpRCMeSxtUuBZGJdTIWb2MrQCpyJRhOcujTCWiZIk0wnAj19mC2FBnwrFyj30KP5CPQLT8u65bnXTCz0a5rKDpTsMS2MSQIIKwD/OGmU6w4VxN8gZ7ll9asS+dM1Q7TZmmeRzliamToFaBr2WoCzLvxUxoCPHCyWPRB1wcIgRNAOeuhktAHGBvRgE4N6oDILArUIQsqwaQCcjkEBc5dFYQn8rDeQgLRRFZJZ0CxXSAYUAjVIho92XeMZeZMwDMEWYz0wHANBB8SGB8MH05LFwpIXDQ/eehP5K9Z/3F2OyvAOCL3xB3FvD0MSWcZWxqdBUWAEhOnHMBZCYgoRuLPwCtxpUGh1nhCcnpBUwl2GfiHcrxADN4hJC3GBQNpI/Fi1n44rGh0gsAKmAtMJAg75osXv7v5CF14igYfcNkSKtIp0ym5xixE9DRCVMsEgMxLM1w+zB6sBkffqRIkrpQlIVLIsxFgtqSoUw/xcxEzSwJY6VZyoCiQVgK6UXLxMQzskb1VDpyFq3KmAuWmISbJ5jCQsLgDJPWckbbOEO0ljOy+ShaarThI4PGBq8gIWOeeSoDtgAAAA==) format('woff2')}
+@font-face{font-family:'NICOTT Logo';font-style:normal;font-weight:700;font-display:block;src:url(data:font/woff2;base64,d09GMk9UVE8AAAXEAAkAAAAAB+AAAAV8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYhvBmAAgQQBNgIkAyAEBgWCSgcgGzwHUZQOUgDiqwLbGBn2wSK9VExSyjvKdzRYP84znON2rt6Qkw6pC81uum/cN7O7n8z2VTuUL84HQ73QrkGlXCpuel0iAC53PyeFLxRwmxLPKPJAE0tkDZjItZ2ILpo0X51fM65Rbh9KbvPmCGhP1IBMmsWudroCD4HT+rRvTx/sinuD/PO/v7fe07/QgjSlB+LbbVAEQ17o28Tl9Oe2t33+ZG+4Gxt/LGxSF+ZxxFG0zrdlUYYBBeaBeqDpJgt4yiFA7lTDOPSorkYiBAxQv1ue3dzbW6MShSdTPW9+xPKo7UJaQs2fmqPuVx2p7bZq/HfoxAKUWk8XZLVsO2x7IQCgqACXmHSgd8pDQIKUR9plMDvYFLU3whAJNe9pkhp+1Hq88VP3md/cOa3q0Xi8FSrnmnIzW4ehj3TDyBaVNVS4By0Vlh/pL9L0pmFeNnxSbLatZmbm4GVhZOGFfiw4DzadJs/+Tv11fJY9H86e23fs2F6w59i3nBbnav7/fcHEv4gj7Tus2AtPEgegfDL/0/fXVzVTPwvFdv7zRTAstsGizzuVQmpyunq0FT7y+SX43iKw+N6T8EXNnVu3pauRa8VzR46dA5a98tBM6h7yQtOZxhoDY9M34blNv+m8YIDVi6gBmv517t3LorI+jyOngws1F0/tXP2TP7ZqH5/FQHamVx5UPa/hv7Kjn3/2XCht98snz0fvRe4dvXTpyH0AnpZ+8jL1YsuTRffDi+/9fKl9FIQc38hv0SC1banyW1JOtNazm8ev9ErjOHgFkZmGHegYLmAb1WBDarvRp/2w8cWuxvEMbFx/6M9jlut5YU0lHEagSS2rGqdpQFNkP9tH9wFW0Eq8ADMkQzPgFD5+qvo8PI/PhR3mITuMbJ1q5o50kOwEfsEo+sUgpSY7xZkftaP2Fr+T6sRB1FHiURdy1eA8L3Lpgog7PvGVC+tOSseFPfaRcLdhLjzN1IEBmW7qye2pcXKHGAVdMfRnnurGxI70wO0ZMyRhGa5nQxwA3HNfCyv7gN5/TMHj9CQ+Bi2dahyotuzJ9qJ90mHtkJPWM2GpmwycTmrqRK3hb8NgR2Lg2hkjY8TBVtdnnVi4M5z40bG0c3v/WsnwB/hNs5WqSpqkblPHys5d/VF/AjZv63SDodrzLNPVfNG1LcdiPd9aLrCKFTDZLExOsZkWOTNljdRG+iP4mvwpB59sf+Y/QyDJeAIGwDSwW5018jQb5lmSwRnqcx85mBOLcueR8tx6RHJ7FMEOGQfQYQPwQ4fZoRqX2ihWzVYYqq4xBGMYBmShxjGOdbbiX3tBMixADnKIyzJWSk9TYXhIsBzfo2co8GncEDjAgRM3PJrEHhNUEMEO4CI9aJyn0Qw7jh/bD+EjQHu23uZlUX+7OdBGeKrEdqlLVdFVqEFNN9VAFrs8sClQ4XjD6ovfr0/weTv1KpK+H7hO4Im0Z6UNy+TM5glYkFxMRVeGOonIG17qlBDEhj1w8nSnQ9PFDn8JiE1gdtoEXgNl02IWwMSMQ1UUWrGV3tiUBt45a9mmPTkVpHdRB8CFbiDNe3vXu8D/iX/+n+Dfnnp2QsLoMWopI+kSgrc8nP8js3Rjr6ArfwbA09i/TT3yr8WfRasgXrSfFF5cugDKGiSxPHiJbM7cw9Fp2GsgogYi7k9EB4JEeQvITakNmM8DaCKV+ZgR8SMOY0XP9+2hiazuZ4zcy30eWh6ugt4fJgsrKznq9b5j+A+gy4OHbyx0bAPmdl4feovNqn+x8Ntkw7LZaXBYtKnHJXTMk76eOsUFXaO1qIM02OKKHIx7etwsuSYZLWXyTM0+iPMKbE2YMFDQSX2ywc2mu2kLa3dpO9JUN+YvBl0DZzZel8cJAAAA) format('woff2')}
+:root{--oat:#E8E4DD;--black:#231F20;--terra-ink:#B23B1C;--ui-sep:#CFC7BB}
+
+/* 템플릿 — 로고 색 (밝은 바탕 = 검정, 짙은 바탕·사진 위 = 오트) */
+.tpl{--logo:#231F20;--logo-inv:#E8E4DD}
+.sk-bold{--logo:#E8E4DD}
+.wm .nwm,.wm2 .nwm{font:inherit}
+/* 세로 조합 — 가이드 표지 비율: 심볼 폭 = 워드마크 폭 × 0.688, 간격 = 워드마크 높이 × 1.03 */
+.wm.nl-v{display:flex;flex-direction:column;align-items:center;line-height:1.03}
+.wm.nl-v .nsym{display:block;font-size:3.259em;line-height:1.03;margin-bottom:.180em}
+/* 가로 조합 — 가이드 바른 예시 비율: 심볼 높이 = 워드마크 높이 × 2.11, 간격 = 워드마크 높이 × 1.10 */
+.nl-h{display:inline-flex;align-items:center;line-height:1.03}
+.nl-h .nsym{display:block;font-size:1.694em;line-height:1.03;margin-right:.411em}
+.nl-h .nwm{display:block;position:relative;top:.052em}
+.DT5 .wm2.nl-h{display:flex;justify-content:center}
+
+/* 대시보드 화면 — 오트 바탕 + 검정 로고 */
+body{background:var(--oat);word-break:keep-all;overflow-wrap:break-word}
+.tpl{word-break:normal;overflow-wrap:normal}   /* 콘텐츠 줄바꿈은 예전 그대로 */
+.side{background:var(--oat);color:var(--black);border-right:1px solid var(--ui-sep)}
+.brandbox{padding:4px 10px 18px}
+.brandbox .logo{height:30px;width:auto;filter:none}
+.brandbox .ver{color:#3D3731;font-size:12.5px;margin-top:12px}
+.nav button{color:var(--black)}
+.nav button:hover{background:rgba(35,31,32,.07);color:var(--black)}
+.nav button.on{background:var(--forest);color:#fff}
+.nav button svg{opacity:1}
+.nav .nb,.mtab .nb{background:var(--terra);color:var(--black)}
+.gm{border-top:1px solid rgba(35,31,32,.16)}
+.gm h4{color:var(--black)}
+.gmr .t{color:var(--black)}
+.gmb{background:rgba(35,31,32,.12)}
+.gmb i{background:var(--forest)}.gmb i.over{background:var(--terra)}
+.side .gnote{color:#3D3731}
+.sfoot{color:var(--black);border-top:1px solid rgba(35,31,32,.16)}
+.sfoot a{color:var(--black)}
+.who span{color:#3D3731}
+.sync{color:var(--black)}
+.sync.boot i{background:#8A8174}
+.ph .st,.seg button.hot b{color:var(--terra-ink)}
+.btn.terra{background:var(--terra);border-color:var(--terra);color:var(--black)}
+@media (max-width:720px){
+  .mtop{background:var(--oat);color:var(--black);border-bottom:1px solid var(--ui-sep)}
+  .mtop .logo{height:24px;width:auto;filter:none}
+  .mtop .sync{color:var(--black)}
+}
+/* 비밀번호 바꾸기 */
+.pwbox{margin-top:16px;padding-top:14px;border-top:1px solid var(--ui-line)}
+.pwbox h4{font-size:14.5px;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.pwnote{font-size:13.5px;line-height:1.65;color:var(--ink);margin-bottom:10px}
+.pwlast{display:block;margin-top:4px;color:var(--ink-sub)}
+.pwself{font-size:12.5px;color:var(--ink-sub)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.grid3{grid-template-columns:minmax(0,1fr)}}
+
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <aside class="side">
-    <div class="brandbox"><img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><div class="ver">콘텐츠 대시보드 · v2.0</div></div>
+    <div class="brandbox"><img class="logo" src="/assets/nicott-lockup-h.svg" alt="NICOTT"><div class="ver">콘텐츠 대시보드 · v2.1</div></div>
     <nav class="nav" id="nav" aria-label="메뉴"></nav>
     <div class="gm"><h4>이번 달 계획·진행</h4><div id="gauge"></div></div>
     <div class="sfoot" id="storeInfo"></div>
@@ -832,10 +894,10 @@ const GUIDE={
    {t:'(이벤트라면) 경품·참여방법·기간이 명확한가',auto:'event3'},{t:'당장 하나 더 팔지 못하더라도, 니코트를 좋아하게 만드는가'}]
 };
 const MIXLABEL={product:'제품·신상품',lifestyle:'브랜드·라이프스타일',story:'브랜드 스토리·제작',event:'고객참여·이벤트'};
-const SKINS=[{id:'sk-ever',name:'에버그린',desc:'뉴트럴·여백',sw:['#FAF8F4','#EAE0D5','#E05A33']},
- {id:'sk-edit',name:'에디토리얼',desc:'굵은 타이포·대비',sw:['#ECEAE4','#231F1C','#231F1C']},
- {id:'sk-soft',name:'소프트',desc:'라운드·크림',sw:['#FBF7F1','#F3EBDD','#C9A98C']},
- {id:'sk-bold',name:'볼드',desc:'짙은 면·시즌',sw:['#2F4433','#E05A33','#D6C3B0']}];
+const SKINS=[{id:'sk-ever',name:'에버그린',desc:'오트 바탕·여백',sw:['#E8E4DD','#D8BFAF','#F1613E']},
+ {id:'sk-edit',name:'에디토리얼',desc:'굵은 타이포·대비',sw:['#E8E4DD','#231F20','#231F20']},
+ {id:'sk-soft',name:'소프트',desc:'라운드·부드럽게',sw:['#E8E4DD','#FFFDFA','#294735']},
+ {id:'sk-bold',name:'볼드',desc:'짙은 면·시즌',sw:['#294735','#F1613E','#D8BFAF']}];
 const B='https://nicott.speedgabia.com/mall/nicott/plating/';
 const SAMPLES=[['10','04','화이트 홈세트'],['10','05','패키지'],['11','01','플레이팅'],['11','04','화이트 테이블'],['11','05','유리잔'],['12','01','소바'],
  ['12','02','커트러리'],['12','04','여름 상차림'],['13','01','머그'],['13','03','핫초코'],['13','04','베어 브레드'],['13','05','디저트']]
@@ -857,7 +919,7 @@ const T=[
 {id:'A3',nm:'컬러 스튜디오',role:'page',fmt:'F1',sp:'NICOTT',bk:'product',ev:'광주요·iittala',
  f:[{k:'img1',t:'image',l:'제품 사진'},{k:'name',t:'text',l:'제품명',v:'데일리 머그',max:16,fs:1},
     {k:'c1',t:'text',l:'컬러 1',v:'밀크',max:6},{k:'h1',t:'color',l:'색 1',v:'#FAF8F4'},
-    {k:'c2',t:'text',l:'컬러 2',v:'샌드',max:6},{k:'h2',t:'color',l:'색 2',v:'#D6C3B0'},
+    {k:'c2',t:'text',l:'컬러 2',v:'샌드',max:6},{k:'h2',t:'color',l:'색 2',v:'#D8BFAF'},
     {k:'c3',t:'text',l:'컬러 3',v:'브라운',max:6},{k:'h3',t:'color',l:'색 3',v:'#5C4638'}],
  r:(v,z)=>`<div class="bd"></div><div class="wm">Nicott</div><div class="im" style="${bg(v.img1)}"></div><div class="lb">COLOR</div><div class="nm" style="${z('name')}">${esc(v.name)}</div><div class="cs">${[1,2,3].map(i=>`<div class="cp"><i style="background:${esc(v['h'+i])}"></i>${esc(v['c'+i])}</div>`).join('')}</div>`},
 {id:'A4',nm:'시리즈 커버',role:'cover',fmt:'F2',sp:'NICOTT',bk:'story',ev:'광주요 락업',
@@ -924,7 +986,7 @@ const T=[
  r:(v,z)=>`<div class="im" style="${bg(v.img1)}"></div><div class="ti" style="${z('title')}">${esc(v.title)}</div><ul style="${z('i1',2)}">${[1,2,3].map(i=>`<li><b>0${i}</b>${esc(v['i'+i])}</li>`).join('')}</ul><div class="wm">Nicott</div>`},
 {id:'P6',nm:'마무리 카드',role:'end',fmt:'F1',sp:'NICOTT',bk:'lifestyle',ev:'캐러셀 엔딩',
  f:[{k:'line',t:'area',l:'마무리 문장',v:'오늘의 식탁이\n조금 더 즐거워지기를.',max:36,fs:1},{k:'handle',t:'text',l:'계정',v:'@nicott_kitchen',max:20}],
- r:(v,z)=>`<div class="wm">Nicott</div><div class="ln3" style="${z('line')}">${nl(v.line)}</div><i></i><div class="hd2">${esc(v.handle)}</div>`},
+ r:(v,z)=>`<div class="wm nl-v"><span class="nsym" aria-hidden="true">&#xE000;</span><span class="nwm">Nicott</span></div><div class="ln3" style="${z('line')}">${nl(v.line)}</div><i></i><div class="hd2">${esc(v.handle)}</div>`},
 {id:'D1',nm:'4분할 콜라주',role:'cover',fmt:'F4',sp:'NICOTT',bk:'lifestyle',ev:'그리드 콜라주',
  f:[{k:'img1',t:'image',l:'좌상'},{k:'img2',t:'image',l:'우상'},{k:'img3',t:'image',l:'좌하'},{k:'img4',t:'image',l:'우하'},
     {k:'title',t:'area',l:'제목',v:'이번 주 식탁\n네 장면',max:20,fs:1}],
@@ -1018,13 +1080,13 @@ const T=[
  f:[{k:'dd',t:'text',l:'D-day',v:'D-3',max:8},{k:'title',t:'area',l:'이벤트명',v:'가을 식탁 준비 위크',max:20,fs:1},{k:'sub',t:'text',l:'기간',v:'9. 1 (월) — 9. 14 (일)',max:26}],
  r:(v,z)=>`<div class="wm">Nicott</div><div class="dd">${esc(v.dd)}</div><h4 style="${z('title')}">${nl(v.title)}</h4><span>${esc(v.sub)}</span><i></i>`},
 {id:'ST6',nm:'스토리 컬러 카드',role:'story',fmt:'F6',sp:'NICOTT',bk:'product',ev:'브랜드 4색 면 + 제품 — 색을 직접 고릅니다',w:1080,h:1920,
- f:[{k:'img1',t:'image',l:'제품 사진'},{k:'tone',t:'select',l:'배경 색 (브랜드 4색)',v:'베이지',o:['베이지','크림','딥그린','테라코타']},
+ f:[{k:'img1',t:'image',l:'제품 사진'},{k:'tone',t:'select',l:'배경 색 (브랜드 4색)',v:'베이지',o:['베이지','오트','딥그린','테라코타']},
     {k:'title',t:'area',l:'문장',v:'새 컬러가 도착했어요',max:20,fs:1},{k:'sub',t:'text',l:'부제',v:'샌드 · 밀크 · 브라운',max:24}],
- r:(v,z)=>{const M={'베이지':['#D6C3B0','rgba(42,39,36,.92)','rgba(42,39,36,.64)'],'크림':['#ECEAE4','rgba(42,39,36,.92)','rgba(42,39,36,.6)'],
-   '딥그린':['#2F4433','#FFFFFF','rgba(255,255,255,.76)'],'테라코타':['#E05A33','#FFFFFF','rgba(255,255,255,.82)']};
+ r:(v,z)=>{const M={'베이지':['#D8BFAF','#231F20','rgba(35,31,32,.84)','#231F20'],'오트':['#E8E4DD','#231F20','rgba(35,31,32,.82)','#231F20'],
+   '딥그린':['#294735','#FFFFFF','rgba(255,255,255,.88)','#E8E4DD'],'테라코타':['#F1613E','#FFFFFF','rgba(255,255,255,.92)','#231F20']};M['크림']=M['오트'];
    const c=M[v.tone]||M['베이지'];
    return `<div style="position:absolute;inset:0;--tone:${c[0]};--ontone:${c[1]};--ontone2:${c[2]};background:${c[0]};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 90px;text-align:center">
-   <div class="wm" style="position:absolute;top:140px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:${c[2]}">Nicott</div>
+   <div class="wm" style="position:absolute;top:140px;left:0;right:0;text-align:center;font-size:calc(24px*var(--ts));color:${c[3]}">Nicott</div>
    <div class="im" style="${bg(v.img1)};width:760px;height:760px;border-radius:var(--rad)"></div>
    <h4 style="${z('title')};margin-top:70px;font-size:calc(46px*var(--ts)*var(--f,1));font-weight:var(--hw);color:${c[1]};line-height:1.5">${nl(v.title)}</h4>
    <span style="margin-top:26px;font-size:calc(28px*var(--ts));color:${c[2]}">${esc(v.sub)}</span></div>`;}},
@@ -1043,7 +1105,7 @@ const T=[
  f:[{k:'img1',t:'image',l:'무드컷'},{k:'head',t:'area',l:'헤드라인',v:'하나쯤 있으면 좋은 패브릭',max:24,fs:1},
     {k:'sub',t:'text',l:'서브타이틀 (상품명)',v:'니코트 기본이 되는 체크 키친크로스 2color',max:40},
     {k:'body',t:'area',l:'카피 본문 (문단 사이 빈 줄)',v:'키친 크로스는\n꼭 필요한 물건은 아닐지도 모릅니다.\n\n하지만 하나쯤 갖추고 나면\n주방에서 가장 자주 손이 가는 소품이 됩니다.',max:600,fs:2}],
- r:(v,z)=>`<div class="lg"><div class="wm">Nicott</div><div class="sl">일상에 낭만을 더하다</div></div><div class="im" style="${bg(v.img1)}"></div><div class="bx"><h4 style="${z('head')}">${nl(v.head)}</h4><div class="sb2">${esc(v.sub)}</div><div class="bd2" style="${z('body',2)}">${nl(v.body)}</div></div>`},
+ r:(v,z)=>`<div class="lg"><div class="wm nl-h"><span class="nsym" aria-hidden="true">&#xE000;</span><span class="nwm">Nicott</span></div><div class="sl">일상에 낭만을 더하다</div></div><div class="im" style="${bg(v.img1)}"></div><div class="bx"><h4 style="${z('head')}">${nl(v.head)}</h4><div class="sb2">${esc(v.sub)}</div><div class="bd2" style="${z('body',2)}">${nl(v.body)}</div></div>`},
 {id:'DT2',nm:'상세 · 컷 나열',role:'detail',fmt:'F1',sp:'NICOTT',bk:'product',ev:'자사몰 OP_02 — 연출컷 세로 나열',w:900,h:2300,
  f:[{k:'img1',t:'image',l:'위 사진'},{k:'img2',t:'image',l:'아래 사진'},{k:'cap',t:'text',l:'하단 캡션 (선택)',v:'',max:60,fs:1}],
  r:(v,z)=>`<div class="im a" style="${bg(v.img1)}"></div><div class="im b" style="${bg(v.img2)}"></div>${v.cap?`<div class="cp2" style="${z('cap')}">${nl(v.cap)}</div>`:''}`},
@@ -1058,7 +1120,7 @@ const T=[
  r:(v,z)=>`<div class="pi">PRODUCT INFO</div>${[['사 이 즈',v.size],['재 질',v.mat],['원 산 지',v.org],['추천용도',v.use]].filter(x=>x[1]).map(x=>`<div class="rw2" style="${z('size',2)}"><b>${esc(x[0])}</b><span>${nl(x[1])}</span></div>`).join('')}<div class="hr2"></div><div class="ln5" style="${z('line')}">${nl(v.line)}</div>`},
 {id:'DT5',nm:'상세 · 마무리',role:'detail',fmt:'F1',sp:'NICOTT',bk:'product',ev:'자사몰 OP_05 — 감성컷+문구+로고',w:900,h:1000,
  f:[{k:'img1',t:'image',l:'마무리 컷'},{k:'line',t:'area',l:'마무리 문구',v:'하루의 살림 속\n자연스럽게 쓰임을 이어가는 니코트입니다.',max:70,fs:1}],
- r:(v,z)=>`<div class="im" style="${bg(v.img1)}"></div><div class="ln6" style="${z('line')}">${nl(v.line)}</div><div class="wm2">Nicott</div>`}
+ r:(v,z)=>`<div class="im" style="${bg(v.img1)}"></div><div class="ln6" style="${z('line')}">${nl(v.line)}</div><div class="wm2 nl-h"><span class="nsym" aria-hidden="true">&#xE000;</span><span class="nwm">Nicott</span></div>`}
 ];
 /* 콘텐츠 유형 — 캘린더·계획·게시에서 공통 사용 */
 const KINDS={
@@ -1274,11 +1336,11 @@ async function prepImage(file){
   const du=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file);});
   if(/gif$/i.test(file.type))return du;
   try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=du;});
-    const MAX=2400,k=Math.min(1,MAX/Math.max(img.naturalWidth,img.naturalHeight));
-    if(k>=1&&file.size<2.5e6&&/jpe?g$/i.test(file.type))return du;
+    const MAX=4096,k=Math.min(1,MAX/Math.max(img.naturalWidth,img.naturalHeight));   // v2.1: 4K 출력에 맞춰 원본 화질 보존
+    if(k>=1&&file.size<8e6&&/jpe?g$/i.test(file.type))return du;
     const cv=document.createElement('canvas');cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
-    const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
-    return cv.toDataURL('image/jpeg',.9);}catch(e){return du;}
+    const cx=cv.getContext('2d');cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
+    return cv.toDataURL('image/jpeg',.93);}catch(e){return du;}
 }
 async function uploadDataUrl(du){
   if(MEDIA_CACHE.has(du))return MEDIA_CACHE.get(du);
@@ -1294,23 +1356,52 @@ async function preloadImgs(p){
   const urls=Object.entries(p.v||{}).filter(([k,v])=>typeof v==='string'&&/^(data:|https?:|\/)/.test(v)&&/img|bg|photo/i.test(k)).map(([,v])=>v);
   await Promise.all(urls.map(u=>new Promise(r=>{const i=new Image();i.crossOrigin='anonymous';i.onload=i.onerror=()=>r();i.src=u;})));
 }
-async function renderPagesToJpeg(pages,skin){
+/* v2.1 이미지 출력 — 항상 4K급으로 그린다 (긴 변 3,840px · 최소 2배)
+   · 내려받기·앱에서 직접 올리기: 4K 원본 그대로 (피드 3072×3840 · 스토리 2160×3840)
+   · 인스타 자동 게시: 인스타 최대 가로 1440px(Meta 공식 — 넘으면 인스타가 줄임, 8MB 이하)로
+     4K 원본에서 반씩 단계 축소해 가장 선명하게 보낸다 */
+const OUT_BG='#E8E4DD',MASTER_LONG=3840,CANVAS_MAX=16e6,IG_W=1440,IG_MAX_BYTES=7.5e6;
+function masterScale(w,h){let s=Math.max(2,MASTER_LONG/Math.max(w,h));while(w*h*s*s>CANVAS_MAX&&s>1)s-=.05;return s;}
+async function fontsReady(){try{await Promise.all([document.fonts.load("700 40px 'NICOTT Logo'",'NICOTT\uE000'),document.fonts.load("400 40px 'NICOTT Logo'",'NICOTT')]);await document.fonts.ready;}catch(e){}}
+function stepDown(src,tw){
+  let cur=src;
+  while(cur.width/2>=tw){const c=document.createElement('canvas');c.width=Math.round(cur.width/2);c.height=Math.round(cur.height/2);
+    const x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cur,0,0,c.width,c.height);
+    if(cur!==src)cur.width=cur.height=0;cur=c;}
+  if(cur.width===tw)return cur;
+  const th=Math.round(src.height*tw/src.width),c=document.createElement('canvas');c.width=tw;c.height=th;
+  const x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cur,0,0,tw,th);
+  if(cur!==src)cur.width=cur.height=0;return c;
+}
+const canvasBlob=(cv,q)=>new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('이미지 변환에 실패했습니다')),'image/jpeg',q));
+async function jpegOf(cv,q,max){let b=await canvasBlob(cv,q);while(max&&b.size>max&&q>.74){q-=.04;b=await canvasBlob(cv,q);}return b;}
+async function renderPagesToJpeg(pages,skin,mode='master',onStep){
   const host=document.getElementById('offstage');const out=[];
-  try{for(const p0 of pages){const p={...p0,skin:p0.skin||skin||S.skin};const t=TB(p.tpl);
-    host.innerHTML=`<div class="tpl ${p.skin} ${t.id}" style="--ts:${p.ts||1};--cw:${CW(t)}px;--ch:${CH(t)}px">${t.r(fullV(p,t),zf(p))}</div>`;
+  await fontsReady();
+  try{for(let i=0;i<pages.length;i++){const p0=pages[i];const p={...p0,skin:p0.skin||skin||S.skin};const t=TB(p.tpl),w=CW(t),h=CH(t);
+    onStep&&onStep(i,pages.length);
+    host.innerHTML=`<div class="tpl ${p.skin} ${t.id}" style="--ts:${p.ts||1};--cw:${w}px;--ch:${h}px">${t.r(fullV(p,t),zf(p))}</div>`;
     await preloadImgs(p);await new Promise(r=>setTimeout(r,150));
-    const cv=await html2canvas(host.firstElementChild,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
-    out.push(cv.toDataURL('image/jpeg',.92));}}
+    const s=masterScale(w,h);let cv=null;
+    for(const k of [1,.75,.5]){   // 기기 메모리가 부족하면 조금씩 낮춰 다시 시도 (최소 2배 근처)
+      try{cv=await html2canvas(host.firstElementChild,{scale:Math.max(1,s*k),width:w,height:h,backgroundColor:OUT_BG,useCORS:true,logging:false,imageTimeout:30000});}catch(e){cv=null;}
+      if(cv&&cv.width>0&&cv.height>0)break;cv=null;}
+    if(!cv)throw new Error('이미지를 그리지 못했습니다');
+    const fin=mode==='ig'?stepDown(cv,Math.min(IG_W,cv.width)):cv;
+    out.push(await jpegOf(fin,.95,mode==='ig'?IG_MAX_BYTES:0));
+    if(fin!==cv)fin.width=fin.height=0;cv.width=cv.height=0;}}
   finally{host.innerHTML='';}
   return out;
 }
+async function uploadBlob(blob){const r=await api('POST','media',blob,'image/jpeg');return r.url;}
+function saveBlob(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement('a');a.download=name;a.href=u;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),120000);}
 async function mediaFor(c){
   if(!(c.pages||[]).length)throw new Error('장이 없습니다');
   const bad=c.pages.some(p=>Object.entries(p.v||{}).some(([k,v])=>k.startsWith('img')&&v&&!isOwnImage(v)));
   if(bad){notice('드라이브 링크·샘플 사진이 들어 있어 게시용 이미지를 만들 수 없습니다.\n콘텐츠를 열어 직접 올린 사진으로 바꿔 주세요.');throw new Error('external');}
   busy(`게시용 이미지 만드는 중… (0/${c.pages.length})`);
-  const imgs=await renderPagesToJpeg(c.pages,c.skin);const urls=[];
-  for(let i=0;i<imgs.length;i++){busy(`게시용 이미지 올리는 중… (${i+1}/${imgs.length})`);urls.push(await uploadDataUrl(imgs[i]));}
+  const imgs=await renderPagesToJpeg(c.pages,c.skin,'ig',(i,n)=>busy(`게시용 이미지 만드는 중… (${i+1}/${n}) · 4K 원본 → 인스타 최대 화질`));const urls=[];
+  for(let i=0;i<imgs.length;i++){busy(`게시용 이미지 올리는 중… (${i+1}/${imgs.length})`);urls.push(await uploadBlob(imgs[i]));}
   return urls;
 }
 
@@ -1541,8 +1632,18 @@ async function userCreate(){const v=id=>(document.getElementById(id)?.value||'')
     toast('계정을 만들었습니다 — 아이디와 처음 비밀번호를 본인에게 전달해 주세요');await loadUsers();render();}catch(e){notice(e.message);}}
 async function userPatch(id,p){try{await api('PATCH','users/'+id,p);toast('바꿨습니다');await loadUsers();}catch(e){notice(e.message);await loadUsers();}}
 async function userResetPw(id,name){const pw=await askInput(`${name} — 새 비밀번호`,'8자 이상. 바꾼 뒤 본인에게 전달해 주세요.','password');if(!pw)return;userPatch(id,{password:pw});}
-async function changeMyPw(){const pw=document.getElementById('myPw')?.value||'';if(pw.length<8){notice('비밀번호는 8자 이상이어야 합니다.');return;}
-  try{await api('PATCH','me',{password:pw});document.getElementById('myPw').value='';toast('비밀번호를 바꿨습니다');}catch(e){notice(e.message);}}
+async function changeMyPw(){const g=i=>document.getElementById(i)?.value||'';const cur=g('myPwCur'),pw=g('myPw'),pw2=g('myPw2');
+  if(!cur){notice('지금 쓰는 비밀번호를 먼저 적어 주세요.');return;}
+  if(pw.length<8){notice('새 비밀번호는 8자 이상이어야 합니다.');return;}
+  if(pw!==pw2){notice('새 비밀번호 두 칸이 서로 다릅니다.\n같은 비밀번호를 두 번 적어 주세요.');return;}
+  if(pw===cur){notice('지금과 다른 비밀번호를 정해 주세요.');return;}
+  try{const r=await api('PATCH','me',{current:cur,password:pw});['myPwCur','myPw','myPw2'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});
+    if(r&&r.master){try{const m=await api('GET','me');Cloud.me=m.me;}catch(e){}render();
+      notice('공용 계정(nicott) 비밀번호를 바꿨습니다.\n다른 기기에서 nicott로 로그인돼 있던 화면은 로그아웃됩니다. 새 비밀번호는 nicott 계정을 함께 쓰는 분께 직접 알려 주세요.');}
+    else notice('비밀번호를 바꿨습니다. 다음 로그인부터 새 비밀번호를 쓰세요.');}catch(e){notice(e.message);}}
+async function masterResetPw(){const pw=await askInput('공용 계정(nicott) 새 비밀번호','8자 이상. 바꾸면 nicott로 로그인돼 있던 기기는 모두 로그아웃됩니다. 바꾼 뒤 nicott를 쓰는 분께 알려 주세요.','password');if(!pw)return;
+  if(pw.length<8){notice('비밀번호는 8자 이상이어야 합니다.');return;}
+  try{await api('PATCH','users/master',{password:pw});toast('공용 계정(nicott) 비밀번호를 바꿨습니다');}catch(e){notice(e.message);}}
 
 /* ── AI 캡션 안 ── */
 async function aiCaptions(){
@@ -1720,7 +1821,7 @@ function paintNav(){
     mt.innerHTML=tabs.map(([k,l])=>`<button class="${S.view===k?'on':''}" onclick="go('${k}')">${ICON[k]}<span>${l}</span>${k==='contents'&&bd?`<span class="nb">${bd}</span>`:''}</button>`).join('')
       +`<button class="${more?'on':''}" onclick="openSheet()">${ICON.more}<span>더보기</span></button>`;}
   const top=document.getElementById('mtop');
-  if(top)top.innerHTML=`<img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><div class="sync" id="syncTop"></div>${Cloud.me?`<button class="ava" onclick="go('settings')" title="${esc(Cloud.me.name)}">${esc(Cloud.me.name.slice(0,1))}</button>`:''}`;
+  if(top)top.innerHTML=`<img class="logo" src="/assets/nicott-lockup-h.svg" alt="NICOTT"><div class="sync" id="syncTop"></div>${Cloud.me?`<button class="ava" onclick="go('settings')" title="${esc(Cloud.me.name)}">${esc(Cloud.me.name.slice(0,1))}</button>`:''}`;
   document.title=(bd?`(${bd}) `:'')+'NICOTT 콘텐츠 대시보드';
 }
 function go(v){S.view=v;closeSheet();closeDetail(true);document.getElementById('app')?.classList.remove('pvopen');render();window.scrollTo(0,0);}
@@ -1948,12 +2049,12 @@ function step3(){
 function saveAndPublish(){approveFromEditor();}
 function saveContent(status){return status==='scheduled'?approveFromEditor():saveDraft();}
 async function exportAll(){
-  busy('이미지를 만드는 중…');
-  try{const imgs=await renderPagesToJpeg(S.pages,S.skin);
+  busy('4K 이미지를 만드는 중…');
+  try{const imgs=await renderPagesToJpeg(S.pages,S.skin,'master',(i,n)=>busy(`4K 이미지를 만드는 중… (${i+1}/${n})`));
     for(let i=0;i<imgs.length;i++){const t=TB(S.pages[i].tpl);
-      const a=document.createElement('a');a.download=(t.role==='detail'&&S.dtCode?S.dtCode+'_OP_'+String(i+1).padStart(2,'0'):`nicott_${String(i+1).padStart(2,'0')}_${t.id}`)+'.jpg';a.href=imgs[i];a.click();
-      await new Promise(r=>setTimeout(r,220));}
-    toast(`${imgs.length}장을 내려받았습니다`);}
+      saveBlob(imgs[i],(t.role==='detail'&&S.dtCode?S.dtCode+'_OP_'+String(i+1).padStart(2,'0'):`nicott_${String(i+1).padStart(2,'0')}_${t.id}`)+'.jpg');
+      await new Promise(r=>setTimeout(r,260));}
+    toast(`${imgs.length}장을 4K로 내려받았습니다`);}
   catch(e){notice('이미지를 만들지 못했습니다 — '+e.message);}finally{busy(false);}
 }
 /* ══ 갤러리 ══ */
@@ -2039,10 +2140,10 @@ function copyCap(id){const c=DB.contents.find(x=>x.id===id);if(!c)return;
 async function publishHelp(id){
   const c=DB.contents.find(x=>x.id===id);if(!c)return;
   copyCap(id);
-  busy('이미지를 만드는 중…');
+  busy('4K 이미지를 만드는 중…');
   let n=0;
-  try{const imgs=await renderPagesToJpeg(c.pages||[],c.skin);
-    for(let i=0;i<imgs.length;i++){const a=document.createElement('a');a.download=`nicott_${c.id}_${String(i+1).padStart(2,'0')}.jpg`;a.href=imgs[i];a.click();n++;await new Promise(r=>setTimeout(r,250));}}
+  try{const imgs=await renderPagesToJpeg(c.pages||[],c.skin,'master',(i,k)=>busy(`4K 이미지를 만드는 중… (${i+1}/${k})`));
+    for(let i=0;i<imgs.length;i++){saveBlob(imgs[i],`nicott_${c.id}_${String(i+1).padStart(2,'0')}.jpg`);n++;await new Promise(r=>setTimeout(r,280));}}
   catch(e){}finally{busy(false);}
   if(await ask('인스타 앱에서 올리셨나요?',`이미지 ${n}장을 내려받고 캡션을 복사했습니다.\n앱에서 올린 뒤 [게시 완료로 기록]을 누르면 콘텐츠 상태가 바뀝니다.`,'게시 완료로 기록','아직이요')){
     if(isAdmin())await act(id,'mark_published');else{await api('POST',`contents/${id}/comments`,{body:'앱에서 직접 올렸습니다. 게시 완료로 기록해 주세요.'});toast('관리자에게 기록을 요청했습니다');pull(true);}}
@@ -2091,7 +2192,7 @@ const pubReady=()=>igReady();
 async function shotPage(i){
   S.cur=i;paint();await new Promise(r=>setTimeout(r,300));
   const t=TB(S.pages[i].tpl),el=document.getElementById('render');
-  const cv=await html2canvas(el,{scale:1,width:CW(t),height:CH(t),backgroundColor:'#FAF8F4',useCORS:true,logging:false});
+  const cv=await html2canvas(el,{scale:masterScale(CW(t),CH(t)),width:CW(t),height:CH(t),backgroundColor:OUT_BG,useCORS:true,logging:false});
   return cv.toDataURL('image/jpeg',.92);
 }
 async function publishNow(id){
@@ -2420,8 +2521,13 @@ function vSettings(){
   return `<div class="ph"><h1>설정</h1></div><div class="psub">여기 값은 팀 전체에 공통으로 적용됩니다. 연결 정보(토큰·키)는 서버에만 보관되고 화면에는 상태만 보입니다.</div>
   <div class="card"><h3>내 계정</h3>
    <dl class="kv"><dt>이름</dt><dd>${esc(Cloud.me?.name||'')}</dd><dt>아이디</dt><dd>${esc(Cloud.me?.login||'')}</dd><dt>권한</dt><dd>${isAdmin()?'관리자 — 승인·예약·연결·사용자 관리':'작성자 — 만들기·검토 요청·댓글'}</dd></dl>
-   ${Cloud.me?.id==='master'?`<div class="hint">지금은 <b>공용 계정(nicott)</b>으로 접속 중입니다. 누가 무엇을 했는지 남도록, 아래 <b>사용자 관리</b>에서 개인 계정을 만들어 쓰시길 권합니다.</div>`
-    :`<div class="grid2"><div class="field"><label><span>새 비밀번호 (8자 이상)</span></label><input type="password" id="myPw" autocomplete="new-password"></div><div class="field" style="display:flex;align-items:flex-end"><button class="btn" onclick="changeMyPw()">비밀번호 바꾸기</button></div></div>`}
+   ${Cloud.me?.id==='master'?`<div class="hint">지금은 <b>공용 계정(nicott)</b>으로 접속 중입니다. 누가 무엇을 했는지 남도록, 아래 <b>사용자 관리</b>에서 개인 계정을 만들어 쓰시길 권합니다.</div>`:''}
+   <div class="pwbox"><h4>비밀번호 바꾸기${Cloud.me?.id==='master'?' — 공용 계정 nicott':''}</h4>
+    ${Cloud.me?.id==='master'?`<p class="pwnote">바꾸면 <b>다른 기기에서 nicott로 로그인돼 있던 화면은 모두 로그아웃</b>됩니다. 지금 이 화면은 그대로 유지됩니다. 새 비밀번호는 nicott 계정을 함께 쓰는 분께 직접 알려 주세요.${Cloud.me?.pwChangedAt?` <span class="pwlast">마지막 변경: ${dt(Cloud.me.pwChangedAt)}${Cloud.me.pwChangedBy?' · '+esc(Cloud.me.pwChangedBy):''}</span>`:''}</p>`:''}
+    <div class="grid3"><div class="field"><label for="myPwCur"><span>지금 비밀번호</span></label><input type="password" id="myPwCur" autocomplete="current-password"></div>
+    <div class="field"><label for="myPw"><span>새 비밀번호 (8자 이상)</span></label><input type="password" id="myPw" autocomplete="new-password"></div>
+    <div class="field"><label for="myPw2"><span>새 비밀번호 한 번 더</span></label><input type="password" id="myPw2" autocomplete="new-password"></div></div>
+    <div class="tools"><button class="btn primary" onclick="changeMyPw()">비밀번호 바꾸기</button></div></div>
    <div class="tools"><a class="btn" href="/logout">로그아웃</a></div></div>
   <div class="card"><h3>인스타그램 연결 <span class="conn ${ig.connected?'on':'off'}">${ig.connected?'연결됨 · @'+esc(ig.username||''):'미연결'}</span></h3>
    ${ig.connected?`<dl class="kv"><dt>연결한 사람</dt><dd>${esc(ig.connectedBy||'')} · ${dt(ig.connectedAt)}</dd>
@@ -2449,6 +2555,7 @@ function vSettings(){
   ${isAdmin()?`<div class="card"><h3>사용자 관리 <span class="badge">${(Cloud.users||[]).length}명</span></h3>
    <div class="hint">사람마다 계정을 만들면 작성자·승인자·댓글이 이름으로 남습니다. <b>작성자</b>는 만들고 검토 요청까지, <b>관리자</b>는 승인·예약·연결까지 합니다.</div>
    ${Cloud.users===null?'<div class="empty">불러오는 중…</div>':Cloud.users.length?`<table class="utable"><thead><tr><th>이름</th><th>아이디</th><th>마지막 접속</th><th>권한</th><th></th></tr></thead><tbody>
+     <tr><td><b>니코트 공용</b></td><td>nicott</td><td>—</td><td>관리자</td><td style="text-align:right;white-space:nowrap">${Cloud.me?.id==='master'?'<span class="pwself">위 [내 계정]에서 변경</span>':'<button class="btn sm" onclick="masterResetPw()">비밀번호</button>'}</td></tr>
      ${Cloud.users.map(u=>`<tr style="${u.active?'':'opacity:.62'}"><td><b>${esc(u.name)}</b>${u.active?'':' (중지)'}</td><td>${esc(u.login)}</td><td>${u.last_login?dt(u.last_login):'—'}</td>
        <td><select onchange="userPatch('${u.id}',{role:this.value})" aria-label="권한"><option value="editor" ${u.role==='editor'?'selected':''}>작성자</option><option value="admin" ${u.role==='admin'?'selected':''}>관리자</option></select></td>
        <td style="text-align:right;white-space:nowrap"><button class="btn sm" onclick="userResetPw('${u.id}','${esc(u.name)}')">비밀번호</button> <button class="btn sm" onclick="userPatch('${u.id}',{active:${u.active?0:1}})">${u.active?'중지':'재개'}</button></td></tr>`).join('')}</tbody></table>`:'<div class="empty">아직 개인 계정이 없습니다.</div>'}
