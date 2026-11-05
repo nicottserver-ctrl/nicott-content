@@ -10,26 +10,26 @@ const HIDDEN = /^\/(functions|\.github|\.wrangler|scripts|node_modules)(\/|$)|\.
 function loginPage(msg = '', next = '/') {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NICOTT 콘텐츠 대시보드 — 로그인</title><link rel="icon" href="/assets/nicott-icon.png">
+<title>NICOTT 콘텐츠 대시보드 — 로그인</title><link rel="icon" href="/assets/nicott-favicon.svg" type="image/svg+xml"><link rel="icon" href="/assets/nicott-favicon-32.png" sizes="32x32"><link rel="apple-touch-icon" href="/assets/nicott-touch-icon.png"><meta name="theme-color" content="#E8E4DD">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0}body{min-height:100vh;display:grid;place-items:center;background:#F4F1EC;font-family:'Noto Sans KR',sans-serif;color:#1F1C19;padding:20px}
-.card{width:100%;max-width:380px;background:#fff;border:1px solid #DDD6CB;border-radius:18px;padding:34px 28px 28px;box-shadow:0 18px 50px rgba(31,28,25,.08)}
-.logo{display:block;height:24px;margin:0 auto 10px}h1{font-size:15px;font-weight:500;text-align:center;margin-bottom:26px;color:#3D3731}
+*{box-sizing:border-box;margin:0}body{min-height:100vh;display:grid;place-items:center;background:#E8E4DD;font-family:'Noto Sans KR',sans-serif;color:#231F20;padding:20px;word-break:keep-all}
+.card{width:100%;max-width:380px;background:#fff;border:1px solid #D3CBBF;border-radius:18px;padding:36px 28px 28px;box-shadow:0 18px 50px rgba(35,31,32,.08)}
+.logo{display:block;height:84px;margin:0 auto 18px}h1{font-size:15px;font-weight:500;text-align:center;margin-bottom:26px;color:#231F20}
 label{display:block;font-size:13px;font-weight:500;margin:0 0 6px;color:#1F1C19}
-input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid #CFC6B8;border-radius:10px;margin-bottom:16px;color:#1F1C19;background:#fff}
-input:focus{outline:none;border-color:#2F4433;box-shadow:0 0 0 3px rgba(47,68,51,.15)}
-button{width:100%;font:inherit;font-size:16px;font-weight:700;padding:13px;border:0;border-radius:10px;background:#2F4433;color:#fff;cursor:pointer}
-button:hover{background:#243628}.msg{background:#FBE9E5;color:#8E2E1F;font-size:13.5px;font-weight:500;padding:10px 12px;border-radius:9px;margin-bottom:16px}
-.foot{margin-top:18px;font-size:12.5px;color:#4A443C;text-align:center;line-height:1.7}
+input{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid #C9BFB1;border-radius:10px;margin-bottom:16px;color:#231F20;background:#fff}
+input:focus{outline:none;border-color:#294735;box-shadow:0 0 0 3px rgba(41,71,53,.18)}
+button{width:100%;font:inherit;font-size:16px;font-weight:700;padding:13px;border:0;border-radius:10px;background:#294735;color:#fff;cursor:pointer}
+button:hover{background:#1F3828}.msg{background:#FBE9E5;color:#8E2E1F;font-size:13.5px;font-weight:500;padding:10px 12px;border-radius:9px;margin-bottom:16px}
+.foot{margin-top:18px;font-size:13px;color:#3D3731;text-align:center;line-height:1.7}
 </style></head><body><form class="card" method="post" action="/login">
-<img class="logo" src="/assets/nicott-logo.png" alt="NICOTT"><h1>콘텐츠 대시보드</h1>
+<img class="logo" src="/assets/nicott-lockup-v.svg" alt="NICOTT"><h1>콘텐츠 대시보드</h1>
 ${msg ? `<div class="msg">${esc(msg)}</div>` : ''}
 <input type="hidden" name="next" value="${esc(next)}">
 <label for="u">아이디</label><input id="u" name="login" autocomplete="username" autocapitalize="off" required>
 <label for="p">비밀번호</label><input id="p" name="password" type="password" autocomplete="current-password" required>
 <button type="submit">로그인</button>
-<div class="foot">계정이 없으면 관리자에게 요청해 주세요.</div></form></body></html>`;
+<div class="foot">계정이 없거나 비밀번호를 잊었으면 관리자에게 요청해 주세요.</div></form></body></html>`;
 }
 const html = (body, status = 200, headers = {}) =>
   new Response(body, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...headers } });

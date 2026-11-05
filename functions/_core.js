@@ -79,7 +79,7 @@ async function sessionKey(env) {
 export const COOKIE = 'nsid';
 const SESSION_DAYS = 30;
 export async function makeSession(env, user) {
-  const payload = b64u(enc.encode(JSON.stringify({ u: user.id, n: user.name, r: user.role, l: user.login, e: Date.now() + SESSION_DAYS * 864e5 })));
+  const payload = b64u(enc.encode(JSON.stringify({ u: user.id, n: user.name, r: user.role, l: user.login, pv: user.pv || 0, e: Date.now() + SESSION_DAYS * 864e5 })));
   const sig = b64u(await crypto.subtle.sign('HMAC', await sessionKey(env), enc.encode(payload)));
   return `${payload}.${sig}`;
 }
@@ -99,19 +99,44 @@ export async function readSession(env, request) {
     if (!row || !row.active) return null;
     return { id: row.id, name: row.name, role: row.role, login: row.login };
   }
-  return { id: 'master', name: p.n, role: 'admin', login: 'nicott' };
+  // 공용 계정: 비밀번호를 바꾼 뒤에는 바꾸기 전 로그인(pv 가 다름)을 받지 않는다
+  const sec = await masterSecret(env);
+  if ((p.pv || 0) !== (sec?.v || 0)) return null;
+  return { id: 'master', name: p.n, role: 'admin', login: 'nicott', pv: sec?.v || 0 };
 }
 export const sessionCookie = (value, maxAgeSec) =>
   `${COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAgeSec}`;
+
+/* ── 공용 계정(nicott) 비밀번호 ──
+   설정 화면에서 바꾸면 D1 kv 'secret:master' 에 PBKDF2 해시로 저장된다(원문은 어디에도 남지 않음).
+   v 는 바꿀 때마다 1씩 오르고, 세션의 pv 와 다르면 로그아웃된다.
+   모두 잊었을 때 복구: Cloudflare → D1 nicott-db 콘솔에서  DELETE FROM kv WHERE key='secret:master';
+   → 다시 Pages 환경변수 SITE_PASS 로 로그인된다. */
+export async function masterSecret(env) {
+  const r = await kvGet(env, 'secret:master');
+  return r && r.value && r.value.hash ? r.value : null;
+}
+export async function setMasterPassword(env, password, by) {
+  const prev = await masterSecret(env);
+  const h = await hashPassword(String(password));
+  const v = (prev?.v || 0) + 1;
+  await kvSet(env, 'secret:master', { salt: h.salt, hash: h.hash, v, changedAt: now(), changedBy: by }, by);
+  return v;
+}
 
 /* ── 로그인 검증 ── */
 export async function verifyLogin(env, login, password) {
   login = String(login || '').trim().toLowerCase();
   password = String(password || '');
   if (!login || !password) return null;
-  // 공용 관리자: 기존 접속 계정(아이디 nicott + Pages 환경변수 SITE_PASS) 그대로 사용
+  // 공용 관리자 nicott: 설정에서 비밀번호를 바꿨으면 그 비밀번호(D1 해시)만, 아직 안 바꿨으면 Pages 환경변수 SITE_PASS
   if (login === 'nicott') {
-    if (env.SITE_PASS && safeEqual(password, String(env.SITE_PASS))) return { id: 'master', name: '니코트 공용', role: 'admin', login: 'nicott' };
+    const sec = await masterSecret(env);
+    if (sec && sec.hash) {
+      const { hash } = await hashPassword(password, sec.salt);
+      return safeEqual(hash, sec.hash) ? { id: 'master', name: '니코트 공용', role: 'admin', login: 'nicott', pv: sec.v || 0 } : null;
+    }
+    if (env.SITE_PASS && safeEqual(password, String(env.SITE_PASS))) return { id: 'master', name: '니코트 공용', role: 'admin', login: 'nicott', pv: 0 };
     return null;
   }
   const row = await env.DB.prepare('SELECT * FROM users WHERE login=?').bind(login).first();
