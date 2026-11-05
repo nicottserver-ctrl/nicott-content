@@ -2,6 +2,7 @@
 // 모든 경로는 _middleware.js 가 로그인 확인 후 context.data.user 를 넣어 준다 (/api/cron/tick 만 예외)
 import {
   ensureSchema, json, err, now, kvGet, kvSet, randomId, hashPassword, ROLES, STATUSES, WORKSPACE_KEYS, cleanSettings,
+  verifyLogin, loginThrottle, makeSession, sessionCookie, masterSecret, setMasterPassword,
   rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh,
 } from '../_core.js';
 
@@ -239,14 +240,30 @@ export async function onRequest(context) {
     if (!user) return err(401, '로그인이 필요합니다', { code: 'AUTH' });
 
     /* 내 정보 */
-    if (a === 'me' && M === 'GET') return json({ me: user, roles: ROLES });
+    if (a === 'me' && M === 'GET') {
+      const me = { id: user.id, name: user.name, role: user.role, login: user.login };
+      if (user.id === 'master') { const sec = await masterSecret(env); me.pwChangedAt = sec?.changedAt || null; me.pwChangedBy = sec?.changedBy || null; }
+      return json({ me, roles: ROLES });
+    }
     if (a === 'me' && M === 'PATCH') {
-      if (user.id === 'master') return err(400, '공용 계정은 여기서 바꿀 수 없습니다. 개인 계정을 만들어 쓰세요.');
       const p = await body(request);
-      if (p.name) await env.DB.prepare('UPDATE users SET name=? WHERE id=?').bind(String(p.name).slice(0, 30), user.id).run();
-      if (p.password) {
-        if (String(p.password).length < 8) return err(400, '비밀번호는 8자 이상이어야 합니다');
-        const h = await hashPassword(String(p.password));
+      if (p.name && user.id !== 'master') await env.DB.prepare('UPDATE users SET name=? WHERE id=?').bind(String(p.name).slice(0, 30), user.id).run();
+      if (p.password !== undefined) {
+        // 비밀번호 바꾸기 — 지금 비밀번호를 먼저 확인한다(틀린 시도는 로그인 실패와 같이 15분 10회 제한)
+        const ip = request.headers.get('cf-connecting-ip') || 'local';
+        if (await loginThrottle(env, ip, false)) return err(429, '시도가 너무 많습니다. 15분 뒤 다시 해 주세요');
+        const pw = String(p.password || '');
+        if (pw.length < 8) return err(400, '새 비밀번호는 8자 이상이어야 합니다');
+        if (pw.length > 128) return err(400, '새 비밀번호가 너무 깁니다 (128자 이하)');
+        const ok = await verifyLogin(env, user.login, String(p.current || ''));
+        if (!ok) { await loginThrottle(env, ip, true); return err(403, '지금 비밀번호가 맞지 않습니다'); }
+        if (pw === String(p.current || '')) return err(400, '지금과 다른 비밀번호를 정해 주세요');
+        if (user.id === 'master') {
+          const v = await setMasterPassword(env, pw, user.name);
+          const token = await makeSession(env, { ...user, pv: v });   // 바꾼 이 기기는 로그인 유지, 다른 기기는 로그아웃
+          return json({ ok: true, master: true }, 200, { 'set-cookie': sessionCookie(token, 30 * 86400) });
+        }
+        const h = await hashPassword(pw);
         await env.DB.prepare('UPDATE users SET salt=?, hash=? WHERE id=?').bind(h.salt, h.hash, user.id).run();
       }
       return json({ ok: true });
@@ -334,6 +351,16 @@ export async function onRequest(context) {
         await env.DB.prepare('INSERT INTO users (id, login, name, role, salt, hash, active, created_at) VALUES (?,?,?,?,?,?,1,?)')
           .bind(id, login, String(p.name).trim().slice(0, 30), role, h.salt, h.hash, now()).run();
         return json({ ok: true, id }, 201);
+      }
+      if (M === 'PATCH' && b === 'master') {
+        // 개인 관리자 계정이 공용 계정(nicott) 비밀번호를 재설정 (대표님이 잊었을 때)
+        if (user.id === 'master') return err(400, '공용 계정으로 접속 중일 때는 [내 계정]에서 지금 비밀번호를 확인하고 바꿔 주세요');
+        const p = await body(request);
+        const pw = String(p.password || '');
+        if (pw.length < 8) return err(400, '비밀번호는 8자 이상이어야 합니다');
+        if (pw.length > 128) return err(400, '비밀번호가 너무 깁니다 (128자 이하)');
+        await setMasterPassword(env, pw, user.name);
+        return json({ ok: true });
       }
       if (M === 'PATCH' && b) {
         const p = await body(request);
