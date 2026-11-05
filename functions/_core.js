@@ -285,10 +285,12 @@ async function suatExpiry(token) {
    ② 페이지에 연결된 인스타 계정: /me/accounts → instagram_business_account
       (니코트처럼 인스타가 다른 사람이 관리하는 FB 페이지에 묶여 있고, 페이지만 파트너로 공유받은 경우)
    ③ 같은 정보를 시스템 사용자 경로로: /me/assigned_pages
+   ④ 붙여넣은 토큰이 '페이지 토큰'이면: /me → instagram_business_account
+   Facebook 로그인(사용자 토큰)으로 ②에서 찾으면 그 페이지의 토큰(pageToken)도 함께 받아 둔다 — 긴 수명 사용자 토큰에서 받은 페이지 토큰은 만료가 없다.
    찾은 계정마다 via·pageId 를 남겨 둔다. 어디서도 못 찾으면 시도한 경로별 결과를 오류 문구에 담는다 (토큰은 안 담김). */
 export async function igFindAccounts(auth) {
   const found = new Map(); const notes = [];
-  const add = (a, via, pageId) => { if (a && a.id && !found.has(String(a.id))) found.set(String(a.id), { id: String(a.id), username: a.username || '', via, pageId: pageId || null }); };
+  const add = (a, via, pageId, pageToken) => { if (a && a.id && !found.has(String(a.id))) found.set(String(a.id), { id: String(a.id), username: a.username || '', via, pageId: pageId || null, pageToken: pageToken || null }); };
   try {
     const j = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username', limit: '50' }, auth);
     (j.data || []).forEach((a) => add(a, 'assigned'));
@@ -296,11 +298,17 @@ export async function igFindAccounts(auth) {
   } catch (e) { notes.push('비즈니스 인스타 조회 실패: ' + e.message); }
   for (const path of ['me/accounts', 'me/assigned_pages']) {
     try {
-      const j = await igRequest('GET', path, { fields: 'id,name,instagram_business_account{id,username}', limit: '50' }, auth);
+      const j = await igRequest('GET', path, { fields: path === 'me/accounts' ? 'id,name,access_token,instagram_business_account{id,username}' : 'id,name,instagram_business_account{id,username}', limit: '50' }, auth);
       const pages = j.data || [];
-      pages.forEach((pg) => add(pg.instagram_business_account, 'page', pg.id));
+      pages.forEach((pg) => add(pg.instagram_business_account, 'page', pg.id, pg.access_token));
       notes.push(`${path === 'me/accounts' ? '페이지' : '할당 페이지'} ${pages.length}개(인스타 연결 ${pages.filter((pg) => pg.instagram_business_account).length})`);
     } catch (e) { notes.push(`${path} 조회 실패: ${e.message}`); }
+  }
+  if (!found.size) {
+    try {
+      const me = await igRequest('GET', 'me', { fields: 'id,name,instagram_business_account{id,username}' }, auth);
+      if (me.instagram_business_account) { add(me.instagram_business_account, 'pagetoken', me.id); notes.push('페이지 토큰(인스타 연결 있음)'); }
+    } catch (e) { notes.push('토큰 본인 조회 실패: ' + e.message); }
   }
   const accounts = [...found.values()];
   // 페이지 경로로 찾은 계정은 username 이 비어 올 수 있어 한 번 더 읽는다
@@ -316,10 +324,13 @@ export async function igConnectToken(token, prefer) {
     const { accounts, notes } = await igFindAccounts(auth);
     if (!accounts.length) throw new Error('이 토큰으로 찾은 인스타 계정이 없습니다 — 토큰을 만들 때 니코트 페이지(또는 nicott_kitchen)를 선택했는지 확인해 주세요. [확인 결과: ' + notes.join(' · ') + ']');
     const pick = accounts.find((a) => a.username.toLowerCase() === want) || accounts[0];
+    // Facebook 로그인 사용자 토큰으로 페이지를 찾았으면 그 페이지 토큰을 저장한다 (사용자 토큰보다 오래 감)
+    const useToken = pick.pageToken || token;
     let businessId = null;
-    try { businessId = (await igRequest('GET', 'me', { fields: 'client_business_id' }, auth)).client_business_id || null; } catch {}
-    const ex = await suatExpiry(token);
-    return { token, kind: 'suat', userId: pick.id, username: pick.username, accounts, businessId,
+    try { businessId = (await igRequest('GET', 'me', { fields: 'client_business_id' }, { token: useToken, kind: 'suat' })).client_business_id || null; } catch {}
+    const ex = await suatExpiry(useToken);
+    return { token: useToken, kind: 'suat', userId: pick.id, username: pick.username, via: pick.via, pageId: pick.pageId || null,
+      accounts: accounts.map(({ pageToken, ...a }) => a), businessId,
       expiresAt: ex.expiresAt, expiresNever: !!ex.never, expiresEstimated: !!ex.unknown };
   };
   const tryIg = async () => {
