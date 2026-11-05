@@ -4,6 +4,9 @@
 
 export const IG_VERSION = 'v26.0';
 export const IG_HOST = 'https://graph.instagram.com';
+// 2026-10~ Meta 새 앱은 '통합 로그인(Unified login)'만 가능 → 비즈니스 통합 시스템 사용자 토큰(SUAT) · graph.facebook.com
+export const FB_HOST = 'https://graph.facebook.com';
+export const FB_VERSION = 'v27.0';
 export const ROLES = { admin: '관리자', editor: '작성자' };
 export const STATUSES = ['planned', 'draft', 'review', 'changes', 'approved', 'scheduled', 'published', 'failed', 'trashed'];
 export const WORKSPACE_KEYS = ['settings', 'mySets', 'favTpl', 'favSet', 'archivedTpl', 'customTpl', 'pendingTpl', 'lastTplCheck', 'trend'];
@@ -189,9 +192,16 @@ export async function addComment(env, contentId, user, kind, body) {
     .bind(contentId, user?.id || 'system', user?.name || '시스템', kind, String(body || '').slice(0, 2000), now()).run();
 }
 
-/* ── 인스타그램 (Instagram API with Instagram Login · graph.instagram.com) ── */
-export async function igRequest(method, path, params, token) {
-  const url = new URL(`${IG_HOST}/${IG_VERSION}/${path}`);
+/* ── 인스타그램 ──
+   두 가지 토큰을 모두 받는다.
+   · kind 'ig'   : Instagram 로그인 토큰(IG…) — graph.instagram.com, 60일, ig_refresh_token 으로 연장 (예전 앱)
+   · kind 'suat' : 통합 로그인 토큰(EA…, 비즈니스 통합 시스템 사용자) — graph.facebook.com, 만료는 구성에 따라(없음 가능)
+     /me 는 시스템 사용자라서 인스타 계정 ID 는 /me/assigned_instagram_accounts 로 얻는다 (Meta 공식 '시작하기' 6단계) */
+export const igAuth = (ig) => ({ token: ig.token, kind: ig.kind || 'ig' });
+const igBase = (auth) => (auth && typeof auth === 'object' && auth.kind === 'suat') ? `${FB_HOST}/${FB_VERSION}` : `${IG_HOST}/${IG_VERSION}`;
+export async function igRequest(method, path, params, auth) {
+  const token = typeof auth === 'string' ? auth : auth.token;
+  const url = new URL(`${igBase(auth)}/${path}`);
   let init = { method };
   const all = { ...params, access_token: token };
   if (method === 'GET') Object.entries(all).forEach(([k, v]) => url.searchParams.set(k, v));
@@ -199,7 +209,7 @@ export async function igRequest(method, path, params, token) {
   const r = await fetch(url.toString(), init);
   const j = await r.json().catch(() => ({}));
   if (!r.ok || j.error) {
-    const e = new Error(j.error?.message || `Instagram HTTP ${r.status}`);
+    const e = new Error(String(j.error?.message || `Instagram HTTP ${r.status}`).split(token).join('…'));   // 오류 문구에 토큰이 섞여 나오지 않게
     e.code = j.error?.code; e.status = r.status;
     throw e;
   }
@@ -209,9 +219,10 @@ export async function igGetSecret(env) { return (await kvGet(env, 'secret:ig'))?
 export function igPublicStatus(ig) {
   if (!ig) return { connected: false };
   return {
-    connected: !!ig.token, username: ig.username || '', userId: ig.userId ? String(ig.userId).slice(0, 4) + '…' : '',
+    connected: !!ig.token, kind: ig.kind || 'ig', username: ig.username || '', userId: ig.userId ? String(ig.userId).slice(0, 4) + '…' : '',
+    accounts: (ig.accounts || []).map((a) => a.username).filter(Boolean),
     connectedAt: ig.connectedAt, connectedBy: ig.connectedBy, refreshedAt: ig.refreshedAt || null,
-    expiresAt: ig.expiresAt || null, expiresEstimated: !!ig.expiresEstimated, lastError: ig.lastError || null, lastCheckAt: ig.lastCheckAt || null,
+    expiresAt: ig.expiresAt || null, expiresNever: !!ig.expiresNever, expiresEstimated: !!ig.expiresEstimated, lastError: ig.lastError || null, lastCheckAt: ig.lastCheckAt || null,
   };
 }
 async function waitContainer(id, token) {
@@ -228,7 +239,7 @@ export async function igPublish(ig, content) {
   const urls = content.mediaUrls || [];
   if (!urls.length) throw new Error('게시할 이미지가 없습니다 (예약 시 이미지가 만들어지지 않았습니다)');
   if (content.channel === 'reels') throw new Error('릴스는 영상이 필요해 자동 게시를 지원하지 않습니다');
-  const uid = ig.userId, token = ig.token;
+  const uid = ig.userId, token = igAuth(ig);
   if (content.channel === 'story') {
     const ids = [];
     for (const u of urls) {
@@ -257,7 +268,54 @@ export async function igPublish(ig, content) {
   try { permalink = (await igRequest('GET', pub.id, { fields: 'permalink' }, token)).permalink || null; } catch {}
   return { mediaId: pub.id, mediaIds: [pub.id], permalink };
 }
+// 토큰 만료 시각 (통합 로그인 토큰) — 0 이면 만료 없음
+async function suatExpiry(token) {
+  try {
+    const u = new URL(`${FB_HOST}/${FB_VERSION}/debug_token`);
+    u.searchParams.set('input_token', token); u.searchParams.set('access_token', token);
+    const j = await (await fetch(u.toString())).json();
+    const ex = Number(j?.data?.expires_at ?? j?.data?.data_access_expires_at ?? NaN);
+    if (ex === 0) return { expiresAt: null, never: true };
+    if (ex > 0) return { expiresAt: new Date(ex * 1000).toISOString(), never: false };
+  } catch {}
+  return { expiresAt: null, never: false, unknown: true };
+}
+// 붙여넣은 토큰으로 연결 정보 만들기 — 토큰 모양(EA…/IG…)으로 먼저 시도할 방식을 정하고, 안 되면 다른 방식도 시도
+export async function igConnectToken(token, prefer) {
+  const want = String(prefer || '').replace(/^@/, '').toLowerCase();
+  const trySuat = async () => {
+    const auth = { token, kind: 'suat' };
+    const list = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username', limit: '50' }, auth);
+    const accounts = (list.data || []).map((a) => ({ id: String(a.id), username: a.username || '' }));
+    if (!accounts.length) throw new Error('이 토큰에 연결된 인스타 계정이 없습니다 (로그인할 때 니코트 계정을 공유했는지 확인)');
+    const pick = accounts.find((a) => a.username.toLowerCase() === want) || accounts[0];
+    let businessId = null;
+    try { businessId = (await igRequest('GET', 'me', { fields: 'client_business_id' }, auth)).client_business_id || null; } catch {}
+    const ex = await suatExpiry(token);
+    return { token, kind: 'suat', userId: pick.id, username: pick.username, accounts, businessId,
+      expiresAt: ex.expiresAt, expiresNever: !!ex.never, expiresEstimated: !!ex.unknown };
+  };
+  const tryIg = async () => {
+    const me = await igRequest('GET', 'me', { fields: 'user_id,username' }, token);
+    return { token, kind: 'ig', userId: me.user_id || me.id, username: me.username || '',
+      expiresAt: new Date(Date.now() + 60 * 864e5).toISOString(), expiresEstimated: true };
+  };
+  const order = /^IG/.test(token) ? [tryIg, trySuat] : [trySuat, tryIg];
+  const errs = [];
+  for (const f of order) { try { return await f(); } catch (e) { errs.push(e.message); } }
+  throw new Error(errs[0] || '토큰을 확인하지 못했습니다');
+}
 export async function igRefresh(env, ig) {
+  if ((ig.kind || 'ig') === 'suat') {
+    // 통합 로그인 토큰: ig_refresh_token 이 없다 → 살아 있는지·만료 시각만 다시 확인
+    await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username' }, igAuth(ig));
+    const ex = await suatExpiry(ig.token);
+    ig.expiresAt = ex.expiresAt; ig.expiresNever = !!ex.never; ig.expiresEstimated = !!ex.unknown;
+    ig.refreshedAt = now(); ig.lastError = null;
+    if (ig.expiresAt && new Date(ig.expiresAt).getTime() - Date.now() < 10 * 864e5) ig.lastError = '토큰 만료가 10일 안으로 다가왔습니다 — [설정]에서 다시 연결해 주세요';
+    await kvSet(env, 'secret:ig', ig, 'system');
+    return ig;
+  }
   const url = `${IG_HOST}/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(ig.token)}`;
   const r = await fetch(url);
   const j = await r.json().catch(() => ({}));
