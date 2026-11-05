@@ -367,3 +367,47 @@ export async function igRefresh(env, ig) {
   await kvSet(env, 'secret:ig', ig, 'system');
   return ig;
 }
+
+/* v2.2 성과 수집 — 게시물별 반응 + (권한 있으면) 도달·저장·공유·조회, 대시보드 콘텐츠와 연결
+   · 미디어 최대 50개 중 최근 30개의 인사이트를 읽는다 (호출 수 ≈ 32회, 하루 1번)
+   · 인사이트 권한(instagram_manage_insights)이 없으면 좋아요·댓글만 모으고 perm=false 로 표시
+   · 대시보드에서 게시한 콘텐츠(mediaId)와 맞춰 종류(bk)·세트·템플릿·게시 시각을 붙인다 → 추천 계산에 씀 */
+export const INS_METRICS = [['reach', 'saved', 'shares', 'total_interactions', 'views'], ['reach', 'saved', 'shares', 'total_interactions'], ['reach', 'saved', 'shares']];
+export async function collectInsights(env, ig) {
+  const auth = igAuth(ig);
+  const list = await igRequest('GET', `${ig.userId}/media`, { fields: 'id,caption,media_type,media_product_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url', limit: '50' }, auth);
+  let account = null;
+  try { const a = await igRequest('GET', `${ig.userId}`, { fields: 'username,followers_count,media_count' }, auth); account = { username: a.username || '', followers: a.followers_count ?? null, media: a.media_count ?? null }; } catch {}
+  // 대시보드에서 게시한 콘텐츠와 연결
+  const rows = (await env.DB.prepare(`SELECT id, data, title FROM contents WHERE status='published'`).all()).results || [];
+  const byMedia = new Map();
+  for (const r of rows) {
+    let d = {}; try { d = JSON.parse(r.data || '{}'); } catch {}
+    const info = { cid: r.id, title: r.title || d.title || '', bk: d.bk || null, kind: d.kind || null, setId: d.setId || null, channel: d.channel || 'feed', tpls: (d.pages || []).map((p) => p.tpl), pages: (d.pages || []).length };
+    [d.mediaId, ...(d.mediaIds || [])].filter(Boolean).forEach((m) => byMedia.set(String(m), info));
+  }
+  const items = []; let perm = null; let mset = 0;
+  for (const [n, m] of (list.data || []).entries()) {
+    const it = { id: m.id, caption: (m.caption || '').slice(0, 120), type: m.media_type, product: m.media_product_type || '', at: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
+    const link = byMedia.get(String(m.id)); if (link) Object.assign(it, link);
+    if (n < 30 && perm !== false) {
+      for (let k = mset; k < INS_METRICS.length; k++) {
+        try {
+          const r = await igRequest('GET', `${m.id}/insights`, { metric: INS_METRICS[k].join(',') }, auth);
+          (r.data || []).forEach((d) => { it[d.name] = d.values?.[0]?.value ?? d.total_value?.value ?? 0; });
+          perm = true; mset = k; break;
+        } catch (e) {
+          if (e.code === 10 || e.code === 200 || /permission|권한/i.test(e.message)) { perm = false; break; }
+          if (e.code === 100 && k < INS_METRICS.length - 1) continue;   // 지원 안 하는 지표 → 더 적은 묶음으로
+          it.insightsError = String(e.message || '').slice(0, 120); break;
+        }
+      }
+    }
+    const inter = (it.likes || 0) + (it.comments || 0) + (it.saved || 0) + (it.shares || 0);
+    it.score = (it.likes || 0) + (it.comments || 0) * 3 + (it.saved || 0) * 5 + (it.shares || 0) * 5;
+    if (it.reach) it.er = +(inter / it.reach).toFixed(4);
+    items.push(it);
+  }
+  await kvSet(env, 'insights', { at: now(), items, perm: perm === true, account }, 'system');
+  return { count: items.length, perm: perm === true };
+}
