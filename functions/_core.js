@@ -196,7 +196,7 @@ export async function addComment(env, contentId, user, kind, body) {
    두 가지 토큰을 모두 받는다.
    · kind 'ig'   : Instagram 로그인 토큰(IG…) — graph.instagram.com, 60일, ig_refresh_token 으로 연장 (예전 앱)
    · kind 'suat' : 통합 로그인 토큰(EA…, 비즈니스 통합 시스템 사용자) — graph.facebook.com, 만료는 구성에 따라(없음 가능)
-     /me 는 시스템 사용자라서 인스타 계정 ID 는 /me/assigned_instagram_accounts 로 얻는다 (Meta 공식 '시작하기' 6단계) */
+     /me 는 시스템 사용자라서 인스타 계정 ID 는 igFindAccounts 로 얻는다 (비즈니스 계정 → 페이지 연결 계정 순) */
 export const igAuth = (ig) => ({ token: ig.token, kind: ig.kind || 'ig' });
 const igBase = (auth) => (auth && typeof auth === 'object' && auth.kind === 'suat') ? `${FB_HOST}/${FB_VERSION}` : `${IG_HOST}/${IG_VERSION}`;
 export async function igRequest(method, path, params, auth) {
@@ -280,14 +280,41 @@ async function suatExpiry(token) {
   } catch {}
   return { expiresAt: null, never: false, unknown: true };
 }
+/* 통합 로그인 토큰으로 접근 가능한 인스타 계정 찾기 (v2.1.2)
+   ① 비즈니스가 소유·공유받은 인스타 계정: /me/assigned_instagram_accounts
+   ② 페이지에 연결된 인스타 계정: /me/accounts → instagram_business_account
+      (니코트처럼 인스타가 다른 사람이 관리하는 FB 페이지에 묶여 있고, 페이지만 파트너로 공유받은 경우)
+   ③ 같은 정보를 시스템 사용자 경로로: /me/assigned_pages
+   찾은 계정마다 via·pageId 를 남겨 둔다. 어디서도 못 찾으면 시도한 경로별 결과를 오류 문구에 담는다 (토큰은 안 담김). */
+export async function igFindAccounts(auth) {
+  const found = new Map(); const notes = [];
+  const add = (a, via, pageId) => { if (a && a.id && !found.has(String(a.id))) found.set(String(a.id), { id: String(a.id), username: a.username || '', via, pageId: pageId || null }); };
+  try {
+    const j = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username', limit: '50' }, auth);
+    (j.data || []).forEach((a) => add(a, 'assigned'));
+    notes.push(`비즈니스 인스타 ${(j.data || []).length}개`);
+  } catch (e) { notes.push('비즈니스 인스타 조회 실패: ' + e.message); }
+  for (const path of ['me/accounts', 'me/assigned_pages']) {
+    try {
+      const j = await igRequest('GET', path, { fields: 'id,name,instagram_business_account{id,username}', limit: '50' }, auth);
+      const pages = j.data || [];
+      pages.forEach((pg) => add(pg.instagram_business_account, 'page', pg.id));
+      notes.push(`${path === 'me/accounts' ? '페이지' : '할당 페이지'} ${pages.length}개(인스타 연결 ${pages.filter((pg) => pg.instagram_business_account).length})`);
+    } catch (e) { notes.push(`${path} 조회 실패: ${e.message}`); }
+  }
+  const accounts = [...found.values()];
+  // 페이지 경로로 찾은 계정은 username 이 비어 올 수 있어 한 번 더 읽는다
+  for (const a of accounts) if (!a.username) { try { a.username = (await igRequest('GET', a.id, { fields: 'username' }, auth)).username || ''; } catch {} }
+  return { accounts, notes };
+}
+
 // 붙여넣은 토큰으로 연결 정보 만들기 — 토큰 모양(EA…/IG…)으로 먼저 시도할 방식을 정하고, 안 되면 다른 방식도 시도
 export async function igConnectToken(token, prefer) {
   const want = String(prefer || '').replace(/^@/, '').toLowerCase();
   const trySuat = async () => {
     const auth = { token, kind: 'suat' };
-    const list = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username', limit: '50' }, auth);
-    const accounts = (list.data || []).map((a) => ({ id: String(a.id), username: a.username || '' }));
-    if (!accounts.length) throw new Error('이 토큰에 연결된 인스타 계정이 없습니다 (로그인할 때 니코트 계정을 공유했는지 확인)');
+    const { accounts, notes } = await igFindAccounts(auth);
+    if (!accounts.length) throw new Error('이 토큰으로 찾은 인스타 계정이 없습니다 — 토큰을 만들 때 니코트 페이지(또는 nicott_kitchen)를 선택했는지 확인해 주세요. [확인 결과: ' + notes.join(' · ') + ']');
     const pick = accounts.find((a) => a.username.toLowerCase() === want) || accounts[0];
     let businessId = null;
     try { businessId = (await igRequest('GET', 'me', { fields: 'client_business_id' }, auth)).client_business_id || null; } catch {}
@@ -308,7 +335,8 @@ export async function igConnectToken(token, prefer) {
 export async function igRefresh(env, ig) {
   if ((ig.kind || 'ig') === 'suat') {
     // 통합 로그인 토큰: ig_refresh_token 이 없다 → 살아 있는지·만료 시각만 다시 확인
-    await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username' }, igAuth(ig));
+    const { accounts } = await igFindAccounts(igAuth(ig));
+    if (!accounts.some((a) => a.id === String(ig.userId))) throw new Error('연결했던 인스타 계정이 더 이상 이 토큰으로 보이지 않습니다 — 다시 연결해 주세요');
     const ex = await suatExpiry(ig.token);
     ig.expiresAt = ex.expiresAt; ig.expiresNever = !!ex.never; ig.expiresEstimated = !!ex.unknown;
     ig.refreshedAt = now(); ig.lastError = null;
