@@ -387,18 +387,22 @@ export async function collectInsights(env, ig) {
     [d.mediaId, ...(d.mediaIds || [])].filter(Boolean).forEach((m) => byMedia.set(String(m), info));
   }
   const items = []; let perm = null; let mset = 0;
+  // Cloudflare 무료 요금제는 한 번 실행에 바깥 요청 50건까지 → 인사이트 호출은 35건 안에서만
+  let budget = 35;
+  const iso = (t) => { const d = new Date(String(t || '').replace(/([+-]\d\d)(\d\d)$/, '$1:$2')); return isNaN(d.getTime()) ? null : d.toISOString(); };   // '+0000' → 사파리도 읽는 형식
   for (const [n, m] of (list.data || []).entries()) {
-    const it = { id: m.id, caption: (m.caption || '').slice(0, 120), type: m.media_type, product: m.media_product_type || '', at: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
+    const it = { id: m.id, caption: (m.caption || '').slice(0, 120), type: m.media_type, product: m.media_product_type || '', at: iso(m.timestamp) || m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
     const link = byMedia.get(String(m.id)); if (link) Object.assign(it, link);
-    if (n < 30 && perm !== false) {
-      for (let k = mset; k < INS_METRICS.length; k++) {
+    if (n < 30 && perm !== false && budget > 0) {
+      for (let k = mset; k < INS_METRICS.length && budget > 0; k++) {
+        budget--;
         try {
           const r = await igRequest('GET', `${m.id}/insights`, { metric: INS_METRICS[k].join(',') }, auth);
           (r.data || []).forEach((d) => { it[d.name] = d.values?.[0]?.value ?? d.total_value?.value ?? 0; });
           perm = true; mset = k; break;
         } catch (e) {
           if (e.code === 10 || e.code === 200 || /permission|권한/i.test(e.message)) { perm = false; break; }
-          if (e.code === 100 && k < INS_METRICS.length - 1) continue;   // 지원 안 하는 지표 → 더 적은 묶음으로
+          if (e.code === 100 && k < INS_METRICS.length - 1 && perm !== true) continue;   // 지원 안 하는 지표 → 더 적은 묶음으로 (한 번 정해지면 게시물마다 다시 줄이지 않음)
           it.insightsError = String(e.message || '').slice(0, 120); break;
         }
       }
