@@ -2087,7 +2087,7 @@ function vInsights(){
   const ins=Cloud.insights,ig=Cloud.integrations.instagram||{},items=insItems(),b=insBase(items);
   const sort=S.insSort||'at';
   const rows=items.slice().sort((p,q)=>sort==='at'?pd(q.at)-pd(p.at):(insVal(q,b)??-1)-(insVal(p,b)??-1));
-  const avg=k=>items.length?items.reduce((s,x)=>s+(x[k]||0),0)/items.length:null;
+  const avg=k=>{const a=items.filter(x=>x[k]!=null);return a.length?a.reduce((s,x)=>s+x[k],0)/a.length:null;};   // 값이 있는 게시물만 평균 (도달은 최근 게시물만 수집)
   const recs=items.length?insRecommend(items,b):[];
   const linked=items.filter(i=>i.cid).length;
   return `<div class="ph"><h1>성과</h1><span class="st">${ins?.at?rel(ins.at)+' 수집':'아직 수집 전'}</span></div>
@@ -2098,7 +2098,7 @@ function vInsights(){
     <div class="kpi"><b>${items.length}</b><span>분석한 게시물</span></div>
     <div class="kpi"><b>${n0(Math.round(avg('likes')))}</b><span>평균 좋아요</span></div>
     <div class="kpi"><b>${n0(Math.round(avg('comments')*10)/10)}</b><span>평균 댓글</span></div>
-    <div class="kpi"><b>${items.some(i=>i.reach!=null)?n0(Math.round(avg('reach'))):'—'}</b><span>평균 도달</span></div>
+    <div class="kpi"><b>${items.some(i=>i.reach!=null)?n0(Math.round(avg('reach'))):'—'}</b><span>평균 도달${items.some(i=>i.reach!=null)?` (최근 ${items.filter(i=>i.reach!=null).length}개)`:''}</span></div>
     ${ins?.account?.followers!=null?`<div class="kpi"><b>${n0(ins.account.followers)}</b><span>팔로워</span></div>`:''}</div>
   <div class="card"><h3>다음에 올리면 좋은 것 <span class="badge">${b==='er'?'참여율 기준':'반응 점수 기준'}</span></h3>
     ${recs.length?recs.map(r=>`<div class="rec"><span class="rt">${r.t}</span><div class="rb"><div>${r.h}</div><span>${r.s}</span></div>${r.set&&ALL_SETS().some(x=>x.id===r.set)&&/^[\w-]+$/.test(r.set)?`<button class="btn sm" onclick="makeFromSet('${r.set}')">이 세트로 만들기</button>`:''}</div>`).join(''):'<div class="hint" style="margin:0">같은 종류의 게시물이 2건 이상 쌓이면 추천을 시작합니다.</div>'}
