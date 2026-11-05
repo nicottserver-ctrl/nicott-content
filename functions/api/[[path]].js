@@ -209,9 +209,14 @@ async function cronTick(env, origin, force) {
       try { ig = await igRefresh(env, ig); summary.refreshed = true; }
       catch (e) { ig.lastError = '토큰 자동 갱신 실패 — ' + e.message; ig.lastCheckAt = now(); await kvSet(env, 'secret:ig', ig, 'system'); summary.notes.push(ig.lastError); }
     }
-    // 성과 수집 — 하루 1번, 게시가 없던 회차에만 (요청 수 제한 고려 · 1회 ≈ 32건)
+    // 성과 수집 — 하루 1번, 게시가 없던 회차에만 (요청 수 제한 고려 · 1회 최대 ≈ 37건)
+    // 실패해도 시도 시각을 남겨 10분마다 다시 몰아치지 않게 한다 (실패 후엔 6시간 뒤 재시도)
     const ins = (await kvGet(env, 'insights'))?.value;
-    if (!summary.published.length && (!ins || Date.now() - new Date(ins.at).getTime() > 864e5)) {
+    const tried = (await kvGet(env, 'insights:try'))?.value?.at;
+    const okAge = ins?.at ? Date.now() - new Date(ins.at).getTime() : Infinity;
+    const tryAge = tried ? Date.now() - new Date(tried).getTime() : Infinity;
+    if (!summary.published.length && okAge > 864e5 && tryAge > 6 * 3600e3) {
+      await kvSet(env, 'insights:try', { at: now() }, 'system');
       try { await collectInsights(env, ig); summary.insights = true; }
       catch (e) { summary.notes.push('성과 수집 실패 — ' + e.message); }
     }
