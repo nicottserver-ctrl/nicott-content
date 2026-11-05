@@ -3,7 +3,7 @@
 import {
   ensureSchema, json, err, now, kvGet, kvSet, randomId, hashPassword, ROLES, STATUSES, WORKSPACE_KEYS, cleanSettings,
   verifyLogin, loginThrottle, makeSession, sessionCookie, masterSecret, setMasterPassword,
-  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh, igAuth, igConnectToken, igFindAccounts, FB_HOST, FB_VERSION,
+  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh, igAuth, igConnectToken, igFindAccounts, collectInsights, FB_HOST, FB_VERSION,
 } from '../_core.js';
 
 const isAdmin = (u) => u && u.role === 'admin';
@@ -51,14 +51,29 @@ function validMediaUrls(list, origin) {
   return list.every((u) => typeof u === 'string' && u.startsWith(origin + '/media/'));
 }
 
+/* v2.2 게시 전 승인(컨펌) 규칙 — 설정의 requireApproval(기본 켜짐) · approvers(승인자 사용자 ID 목록)
+   · 승인자가 지정돼 있으면 그 사람만 승인·수정 요청을 할 수 있다 (없으면 관리자 누구나)
+   · 승인 필수면 '승인됨' 이 아닌 콘텐츠는 승인자만 예약·바로 게시·게시 기록을 할 수 있다 (= 승인과 동시에) */
+async function approvalPolicy(env) {
+  const ws = (await kvGet(env, 'workspace'))?.value || {};
+  const st = ws.settings || {};
+  return { required: st.requireApproval !== false, approvers: Array.isArray(st.approvers) ? st.approvers.map(String) : [] };
+}
+const canApprove = (pol, u) => !!u && (pol.approvers.length ? pol.approvers.includes(String(u.id)) : isAdmin(u));
+
 async function doAction(env, user, id, b, origin) {
   const spec = ACTIONS[b.action];
   if (!spec) return err(400, '알 수 없는 동작입니다');
-  if (spec.admin && !isAdmin(user)) return err(403, '관리자만 할 수 있습니다');
+  const pol = await approvalPolicy(env);
+  const approverAct = ['approve', 'request_changes'].includes(b.action);
+  if (approverAct) { if (!canApprove(pol, user)) return err(403, pol.approvers.length ? '승인 권한이 없습니다 — 승인자로 지정된 분(대표·MD)만 승인하거나 수정 요청을 할 수 있습니다' : '관리자만 할 수 있습니다'); }
+  else if (spec.admin && !isAdmin(user)) return err(403, '관리자만 할 수 있습니다');
   const row = await contentRow(env, id);
   if (!row) return err(404, '콘텐츠를 찾을 수 없습니다');
   if (b.baseVersion && Number(b.baseVersion) !== row.version) return err(409, '다른 사람이 먼저 수정했습니다. 최신 내용을 불러옵니다.', { current: rowToContent(row) });
   if (!spec.from.includes(row.status)) return err(409, `지금 상태(${row.status})에서는 할 수 없습니다`, { current: rowToContent(row) });
+  if (pol.required && ['schedule', 'publish_now', 'mark_published'].includes(b.action) && !['approved', 'scheduled', 'failed'].includes(row.status) && !canApprove(pol, user))
+    return err(409, '게시 전 승인이 필요합니다 — 먼저 [검토 요청]을 보내 대표·MD 승인을 받아 주세요', { current: rowToContent(row) });
   const note = String(b.note || '').trim();
   if (spec.note && !note) return err(400, '수정 요청 내용을 적어 주세요');
 
@@ -194,30 +209,15 @@ async function cronTick(env, origin, force) {
       try { ig = await igRefresh(env, ig); summary.refreshed = true; }
       catch (e) { ig.lastError = '토큰 자동 갱신 실패 — ' + e.message; ig.lastCheckAt = now(); await kvSet(env, 'secret:ig', ig, 'system'); summary.notes.push(ig.lastError); }
     }
-    // 성과 수집 — 3일마다, 게시가 없던 회차에만 (요청 수 제한 고려)
+    // 성과 수집 — 하루 1번, 게시가 없던 회차에만 (요청 수 제한 고려 · 1회 ≈ 32건)
     const ins = (await kvGet(env, 'insights'))?.value;
-    if (!summary.published.length && (!ins || Date.now() - new Date(ins.at).getTime() > 3 * 864e5)) {
+    if (!summary.published.length && (!ins || Date.now() - new Date(ins.at).getTime() > 864e5)) {
       try { await collectInsights(env, ig); summary.insights = true; }
       catch (e) { summary.notes.push('성과 수집 실패 — ' + e.message); }
     }
   }
   await kvSet(env, 'cron:last', { at: now(), summary });
   return json({ ok: true, ...summary });
-}
-
-async function collectInsights(env, ig) {
-  const list = await igRequest('GET', `${ig.userId}/media`, { fields: 'id,caption,media_type,timestamp,like_count,comments_count,permalink,thumbnail_url,media_url', limit: '20' }, igAuth(ig));
-  const items = [];
-  for (const m of (list.data || []).slice(0, 12)) {
-    const it = { id: m.id, caption: (m.caption || '').slice(0, 80), type: m.media_type, at: m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
-    try {
-      const r = await igRequest('GET', `${m.id}/insights`, { metric: 'reach,saved,shares' }, igAuth(ig));
-      (r.data || []).forEach((d) => { it[d.name] = d.values?.[0]?.value ?? d.total_value?.value ?? 0; });
-    } catch { it.insightsError = true; }
-    it.score = (it.likes || 0) + (it.comments || 0) * 3 + (it.saved || 0) * 5 + (it.shares || 0) * 5;
-    items.push(it);
-  }
-  await kvSet(env, 'insights', { at: now(), items });
 }
 
 /* ══ 라우터 ══ */
@@ -287,7 +287,12 @@ export async function onRequest(context) {
       const set = p.set || {};
       for (const k of Object.keys(set)) {
         if (!WORKSPACE_KEYS.includes(k)) continue;
-        cur[k] = k === 'settings' ? cleanSettings(set[k]) : set[k];
+        if (k === 'settings') {
+          const next = cleanSettings(set[k]);
+          // 승인 규칙(게시 전 승인 필수·승인자)은 관리자만 바꿀 수 있다
+          if (!isAdmin(user)) { const prev = cur.settings || {}; ['requireApproval', 'approvers'].forEach((x) => { if (x in prev) next[x] = prev[x]; else delete next[x]; }); }
+          cur[k] = next;
+        } else cur[k] = set[k];
       }
       if (JSON.stringify(cur).length > 900000) return err(413, '공용 설정 데이터가 너무 큽니다');
       await kvSet(env, 'workspace', cur, user.name);
@@ -449,6 +454,15 @@ export async function onRequest(context) {
     }
 
     if (a === 'insights' && M === 'GET') return json((await kvGet(env, 'insights'))?.value || { items: [] });
+    if (a === 'insights' && b === 'refresh' && M === 'POST') {
+      if (!isAdmin(user)) return err(403, '관리자만 할 수 있습니다');
+      const ig = await igGetSecret(env);
+      if (!ig?.token) return err(400, '인스타그램이 연결되지 않았습니다');
+      const ins = (await kvGet(env, 'insights'))?.value;
+      if (ins?.at && Date.now() - new Date(ins.at).getTime() < 10 * 60e3) return err(429, '방금 모았습니다 — 10분 뒤에 다시 눌러 주세요');
+      try { const r = await collectInsights(env, ig); return json({ ok: true, ...r, insights: (await kvGet(env, 'insights'))?.value }); }
+      catch (e) { return err(400, '성과를 모으지 못했습니다 — ' + e.message); }
+    }
     if (a === 'cron' && b === 'run' && M === 'POST') { if (!isAdmin(user)) return err(403, '관리자만'); return cronTick(env, origin, true); }
 
     return err(404, '없는 경로입니다');
