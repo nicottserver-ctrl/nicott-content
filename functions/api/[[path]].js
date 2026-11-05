@@ -3,7 +3,7 @@
 import {
   ensureSchema, json, err, now, kvGet, kvSet, randomId, hashPassword, ROLES, STATUSES, WORKSPACE_KEYS, cleanSettings,
   verifyLogin, loginThrottle, makeSession, sessionCookie, masterSecret, setMasterPassword,
-  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh, igAuth, igConnectToken, FB_HOST, FB_VERSION,
+  rowToContent, stripServerFields, contentFingerprint, addComment, igRequest, igGetSecret, igPublicStatus, igPublish, igRefresh, igAuth, igConnectToken, igFindAccounts, FB_HOST, FB_VERSION,
 } from '../_core.js';
 
 const isAdmin = (u) => u && u.role === 'admin';
@@ -405,8 +405,8 @@ export async function onRequest(context) {
         if (!ig?.token) return err(400, '연결된 토큰이 없습니다');
         try {
           if (ig.kind === 'suat') {
-            const list = await igRequest('GET', 'me/assigned_instagram_accounts', { fields: 'id,username' }, igAuth(ig));
-            const a = (list.data || []).find((x) => String(x.id) === String(ig.userId));
+            const { accounts } = await igFindAccounts(igAuth(ig));
+            const a = accounts.find((x) => x.id === String(ig.userId));
             if (!a) throw new Error('연결했던 인스타 계정이 더 이상 공유되어 있지 않습니다 — 다시 연결해 주세요');
             ig.username = a.username || ig.username;
           } else { const me = await igRequest('GET', 'me', { fields: 'user_id,username' }, ig.token); ig.username = me.username || ig.username; }
