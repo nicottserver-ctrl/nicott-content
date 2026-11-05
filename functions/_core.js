@@ -369,7 +369,7 @@ export async function igRefresh(env, ig) {
 }
 
 /* v2.2 성과 수집 — 게시물별 반응 + (권한 있으면) 도달·저장·공유·조회, 대시보드 콘텐츠와 연결
-   · 미디어 최대 50개 중 최근 30개의 인사이트를 읽는다 (호출 수 ≈ 32회, 하루 1번)
+   · 미디어 최대 50개 중 최근 35개까지 인사이트를 읽는다 (호출 수 ≈ 37회 상한, 하루 1번)
    · 인사이트 권한(instagram_manage_insights)이 없으면 좋아요·댓글만 모으고 perm=false 로 표시
    · 대시보드에서 게시한 콘텐츠(mediaId)와 맞춰 종류(bk)·세트·템플릿·게시 시각을 붙인다 → 추천 계산에 씀 */
 export const INS_METRICS = [['reach', 'saved', 'shares', 'total_interactions', 'views'], ['reach', 'saved', 'shares', 'total_interactions'], ['reach', 'saved', 'shares']];
@@ -393,7 +393,7 @@ export async function collectInsights(env, ig) {
   for (const [n, m] of (list.data || []).entries()) {
     const it = { id: m.id, caption: (m.caption || '').slice(0, 120), type: m.media_type, product: m.media_product_type || '', at: iso(m.timestamp) || m.timestamp, likes: m.like_count || 0, comments: m.comments_count || 0, permalink: m.permalink, thumb: m.thumbnail_url || (m.media_type !== 'VIDEO' ? m.media_url : '') || '' };
     const link = byMedia.get(String(m.id)); if (link) Object.assign(it, link);
-    if (n < 30 && perm !== false && budget > 0) {
+    if (perm !== false && budget > 0) {
       for (let k = mset; k < INS_METRICS.length && budget > 0; k++) {
         budget--;
         try {
